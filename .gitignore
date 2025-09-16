@@ -1,0 +1,94 @@
+# Ignore build outputs
+bin/
+obj/
+
+# Ignore NuGet packages
+*.nupkg
+*.snupkg
+packages/
+
+# Ignore user-specific files
+.vscode/
+*.swp
+*~
+
+# Ignore Rider project settings
+.idea/
+.idea_modules/
+
+# Ignore Visual Studio specific files
+.vscode/
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+
+# Ignore Visual Studio Code specific files
+.vscode/
+.vscode/*
+
+# Ignore macOS-specific files
+.DS_Store
+
+# Ignore Windows-specific files
+Thumbs.db
+desktop.ini
+
+# Ignore temporary files
+*.tmp
+*.temp
+
+# Ignore log files
+*.log
+
+# Ignore WebAssembly build artifacts
+#wwwroot/_framework/
+#wwwroot/css/app.css
+#wwwroot/css/bootstrap/
+#wwwroot/js/app.js
+
+# Ignore .NET generated files
+project.lock.json
+project.fragment.lock.json
+
+# Ignore local configuration files
+appsettings.Development.json
+appsettings.Local.json
+appsettings.Production.json
+
+# Ignore publish output
+# wwwroot/
+
+# Ignore any publish profile transforms (these can be used for sensitive info)
+*.pubxml
+*.publishsettings
+
+# Ignore Rider IDE files
+.idea/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# Ignore Resharper files
+_ReSharper*/
+*.[Rr]e[Ss]harper
+*.DotSettings.user
+
+# Ignore coverage files
+coverage/
+
+# Ignore npm package directories
+node_modules/
+
+# Ignore build results of npm
+dist/
+
+# Ignore npm debug log
+npm-debug.log*
+
+# Ignore Yarn lock file
+yarn.lock
+.pnp.*
+.pnpjs/

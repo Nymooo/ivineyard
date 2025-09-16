@@ -1,0 +1,128 @@
+﻿@using Model.Entities.Bookingobjects.Vineyard
+@using MudBlazor.Interfaces
+@using WebGUI.Client.ClientServices
+@using WebGUI.Client.Pages.Components.Records
+
+<div class="flex-grid w-100 justify-content-evenly">
+    <div class="col">
+        <MudCard Class="d-flex flex-column shadow-lg rounded-3" Elevation="4"
+                 Style="margin: 25px 30px 15px 15px; height: 30vh; background-color: white; color: black; text-align: center;">
+            <MudCardContent Class="d-flex flex-column" Style="position: relative;">
+                <MudText Typo="Typo.h4" Class="mt-3">Status</MudText>
+                <MudGrid Justify="Justify.Center" Style="width: 100%;">
+                    <MudItem Style="width: 80%; display: flex; flex-direction: column; align-items: center;">
+                        @foreach (var status in Vineyard.StatusList
+                        .OrderBy(s => s.EndDate.HasValue ? 1 : 0) // Null-EndDates zuerst
+                        .ThenBy(s => s.EndDate)                  // Nach EndDate sortieren
+                        .ThenBy(s => s.StartDate)                // Nach StartDate sortieren
+                        .Take(4))                                // Maximal 5 Elemente
+                        {
+                        <MudAlert Severity="Severity.Success" Variant="Variant.Outlined" NoIcon="true" Class="my-2"
+                                  Style="width: 100%; text-align: center;">
+                            <b>@status.VineyardStatusType.Type</b> seit
+                            <b>@status.StartDate.ToString("dd.MM.yyyy")</b> bis
+                            <b>@(status.EndDate?.ToString("dd.MM.yyyy") ?? "/")</b>
+                        </MudAlert>
+                        }
+                    </MudItem>
+                </MudGrid>
+
+
+            </MudCardContent>
+        </MudCard>
+    </div>
+    <div class="col">
+        <MudCard Class="d-flex flex-column shadow-lg rounded-3" Elevation="4"
+                 Style="margin: 25px 30px 15px 15px; height: 30vh; background-color: white; color: black; text-align: center;">
+            <MudCardContent Class="d-flex flex-column" Style="position: relative; padding: 20px; padding-left: 40px; padding-right: 40px;">
+                <MudText Typo="Typo.h4" Class="mb-4">Edit Status</MudText>
+                <div class="row g-3">
+                    <div class="row g-3">
+                        @foreach (var status in StatusType)
+                        {
+                        var isChecked = Vineyard.StatusList.Any(s => s.VineyardStatusType.Id == status.Id && s.EndDate == null);
+                        var matchingEntity = Vineyard.StatusList.Find(s => s.VineyardStatusType.Id == status.Id);
+
+                        <div class="col-6 d-flex align-items-center">
+                            @if (matchingEntity != null)
+                            {
+                            <input type="checkbox" class="me-2" style="transform: scale(1.3);"
+                                   checked="@isChecked"
+                                   @onclick="() => OnCheckboxClicked(status.Id, isChecked, matchingEntity.StartDate)" />
+                            }
+                            else
+                            {
+                            <input type="checkbox" class="me-2" style="transform: scale(1.3);"
+                                   checked="@isChecked"
+                                   @onclick="() => OnCheckboxClicked(status.Id, isChecked, DateTime.Now)" />
+                            }
+
+                            <MudText Typo="Typo.body1" style="font-size: 1.1rem; font-weight: 500;">
+                                <strong>@status.Type</strong>
+                            </MudText>
+                        </div>
+                        }
+                    </div>
+                </div>
+            </MudCardContent>
+        </MudCard>
+    </div>
+</div>
+
+@code {
+[Parameter] public int Id { get; set; }
+private VineyardRecord Vineyard { get; set; } = new();
+private List<VineyardStatusType> StatusType { get; set; } = new();
+
+[Inject] private VineyardService VineyardService { get; set; }
+[Inject] private VineyardHasStatusService VineyardHasStatusService { get; set; }
+[Inject] private StateService StateService { get; set; }
+
+protected override async Task OnParametersSetAsync()
+{
+    // Hier werden Vineyard und StatusType immer neu geladen, wenn die ID gesetzt wird.
+    Vineyard = await VineyardService.GetVineyardbyIdAsync(Id);
+    StatusType = await StateService.GetState();
+
+    // Optional: Wenn Vineyard nicht gefunden wird
+    if (Vineyard == null)
+    {
+    Console.WriteLine($"Vineyard mit der ID {Id} nicht gefunden.");
+    }
+}
+
+private async Task OnCheckboxClicked(int statusId, bool isChecked, DateTime startDate)
+{
+    if (isChecked)
+        {
+        // Checkbox war ausgewählt -> Status wird entfernt (Update)
+        var existingStatus = await VineyardHasStatusService.FindAsync(Vineyard.BookingObjectId, statusId);
+        if (existingStatus != null)
+         {
+            Console.WriteLine($"Status {statusId} wird aktualisiert...");
+            await VineyardHasStatusService.UpdateVineyardhasStatus(existingStatus);
+            StateHasChanged();
+            }
+            StateHasChanged();
+         }
+    else
+        {
+        // Checkbox war nicht ausgewählt -> Status wird hinzugefügt (Create)
+        var data = new Dictionary<string, object>
+        {
+            { "VineyardId", Vineyard.BookingObjectId },
+            { "StatusId", statusId },
+            { "StartDate", DateTime.Now }
+        };
+
+        Console.WriteLine($"Status {statusId} wird erstellt...");
+        await VineyardHasStatusService.CreateVineyardhasStatus(data);
+        StateHasChanged();
+        }
+
+    OnParametersSetAsync();
+}
+
+
+
+}

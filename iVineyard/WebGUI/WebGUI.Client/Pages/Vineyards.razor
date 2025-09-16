@@ -1,0 +1,202 @@
+﻿@page "/Vineyards"
+@using Microsoft.AspNetCore.Authorization
+@using WebGUI.Client.ClientServices
+@using WebGUI.Client.Pages.Components.Records
+@using WebGUI.Client.Pages.Components.Vineyard
+@using Microsoft.AspNetCore.Components.Sections
+@using Model.Entities.Bookingobjects.Vineyard
+@rendermode InteractiveAuto
+@inject IDialogService DialogService
+@inject NavigationManager Navigation1
+
+
+@attribute [Authorize]
+
+@inject IJSRuntime JsRuntime
+@inject VineyardService service;
+@inject BookingObjectService bookingobjectservice;
+
+<SectionContent SectionName="headbar">
+    <MudText Typo="Typo.h4">Vineyards</MudText>
+</SectionContent>
+
+<div id="vineyardMap" style="width: 100px; height: 300px; z-index: 2 !important "></div>
+@*<BottomMenu/>*@
+
+<AuthorizeView Roles="Admin">
+    <div class="bottom-menu @(_isMenuVisible ? "visible" : "") w-100">
+        <MudButton Class="burger-button" OnClick="Slide"  ButtonType="ButtonType.Button" ><MudIcon Icon="@Icons.Material.Filled.Menu" /></MudButton>
+        <div class="w-100 menu-content d-flex flex-row">
+            @foreach(var i in vineyards)
+            {
+            <MudCard Style="height: 100%; min-width: 30%; margin: 0 10px 5px 5px" Elevation="0" Class="shadow-lg rounded-2" @onclick="() => NavigateToSpecificVineyard(i.BookingObjectId)">
+                <MudCardHeader class="d-flex flex-column justify-content-center" Style="background-color: #D7F6CD">
+                    <MudText Typo="Typo.h4">@i.Name</MudText>
+                </MudCardHeader>
+                <MudCardContent Class="d-flex flex-column" Style="overflow-y: scroll;">
+                    <MudText Typo="Typo.h5"><b>Größe:</b> @i.Area ha</MudText>
+                    <MudText><b>Stati:</b></MudText>
+
+                    @foreach (var s in i.StatusList.OrderBy(s => s.EndDate.HasValue ? 1 : 0) // Null-EndDates zuerst
+                    .ThenBy(s => s.EndDate)                  // Nach EndDate sortieren
+                    .ThenBy(s => s.StartDate)                  // Nach EndDate sortieren
+                    .Take(3)) {
+                    <MudText Color="Color.Primary">@s.VineyardStatusType.Type</MudText>
+                    }
+
+
+                    <!--    <MudText>@i.StatusList[0].VineyardStatusType.Type</MudText>-->
+                </MudCardContent>
+            </MudCard>
+            }
+
+        </div>
+    </div>
+</AuthorizeView>
+
+@code {
+    private List<VineyardStatusType> _statusType = new();
+    private static Dictionary<string, object> CurrentVineyardData { get; set; }
+    private bool _isMenuVisible = false;
+    private IJSObjectReference? _module;
+    protected List<VineyardRecord> vineyards = new ();
+    
+    
+    [JSInvokable]
+    public async Task<string> ShowDialog()
+    {
+        // Zeige den Dialog an und erhalte das Ergebnis
+        var result = await DialogService.ShowAsync<VineyardCreateDialog>();
+
+        // Wenn der Dialog erfolgreich abgeschlossen wurde
+        if (result?.Result != null )
+        {
+            //var vineyardName = result.ToString(); // Der Rückgabewert des Dialogs (VineyardName)
+            //Console.WriteLine($"Vineyard Name: {vineyardName}");
+            return "HALLOOOOOOOOOOOOO";
+        }
+
+        return "nix funktioneirt ";
+    }
+
+    
+    
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        
+        if (firstRender)
+        {
+            if (JsRuntime is not null)
+            {
+                var dotNetObjectReference = DotNetObjectReference.Create(this);
+                _module = await JsRuntime.InvokeAsync<IJSObjectReference>("import", "./map.js");
+                if (_module is not null)
+                {
+                    await _module.InvokeVoidAsync("MapFunctionVineyards", dotNetObjectReference);
+                    vineyards = await service.GetVineyardsAsync();
+                    
+                    if (vineyards != null) {
+                        await _module.InvokeVoidAsync("LoadVineyardsFunction", vineyards);
+
+                    }
+                        
+                }
+            }
+        }
+    }
+    
+    private void Slide()
+    {
+        _isMenuVisible = !_isMenuVisible;
+    }
+    
+    [JSInvokable]
+    public async void ReceiveVineyardData(string area, string coordinates, double[] midcoordinate) {
+        string midcoordinates = midcoordinate[0].ToString("F6").Replace(",", ".") + "," + midcoordinate[1].ToString("F6").Replace(",", ".");
+        
+        var dialog = await DialogService.ShowAsync<VineyardCreateDialog>("Add Vineyard");
+        var result = await dialog.Result;  // Warte auf das Ergebnis des Dialogs        Console.WriteLine("_-------------------------" +result.Result);
+        string vineyardName = (string)result.Data;
+        var BookingObject = await bookingobjectservice.ManageBookingObject();
+        
+        Console.WriteLine($"VINEYARDS.razor : Area: {area}, Coordinates: {coordinates}, midcooratines: {midcoordinates}, name : {vineyardName}"); //werden mit , a getrennt mit comma
+        if (float.TryParse(area, System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture, out float parsedArea)) {
+                CurrentVineyardData = new Dictionary<string, object>()
+                {
+                    { "Area", parsedArea },  // Verwende den konvertierten float-Wert
+                    { "Coordinates", coordinates },
+                    { "MidCoordinate", midcoordinates},
+                    {"Name",vineyardName},
+                    {"Id", BookingObject.Id }
+                };
+                bool check = await service.CreateVineyard(CurrentVineyardData);
+
+                if (check) {
+                    ReloadPage(Navigation1);
+                }
+        } else {
+            // Gib eine Fehlermeldung aus, falls die Konvertierung fehlschlägt
+            Console.WriteLine("Fehler: 'area' konnte nicht in float konvertiert werden.");
+        }
+    }
+
+    public static void ReloadPage( NavigationManager manager)
+    {
+        manager.NavigateTo(manager.Uri, true);
+    }
+    
+    private void NavigateToSpecificVineyard(int id)
+    {
+        // Navigiere zur gewünschten Seite mit der ID in der URL
+        Navigation1.NavigateTo($"/specificVineyard/{id}");
+    }
+   
+
+}
+
+<AuthorizeView Roles="Employee">
+    <style>
+        .leaflet-draw {
+            display: none;
+        }
+        .leaflet-control {
+            display: none;
+        }
+        
+    </style>
+</AuthorizeView>
+
+<style>
+    .bottom-menu {
+        position: fixed;
+        z-index:1002;    
+        bottom: -20vh;
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        transition: bottom 0.5s ease-in-out; /* Übergang für das Aufsteigen */
+        background-color: transparent;  
+    }
+
+    .bottom-menu.visible {
+        bottom: 0   ;
+    }
+    
+    .burger-button {
+        position: relative;
+        left: 15px;
+        margin-bottom: 15px;
+        z-index: 1001;
+        background-color: #ffffff;
+        margin: 5px 0px 15px 5px;
+        
+        
+    }
+    
+    .menu-content {
+        background-color: transparent;
+        height: 20vh;
+        padding: 15px;
+        overflow: auto;
+    }
+</style>

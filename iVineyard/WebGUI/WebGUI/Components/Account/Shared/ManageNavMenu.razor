@@ -1,0 +1,51 @@
+﻿@using Microsoft.AspNetCore.Identity
+@using Model.Configurations
+
+@inject SignInManager<ApplicationUser> SignInManager
+
+@*
+<ul class="nav nav-pills flex-column">
+    <li class="nav-item">
+        <NavLink class="nav-link" href="Account/Manage" Match="NavLinkMatch.All">Profile</NavLink>
+    </li>
+    <li class="nav-item">
+        <NavLink class="nav-link" href="Account/Manage/Email">Email</NavLink>
+    </li>
+    <li class="nav-item">
+        <NavLink class="nav-link" href="Account/Manage/ChangePassword">Password</NavLink>
+    </li>
+    @if (hasExternalLogins)
+    {
+        <li class="nav-item">
+            <NavLink class="nav-link" href="Account/Manage/ExternalLogins">External logins</NavLink>
+        </li>
+    }
+    
+    <li class="nav-item">
+        <NavLink class="nav-link" href="Account/Manage/TwoFactorAuthentication">Two-factor authentication</NavLink>
+    </li>
+    <li class="nav-item">
+        <NavLink class="nav-link" href="Account/Manage/PersonalData">Personal data</NavLink>
+    </li>
+</ul>
+*@
+
+<MudNavMenu Class="mud-width-full h-100" Color="Color.Primary" Margin="Margin.Normal" Bordered="true" Rounded="true">
+    <MudNavLink Href="Account/Manage" Icon="@Icons.Material.Filled.ManageAccounts" Match="NavLinkMatch.All">Profile</MudNavLink>
+    <MudNavLink Href="Account/Manage/Email" Icon="@Icons.Material.Filled.Email">Email</MudNavLink>
+    <MudNavLink Href="Account/Manage/ChangePassword" Icon="@Icons.Material.Filled.Password">Password</MudNavLink>
+    @if (hasExternalLogins)
+    {
+        <MudNavLink Href="Account/Manage/ExternalLogins" Icon="@Icons.Material.Filled.Login">External logins</MudNavLink>
+    }
+</MudNavMenu>
+
+@code {
+    private bool hasExternalLogins;
+
+    protected override async Task OnInitializedAsync()
+    {
+        hasExternalLogins = (await SignInManager.GetExternalAuthenticationSchemesAsync()).Any();
+    }
+
+}

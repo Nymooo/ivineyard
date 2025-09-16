@@ -1,0 +1,139 @@
+﻿@page "/Employees"
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Identity
+@using WebGUI.Client.ClientServices
+@using Microsoft.AspNetCore.Components.Sections
+@using Model.Configurations
+@using WebGUI.Client.Pages.Components.Records
+@using WebGUI.Client.Pages.Components.Users
+
+@attribute [Authorize(Roles = "Admin")]
+
+@inject IDialogService DialogService
+@inject RolesService RoleService
+@inject UserService UserService
+
+<SectionContent SectionName="headbar">
+    <MudText Typo="Typo.h4">Employees</MudText>
+    <MudButton OnClick="(e) => UserAddWorkModal()" Variant="Variant.Filled" ButtonType="ButtonType.Button"
+               StartIcon="@Icons.Material.Filled.Work" Color="Color.Primary">
+        Add Work
+    </MudButton>
+    <MudButton OnClick="(e) => CreateUserModal()" Variant="Variant.Filled" ButtonType="ButtonType.Button"
+               StartIcon="@Icons.Material.Filled.Person" Color="Color.Primary">
+        Add User
+    </MudButton>
+</SectionContent>
+
+@if (Users is null)
+{
+    <p>loading data...</p>
+}
+else
+{
+    <MudTable Items="@Users" Hover="true" Breakpoint="Breakpoint.Xs" Outlined="true">
+        <HeaderContent>
+            <MudTh>Id</MudTh>
+            <MudTh>E-Mail</MudTh>
+            <MudTh>Tel.</MudTh>
+            <MudTh>Salary</MudTh>
+            <MudTh>Role</MudTh>
+            <MudTh Class="d-flex justify-content-center">Action</MudTh>
+        </HeaderContent>
+        <RowTemplate>
+            <MudTd DataLabel="Id">@context.UserData.Id</MudTd>
+            <MudTd DataLabel="E-Mail">@context.UserData.Email</MudTd>
+            <MudTd DataLabel="Tel.">@(context.UserData.PhoneNumber ?? "-")</MudTd>
+            <MudTd DataLabel="Salary">@context.UserData.Salary</MudTd>
+            <MudTd DataLabel="Role">@context.RoleData?.NormalizedName</MudTd>
+            <MudTd DataLabel="Action" class="d-flex justify-content-center">
+                <MudButton OnClick="(e) => UpdateUserModal(context)" Class="m-2" Variant="Variant.Filled" Color="Color.Tertiary" Size="Size.Small">
+                    <MudIcon Icon="@Icons.Material.Filled.Edit"></MudIcon>
+                </MudButton>
+                <MudButton OnClick="(e) => DetailedUserModal(context)" Class="m-2" Variant="Variant.Filled" Color="Color.Secondary" Size="Size.Small">
+                    <MudIcon Icon="@Icons.Material.Filled.RemoveRedEye"></MudIcon>
+                </MudButton>
+                <MudButton OnClick="(e) => DeleteUserModal(context)" Class="m-2" Variant="Variant.Filled" Color="Color.Error" Size="Size.Small">
+                    <MudIcon Icon="@Icons.Material.Filled.Delete"></MudIcon>
+                </MudButton>
+            </MudTd>
+        </RowTemplate>
+    </MudTable>
+}
+
+
+@code {
+    private List<IdentityRole>? _identityRoles = new();
+    public List<UserWithRoleRecord>? Users = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        Users = await UserService.GetUsersWithRole();
+        _identityRoles = await RoleService.GetRolesAsync();
+    }
+
+    private Task UpdateUserModal(UserWithRoleRecord employee)
+    {
+        var parameters = new DialogParameters<UserUpdateDialog>()
+        {
+            { x => x.UserData, employee },
+            { x => x.IdentityRoles, _identityRoles }
+        };
+
+        return DialogService.ShowAsync<UserUpdateDialog>("Update User", parameters);
+    }
+
+    private Task CreateUserModal()
+    {
+        var parameters = new DialogParameters<UserUpdateDialog>()
+        {
+            { x => x.IdentityRoles, _identityRoles }
+        };
+
+        return DialogService.ShowAsync<UserCreateDialog>("Create User", parameters);
+    }
+
+    private Task DeleteUserModal(UserWithRoleRecord user)
+    {
+        var parameters = new DialogParameters<UserDeleteDialog>()
+        {
+            { x => x.UserData, user }
+        };
+
+        return DialogService.ShowAsync<UserDeleteDialog>("Delete User", parameters);
+    }
+
+    private Task DetailedUserModal(UserWithRoleRecord user)
+    {
+        var parameters = new DialogParameters<UserDetailedDialog>()
+        {
+            { x => x.UserData, user }
+        };
+
+        var options = new DialogOptions()
+        {
+            MaxWidth = MaxWidth.Large,
+            CloseButton = true,
+        };
+
+        return DialogService.ShowAsync<UserDetailedDialog>($"{user.UserData.Email} [{user.RoleData.NormalizedName}]", parameters, options);
+    }
+
+    private Task UserAddWorkModal()
+    {
+        var parameters = new DialogParameters<UserAddWorkDialog>()
+        {
+            { x => x.Users, Users }
+        };
+
+        var options = new DialogOptions()
+        {
+            MaxWidth = MaxWidth.Large,
+            CloseButton = true,
+            NoHeader = true
+        };
+
+        return DialogService.ShowAsync<UserAddWorkDialog>("Add Work", parameters, options);
+    }
+
+}

@@ -1,0 +1,61 @@
+﻿name: iVineyard_local
+services:
+  client:
+    container_name: ivineyard_client_local
+    image: webgui.client
+    build:
+      context: .
+      dockerfile: WebGUI/WebGUI.Client/Dockerfile
+
+  webserver:
+    container_name: ivineyard_server_local
+    image: webgui
+    build:
+      context: .
+      dockerfile: WebGUI/WebGUI/Dockerfile
+    ports:
+      - "8080:8080"
+      - "8081:8081"
+    depends_on:
+      - database
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ConnectionStrings__DatabaseConnection=server=database;database=iVineyardAuth;user=root;password=123mysql
+    networks:
+      - iVineyard_network
+        
+  webapi:
+    container_name: ivineyard_webapi_local
+    image: webapi
+    build:
+      context: .
+      dockerfile: WebAPI/Dockerfile
+    ports:
+      - "5189:5189"
+    depends_on:
+      - database
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ConnectionStrings__DatabaseConnection=server=database;database=iVineyardAuth;user=root;password=123mysql
+    networks:
+      - iVineyard_network
+        
+  database:
+    container_name: ivineyard_db_local
+    image: mysql:latest
+    ports:
+      - "3313:3306"
+    environment:
+      - MYSQL_ROOT_PASSWORD=123mysql
+      - MYSQL_DATABASE=iVineyardAuth
+    volumes:
+      - mysql_data:/var/lib/mysql
+    networks:
+      - iVineyard_network
+
+volumes:
+  mysql_data:
+    
+networks:
+  iVineyard_network:
+    driver: bridge

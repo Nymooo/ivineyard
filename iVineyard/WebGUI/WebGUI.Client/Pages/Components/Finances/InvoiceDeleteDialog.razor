@@ -1,0 +1,50 @@
+@using Model.Entities.Company
+@using WebGUI.Client.ClientServices
+@inject IDialogService DialogService
+@inject FinanceService FinanceService
+@inject NavigationManager Navigation
+
+<MudDialog>
+    <DialogContent>
+        <MudText>Do you really want to delete this Invoice? This process cannot be undone.</MudText>
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="CancelAction">Cancel</MudButton>
+        <MudButton OnClick="DeleteInvoiceAsync" Color="Color.Error" Variant="Variant.Filled" ButtonType="ButtonType.Button">Delete</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter] MudDialogInstance Dialog { get; set; }
+    [Parameter] public Invoice Invoice { get; set; }
+
+    protected override Task OnInitializedAsync()
+    {
+        Dialog.Options.CloseButton = true;
+        Dialog.Options.MaxWidth = MaxWidth.ExtraSmall;
+        Dialog.Title = "Delete";
+        return base.OnInitializedAsync();
+    }
+
+    private void CancelAction()
+    {
+        Invoice = new();
+        Dialog.Cancel(); // Closes the dialog
+    }
+
+    private async void DeleteInvoiceAsync()
+    {
+        var response = await FinanceService.DeleteInvoiceAsync(Invoice.Id);
+
+        if (response?.IsSuccessStatusCode == true)
+        {
+            Dialog.Close();
+            RefreshPage();
+        }
+    }
+    
+    private void RefreshPage()
+    {
+        Navigation.NavigateTo(Navigation.Uri, forceLoad: true);
+    }
+}

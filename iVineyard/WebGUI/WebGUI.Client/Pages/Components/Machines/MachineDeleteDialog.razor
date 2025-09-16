@@ -1,0 +1,46 @@
+﻿@using Model.Entities.Bookingobjects.Machine
+@using WebGUI.Client.ClientServices
+@using WebGUI.Client.Pages.Components.Records
+@inject MachineService _service;
+@inject NavigationManager Navigation
+
+
+<MudDialog>
+    <DialogContent>
+        <MudText>Do you really want to delete this Machine? This process cannot be undone.</MudText>
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="CancelAction">Cancel</MudButton>
+        <MudButton OnClick="DeleteEmployeeAsync" Color="Color.Error" Variant="Variant.Filled" ButtonType="ButtonType.Button">Delete</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter] MudDialogInstance Dialog { get; set; }
+    [Parameter] public MachineRecord Data { get; set; }
+    Machine? m = new();
+    protected override async Task OnInitializedAsync() {
+        Dialog.Options.CloseButton = true;
+        Dialog.Options.MaxWidth = MaxWidth.ExtraSmall;
+        Dialog.Title = "Delete";
+    }
+    
+    
+    private void CancelAction()
+    {
+        
+        Dialog.Cancel(); // Closes the dialog
+    }
+
+    private async void DeleteEmployeeAsync() {
+       
+        await _service.DeleteMachineAsync(Data.BookingObjectId);
+        Dialog.Close();
+        RefreshPage();
+
+    }
+    private void RefreshPage()
+    {
+        Navigation.NavigateTo(Navigation.Uri, forceLoad: true);
+    }
+}

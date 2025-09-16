@@ -1,0 +1,148 @@
+﻿@page "/DashboardAdmin"
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Components.Sections
+@using Model.Entities.Bookingobjects.Vineyard
+@using WebGUI.Client.ClientServices
+@using WebGUI.Client.Pages.Components.Records
+
+@rendermode InteractiveAuto
+
+@attribute [Authorize(Roles = "Admin")]
+
+@inject IJSRuntime JsRuntime
+@inject NavigationManager NavManager
+@inject WorkinformationService WorkInformationService
+
+<SectionContent SectionName="headbar">
+    <MudText Typo="Typo.h4">Dashboard</MudText>
+</SectionContent>
+
+<div class="d-flex flex-column w-100">
+    <div class="d-flex flex-row w-100">
+        <MudCard Class="d-flex flex-grow-1 shadow-lg flex-column" Elevation="0" Style="margin: 25px 15px 15px 30px; height: 33vh;">
+            <MudCardHeader>
+                <i>
+                    <MudText Typo="Typo.h6">Today's Expenses</MudText>
+                </i>
+            </MudCardHeader>
+            <MudCardContent Class="d-flex justify-content-center align-items-center">
+                <MudText Typo="Typo.h1">@TodaysExpenses€</MudText>
+            </MudCardContent>
+            <MudCardActions Class="d-flex justify-content-end   ">
+                <MudButton ButtonType="ButtonType.Button" Variant="Variant.Text">
+                    <MudIcon Icon="@Icons.Material.Outlined.Info"/>
+                </MudButton>
+            </MudCardActions>
+        </MudCard>
+        <MudCard Class="d-flex flex-grow-1 shadow-lg" Elevation="0" Style="margin: 25px 30px 15px 15px; height: 33vh;">
+            <MudCardContent Class="p-0">
+                <div @onmouseup="OnMouseUp" @onmousedown="OnMouseDown" @onmousemove="OnMouseMove" class="rounded" id="dashboardMap" style="width: 100%; height: 100%"></div>
+            </MudCardContent>
+        </MudCard>
+    </div>
+    <MudCard Class="d-flex flex-grow-1 shadow-lg" Elevation="0" Style="margin: 15px 30px 30px 30px; height: 47.2vh;">
+        <MudCardHeader class="d-flex flex-column align-items-start">
+            <i>
+                <MudText Typo="Typo.h6">Worker Overview</MudText>
+            </i>
+            <i>
+                <MudText Typo="Typo.subtitle1">@_groupedWorkInfo.Count active Workers</MudText>
+            </i>
+        </MudCardHeader>
+        <MudCardContent Class="d-flex align-items-center flex-row" Style="overflow-x: scroll; overflow-y: hidden">
+            @foreach (var user in _groupedWorkInfo)
+            {
+                <MudCard Style="height: 100%; min-width: 30%; margin: 0 5px 5px 5px" Elevation="0" Class="shadow-lg">
+                    <MudCardHeader class="d-flex flex-column justify-content-center" Style="background-color: #D7F6CD">
+                        <MudAvatar Color="Color.Primary" Size="Size.Large">
+                            <MudIcon Size="Size.Large" Icon="@Icons.Material.Filled.Person"></MudIcon>
+                        </MudAvatar>
+                        <MudText Typo="Typo.h6">@user.UserEmail</MudText> <!-- Benutzername anzeigen -->
+                    </MudCardHeader>
+                    <MudCardContent Class="d-flex flex-column" Style="overflow-y: scroll;">
+                        <MudText Style="margin-bottom: 5px">
+                            <b>Worked at</b>
+                        </MudText>
+                        <div>
+                            @foreach (var vineyard in user.Vineyards)
+                            {
+                                <p>
+                                    <i>
+                                        <span>@vineyard.VineyardName</span>
+                                        <b> using </b>
+                                        <span>@string.Join(", ", vineyard.MachineNames)</span>
+                                    </i>
+                                </p>
+                            }
+                        </div>
+                    </MudCardContent>
+                </MudCard>
+            }
+        </MudCardContent>
+    </MudCard>
+</div>
+
+@code {
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            if (JsRuntime is not null)
+            {
+                var dotNetObjectReference = DotNetObjectReference.Create(this);
+                _module = await JsRuntime.InvokeAsync<IJSObjectReference>("import", "./map.js");
+                if (_module is not null)
+                {
+                    await _module.InvokeVoidAsync("MapFunction", dotNetObjectReference);
+                }
+            }
+        }
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        WorkInformationToday = await WorkInformationService.GetWorkInformationToday();
+        
+        if (WorkInformationToday is not null)
+        {
+            _groupedWorkInfo = WorkInformationService.GroupWorkInformation(WorkInformationToday);
+            TodaysExpenses = WorkInformationService.GetTodaysExpenses(WorkInformationToday);
+        }
+    }
+
+    private List<WorkInformation>? WorkInformationToday { get; set; } = new();
+    private List<UserWorkInfo>? _groupedWorkInfo = new();
+
+    private double TodaysExpenses { get; set; }
+    private IJSObjectReference? _module;
+    private bool _isDragging = false;
+    private bool _mouseDown = false;
+
+    private void OnMouseDown()
+    {
+        _mouseDown = true;
+        _isDragging = false;
+    }
+
+    private void OnMouseUp()
+    {
+        if (!_isDragging)
+        {
+            // Navigation nur bei einfachem Klick
+            NavManager.NavigateTo("Vineyards");
+        }
+
+        // Zurücksetzen
+        _mouseDown = false;
+        _isDragging = false;
+    }
+
+    private void OnMouseMove()
+    {
+        if (_mouseDown)
+        {
+            _isDragging = true;
+        }
+    }
+}

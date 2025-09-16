@@ -1,0 +1,68 @@
+@using System.Globalization
+@using Mapster
+@using Microsoft.AspNetCore.Identity
+@using Model.Configurations
+@using Model.Entities.Company
+@using WebGUI.Client.ClientServices
+@using WebGUI.Client.Pages.Components.Records
+@inject FinanceService FinanceService
+@inject NavigationManager Navigation
+
+<MudDialog MaxWidth="MaxWidth.Small" CloseButton="true">
+    <DialogContent>
+        @if (InvoiceData is not null)
+        {
+            <MudForm>
+                <MudTextField Label="Id" Disabled @bind-Value="InvoiceData.Id" Variant="Variant.Outlined" FullWidth="true" Placeholder=@(InvoiceData.Id.ToString()) />
+                <MudTextField Required Label="Price [€]" @bind-Value="InvoiceData.Price" Variant="Variant.Outlined" FullWidth="true" Placeholder=@(InvoiceData.Price.ToString(CultureInfo.InvariantCulture)) />
+                <MudDatePicker Required Label="Bought At" @bind-Date="InvoiceData.BoughAt" />
+                <MudTextField Required Label="Description" @bind-Value="InvoiceData.Description" Variant="Variant.Outlined" FullWidth="true" Placeholder=@(InvoiceData.Description) />
+            </MudForm>
+        }
+    </DialogContent>
+
+    <DialogActions>
+        <MudButton OnClick="Cancel" Color="Color.Default">Cancel</MudButton>
+        <MudButton OnClick="Update" Color="Color.Primary" Variant="Variant.Filled">Update Invoice</MudButton>
+    </DialogActions>
+</MudDialog>
+
+
+@code {
+    [CascadingParameter] MudDialogInstance Dialog { get; set; } = new();
+    [Parameter] public Invoice InvoiceData { get; set; } = new();
+
+    private async Task Update()
+    {
+        if (InvoiceData == null)
+        {
+            Dialog.Close(DialogResult.Cancel());
+            return;
+        }
+
+        var responseUserUpdate = await FinanceService.UpdateInvoiceAsync(InvoiceData.Id, InvoiceData);
+            
+        if (responseUserUpdate.IsSuccessStatusCode)
+        {
+            // Refresh and close the dialog
+            Dialog.Close(DialogResult.Ok(true));
+            RefreshPage();
+        }
+        else
+        {
+            Dialog.Close(DialogResult.Ok(false));
+        }
+    }
+
+    private void Cancel()
+    {
+        InvoiceData = new();
+        Dialog.Cancel();
+    }
+
+    private void RefreshPage()
+    {
+        Navigation.NavigateTo(Navigation.Uri, forceLoad: true);
+    }
+
+}

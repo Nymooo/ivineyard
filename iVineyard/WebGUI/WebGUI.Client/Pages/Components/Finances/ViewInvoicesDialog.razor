@@ -1,0 +1,58 @@
+@using Model.Entities.Company
+@inject IDialogService DialogService
+
+<MudTable Items="Invoices" Hover="true" Dense="true" Bordered="true" Striped="true">
+    <HeaderContent>
+        <MudTh>Invoice ID</MudTh>
+        <MudTh>Price (€)</MudTh>
+        <MudTh>Bought At</MudTh>
+        <MudTh>Description</MudTh>
+        <MudTh>Actions</MudTh>
+    </HeaderContent>
+    <RowTemplate>
+        <MudTd>@context.Id</MudTd>
+        <MudTd>@context.Price.ToString("F2")</MudTd>
+        <MudTd>@context.BoughAt?.ToString("dd.MM.yyyy")</MudTd>
+        <MudTd>@context.Description</MudTd>
+        <MudTd DataLabel="Action" class="d-flex justify-content-center">
+            <MudButton OnClick="(e) => UpdateInvoiceModal(context)" Class="m-2" Variant="Variant.Filled" Color="Color.Tertiary" Size="Size.Small">
+                <MudIcon Icon="@Icons.Material.Filled.Edit"></MudIcon>
+            </MudButton>
+            <MudButton OnClick="(e) => DeleteInvoiceModal(context)" Class="m-2" Variant="Variant.Filled" Color="Color.Error" Size="Size.Small">
+                <MudIcon Icon="@Icons.Material.Filled.Delete"></MudIcon>
+            </MudButton>
+        </MudTd>
+    </RowTemplate>
+    <NoRecordsContent>
+        <MudText>No invoices found.</MudText>
+    </NoRecordsContent>
+</MudTable>
+
+@code {
+
+    [CascadingParameter] private MudDialogInstance MudDialog { get; set; }
+    [Parameter] public List<Invoice>? Invoices { get; set; }
+    
+    private void Cancel() => MudDialog.Cancel();
+
+    
+    private Task DeleteInvoiceModal(Invoice invoice)
+    {
+        var parameters = new DialogParameters<InvoiceDeleteDialog>()
+        {
+            { x => x.Invoice, invoice }
+        };
+
+        return DialogService.ShowAsync<InvoiceDeleteDialog>("Delete", parameters);
+    }
+    
+    private Task UpdateInvoiceModal(Invoice invoice)
+    {
+        var parameters = new DialogParameters<InvoiceUpdateDialog>()
+        {
+            { x => x.InvoiceData, invoice }
+        };
+
+        return DialogService.ShowAsync<InvoiceUpdateDialog>("Delete", parameters);
+    }
+}

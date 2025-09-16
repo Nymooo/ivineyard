@@ -1,0 +1,183 @@
+@page "/finances"
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Components.Sections
+@using Model.Entities.Bookingobjects
+@using Model.Entities.Bookingobjects.Machine
+@using Model.Entities.Bookingobjects.Vineyard
+@using Model.Entities.Company
+@using WebGUI.Client.ClientServices
+@using WebGUI.Client.Pages.Components.Finances
+@inject IDialogService DialogService
+@inject FinanceService FinanceService
+
+@rendermode InteractiveAuto
+@attribute [Authorize(Roles = "Admin")]
+
+<style>
+    .flex-grid {
+        display: flex;
+    }
+
+    .col {
+        flex: 1;
+    }
+</style>
+
+<SectionContent SectionName="headbar">
+    <MudText Typo="Typo.h4">Finances</MudText>
+    <MudButton OnClick="AddFinanceModal" Variant="Variant.Filled" ButtonType="ButtonType.Button"
+               StartIcon="@Icons.Material.Filled.ShowChart" Color="Color.Primary">
+        Add Expense / Income
+    </MudButton>
+    <MudButton OnClick="ViewInvoicesModal" Variant="Variant.Filled" ButtonType="ButtonType.Button"
+               StartIcon="@Icons.Material.Filled.RemoveRedEye" Color="Color.Primary">
+        Invoice Details
+    </MudButton>
+    <MudButton OnClick="AddEquipmentModal" Variant="Variant.Filled" ButtonType="ButtonType.Button"
+               StartIcon="@Icons.Material.Filled.Cases" Color="Color.Primary">
+        Add Equipment
+    </MudButton>
+</SectionContent>
+
+<div class="d-flex flex-column w-100">
+    <div class="flex-grid">
+        <div class="col">
+            <MudCard Class="d-flex flex-grow-1 shadow-lg flex-column rounded-3" Elevation="0"
+                     Style="margin: 25px 15px 15px 30px; height: 15vh; background-color: #44633F; color: white">
+                <MudCardContent Class="d-flex justify-content-center align-items-center">
+                    <div class="d-flex flex-row">
+                        <MudText Typo="Typo.h1" Style="margin-right: 30px">€</MudText>
+                        <div class="d-flex flex-column m-auto">
+                            <MudText Typo="Typo.h5">Total Capital</MudText>
+                            <MudText Typo="Typo.h5">@(Math.Round(FinanceService.TotalCapital, 2))</MudText>
+                        </div>
+                    </div>
+                </MudCardContent>
+            </MudCard>
+        </div>
+        <div class="col">
+            <MudCard Class="d-flex flex-grow-1 shadow-lg flex-column rounded-3" Elevation="0"
+                     Style="margin: 25px 15px 15px 15px; height: 15vh; background-color: #5A9367; color: white">
+                <MudCardContent Class="d-flex justify-content-center align-items-center">
+                    <div class="d-flex flex-row">
+                        <MudText Typo="Typo.h1" Style="margin-right: 30px">€</MudText>
+                        <div class="d-flex flex-column m-auto">
+                            <MudText Typo="Typo.h5">Months Income</MudText>
+                            <MudText Typo="Typo.h5">@(Math.Round(FinanceService.CurrentMonthIncome, 2))</MudText>
+                        </div>
+                    </div>
+                </MudCardContent>
+            </MudCard>
+        </div>
+        <div class="col">
+            <MudCard Class="d-flex flex-grow-1 shadow-lg flex-column rounded-3" Elevation="0"
+                     Style="margin: 25px 15px 15px 15px; height: 15vh; background-color: #5CAB7D; color: white">
+                <MudCardContent Class="d-flex justify-content-center align-items-center">
+                    <div class="d-flex flex-row">
+                        <MudText Typo="Typo.h1" Style="margin-right: 30px">€</MudText>
+                        <div class="d-flex flex-column m-auto">
+                            <MudText Typo="Typo.h5">Months Expenses</MudText>
+                            <MudText Typo="Typo.h5">@(Math.Round(FinanceService.CurrentMonthExpenses, 2))</MudText>
+                        </div>
+                    </div>
+                </MudCardContent>
+            </MudCard>
+        </div>
+        <div class="col">
+            <MudCard Class="d-flex flex-grow-1 shadow-lg flex-column rounded-3" Elevation="0"
+                     Style="margin: 25px 30px 15px 15px; height: 15vh; background-color: #4ADBC8; color: white">
+                <MudCardContent Class="d-flex justify-content-center align-items-center">
+                    <div class="d-flex flex-row">
+                        <MudText Typo="Typo.h1" Style="margin-right: 30px">€</MudText>
+                        <div class="d-flex flex-column m-auto">
+                            <MudText Typo="Typo.h5">Months Profit</MudText>
+                            <MudText Typo="Typo.h5">@(Math.Round(FinanceService.CurrentMonthProfit, 2))</MudText>
+                        </div>
+                    </div>
+                </MudCardContent>
+            </MudCard>
+        </div>
+    </div>
+    <MudCard Class="d-flex flex-grow-1 shadow-lg" Elevation="0" Style="margin: 15px 30px 25px 30px; height: 64vh">
+        <MudCardContent Class="d-flex justify-content-center align-items-center ">
+            <div class="flex-grid w-100 justify-content-evenly">
+                <div class="col">
+                    <MudText Typo="Typo.h6" Align="Align.Center" Style="margin-bottom: 10px">Types of Expenses</MudText>
+                    @if (FinanceService.Data.Any())
+                    {
+                    <MudChart ChartType="ChartType.Pie" InputData="@FinanceService.Data" InputLabels="@FinanceService.Labels" Width="300px" Height="300px"/>
+                    }
+                    else
+                    {
+                    <MudText Typo="Typo.body1" Align="Align.Center" Color="Color.Error">
+                        No expense data available to display.
+                    </MudText>
+                    }
+                </div>
+                <div class="col">
+                    <MudText Typo="Typo.h6" Align="Align.Center" Style="margin-bottom: 10px">Income / Expenses Display</MudText>
+                    @if (FinanceService.Series.Any())
+                    {
+                        <MudChart ChartType="ChartType.Line" ChartOptions="@_options" ChartSeries="@FinanceService.Series" XAxisLabels="@FinanceService.XAxisLabels" Width="100%" Height="350px" CanHideSeries/>
+                        <MudSlider @bind-Value="_options.YAxisTicks" Min="10" Max="400" Step="10" Color="Color.Info">Scale: @_options.YAxisTicks.ToString()</MudSlider>
+                    }
+                    else
+                    {
+                    <MudText Typo="Typo.body1" Align="Align.Center" Color="Color.Error">
+                        No income or expense data available to display.
+                    </MudText>
+                    }
+                </div>
+            </div>
+        </MudCardContent>
+    </MudCard>
+</div>
+
+
+@code {
+    private readonly ChartOptions _options = new();
+    
+    protected override async Task OnInitializedAsync()
+    {
+        _options.YAxisTicks = 50;
+        
+        await FinanceService.LoadFinanceDataAsync();
+    }
+
+    private Task AddFinanceModal()
+    {
+        var options = new DialogOptions()
+        {
+            MaxWidth = MaxWidth.Large,
+            CloseButton = true,
+            NoHeader = true
+        };
+
+        return DialogService.ShowAsync<CreateInvoiceDialog>("Add Invoice", options);
+    }
+
+    private Task AddEquipmentModal()
+    {
+        var options = new DialogOptions()
+        {
+            CloseButton = true,
+        };
+
+        return DialogService.ShowAsync<CreateEquipmentDialog>("Add new Equipment", options);
+    }
+    
+    private Task ViewInvoicesModal()
+    {
+        var options = new DialogOptions()
+        {
+            CloseButton = true,
+        };
+
+        var parameters = new DialogParameters<ViewInvoicesDialog>()
+        {
+            { x => x.Invoices, FinanceService.Invoices }
+        };
+
+        return DialogService.ShowAsync<ViewInvoicesDialog>("Invoices", parameters, options);
+    }
+}

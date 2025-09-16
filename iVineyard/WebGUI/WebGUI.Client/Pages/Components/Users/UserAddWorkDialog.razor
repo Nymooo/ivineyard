@@ -1,0 +1,236 @@
+@using Model.Entities.Bookingobjects.Machine
+@using MudBlazor
+@using WebGUI.Client.Pages.Components.Records
+@using Model.Entities.Bookingobjects.Vineyard
+@using WebGUI.Client.ClientServices
+
+@inject ISnackbar Snackbar
+@inject VineyardService VineyardService
+@inject WorkinformationService WorkInformationService
+@inject MachineService MachineService
+
+<style>
+    .selected {
+        background-color: #1E88E5 !important;
+    }
+    .selected > td {
+        color: white !important;
+    }
+    .selected > td .mud-input {
+        color: white !important;
+    }
+</style>
+
+@if (!isSelectingVineyards)
+{
+    <MudTable T="UserWithRoleRecord" Items="@Users" MultiSelection="true" SelectionChangeable="true" Hover="true"
+              @bind-SelectedItems="selectedUsers" SelectOnRowClick="true" RowClass="cursor-pointer">
+        <HeaderContent>
+            <MudTh>E-Mail</MudTh>
+            <MudTh>Role</MudTh>
+        </HeaderContent>
+        <RowTemplate>
+            <MudTd DataLabel="E-Mail">@context.UserData.Email</MudTd>
+            <MudTd DataLabel="Role">@context.RoleData?.Name</MudTd>
+        </RowTemplate>
+        <PagerContent>
+            <MudTablePager PageSizeOptions="new int[] { 10, 25, 50, 100 }"/>
+        </PagerContent>
+    </MudTable>
+    <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="ProceedToNextStep">Select Workers</MudButton>
+}
+else if (!isSelectingMachines)
+{
+    <MudTable @ref="vineyardTable" T="VineyardRecord" Items="@Vineyards" MultiSelection="false" SelectionChangeable="true" Hover="true"
+              @bind-SelectedItem="selectedVineyard" SelectOnRowClick="true" RowClassFunc="@SelectedRowClassFuncVineyards" RowClass="cursor-pointer">
+        <HeaderContent>
+            <MudTh>Name</MudTh>
+        </HeaderContent>
+        <RowTemplate>
+            <MudTd DataLabel="Name">@context.Name</MudTd>
+        </RowTemplate>
+        <PagerContent>
+            <MudTablePager PageSizeOptions="new int[] { 10, 25, 50, 100 }"/>
+        </PagerContent>
+    </MudTable>
+    <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="ProceedToNextStep">Select Vineyard</MudButton>
+}
+else if (!isSettingDates)
+{
+    <MudTable T="Machine" Items="@Machines" MultiSelection="true" SelectionChangeable="true" Hover="true"
+              @bind-SelectedItems="selectedMachines" SelectOnRowClick="true" RowClass="cursor-pointer">
+        <HeaderContent>
+            <MudTh>Name</MudTh>
+        </HeaderContent>
+        <RowTemplate>
+            <MudTd DataLabel="Name">@context.Name</MudTd>
+        </RowTemplate>
+        <PagerContent>
+            <MudTablePager PageSizeOptions="new int[] { 10, 25, 50, 100 }"/>
+        </PagerContent>
+    </MudTable>
+    <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="ProceedToNextStep">Select Machines</MudButton>
+}
+else
+{
+    <MudTable T="WorkInformation" Items="@workAssignments">
+        <HeaderContent>
+            <MudTh>User</MudTh>
+            <MudTh>Machines</MudTh>
+            <MudTh>Start Date</MudTh>
+            <MudTh>End Date</MudTh>
+            <MudTh>Description</MudTh>
+        </HeaderContent>
+        <RowTemplate>
+            <MudTd DataLabel="User">@context.ApplicationUser?.Email</MudTd>
+            <MudTd DataLabel="Machines">
+                @(userMachines.ContainsKey(context.ApplicationUser?.Id) ? userMachines[context.ApplicationUser?.Id] : "")
+            </MudTd>
+            <MudTd DataLabel="Start Date">
+                <MudDatePicker @bind-Date="@context.StartedAt" Label="Start Date" DisableToolbar="true"/>
+            </MudTd>
+            <MudTd DataLabel="End Date">
+                <MudDatePicker @bind-Date="@context.FinishedAt" Label="End Date" DisableToolbar="true"/>
+            </MudTd>
+            <MudTd DataLabel="Description">
+                <MudTextField @bind-Value="@context.Description" Label="Description" Variant="Variant.Outlined" />
+            </MudTd>
+        </RowTemplate>
+    </MudTable>
+}
+<MudButton Variant="Variant.Filled" Color="Color.Success" Disabled="@(!isSettingDates)" OnClick="FinalizeSelection">
+    Confirm Assignments
+</MudButton>
+
+@code {
+    [CascadingParameter] private MudDialogInstance MudDialog { get; set; }
+    [Parameter] public List<UserWithRoleRecord> Users { get; set; } = new();
+    private List<Machine>? Machines = new();
+    private HashSet<UserWithRoleRecord> selectedUsers = new();
+    private HashSet<Machine> selectedMachines = new();
+    private VineyardRecord? selectedVineyard = new();
+    private List<VineyardRecord>? Vineyards = new();
+    private List<WorkInformation> workAssignments = new();
+    private List<WorkInformation> workAssignmentsBackend = new();
+    private bool isSelectingVineyards = false;
+    private bool isSelectingMachines = false;
+    private bool isSettingDates = false;
+    private int selectedRowNumber = -1;
+    private MudTable<VineyardRecord> vineyardTable;
+    private Dictionary<string, string> userMachines = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        Vineyards = await VineyardService.GetVineyardsAsync();
+        Machines = await MachineService.GetMachinesAsync();
+    }
+
+    private void ProceedToNextStep()
+    {
+        if (!isSelectingVineyards)
+        {
+            if (selectedUsers.Any())
+            {
+                isSelectingVineyards = true;
+            }
+            else
+            {
+                Snackbar.Add("Select a minimum of one user", Severity.Error);
+            }
+        }
+        else if (!isSelectingMachines)
+        {
+            if (selectedVineyard != null)
+            {
+                isSelectingMachines = true;
+            }
+            else
+            {
+                Snackbar.Add("Select a vineyard", Severity.Error);
+            }
+        }
+        else if (!isSettingDates)
+        {
+            workAssignments.Clear();
+
+            foreach (var user in selectedUsers)
+            {
+                var machineNames = selectedMachines.Select(m => m.Name).ToList();
+                
+                workAssignments.Add(new WorkInformation
+                {
+                    ApplicationUser = user.UserData,
+                    UserId = user.UserData.Id,
+                    VineyardId = selectedVineyard.BookingObjectId,
+                    StartedAt = DateTime.UtcNow,
+                    FinishedAt = DateTime.UtcNow.AddDays(1), 
+                    Description = "" // Standardwert
+                });
+
+                workAssignmentsBackend.AddRange(selectedMachines.Any()
+                    ? selectedMachines.Select(machine => new WorkInformation
+                    {
+                        ApplicationUser = user.UserData,
+                        UserId = user.UserData.Id,
+                        VineyardId = selectedVineyard.BookingObjectId,
+                        MachineId = machine.BookingObjectId,
+                        StartedAt = DateTime.UtcNow,
+                        FinishedAt = DateTime.UtcNow.AddDays(1),
+                        Description = ""
+                    })
+                    : new List<WorkInformation>
+                    {
+                        new WorkInformation
+                        {
+                            ApplicationUser = user.UserData,
+                            UserId = user.UserData.Id,
+                            VineyardId = selectedVineyard.BookingObjectId,
+                            MachineId = null,
+                            StartedAt = DateTime.UtcNow,
+                            FinishedAt = DateTime.UtcNow.AddDays(1),
+                            Description = ""
+                        }
+                    });
+                
+                userMachines[user.UserData.Id] = string.Join(", ", machineNames);
+            }
+            
+            isSettingDates = true;
+        }
+    }
+
+    private async Task FinalizeSelection()
+    {
+        foreach (var workInfo in workAssignmentsBackend)
+        {
+            var matchingWorkInfo = workAssignments.FirstOrDefault(w => w.UserId == workInfo.UserId);
+            if (matchingWorkInfo != null)
+            {
+                workInfo.Description = matchingWorkInfo.Description; // Setze die richtige Beschreibung
+                workInfo.StartedAt = matchingWorkInfo.StartedAt;
+                workInfo.FinishedAt = matchingWorkInfo.FinishedAt;
+            }
+        }
+        await WorkInformationService.CreateVineyardInfoAsync(workAssignmentsBackend);
+        Snackbar.Add("Work assignments successfully saved", Severity.Success);
+        MudDialog?.Close();
+    }
+    
+    private string SelectedRowClassFuncVineyards(VineyardRecord element, int rowNumber)
+    {
+        if (selectedRowNumber == rowNumber)
+        {
+            selectedRowNumber = -1;
+            return string.Empty;
+        }
+        else if (vineyardTable.SelectedItem != null && vineyardTable.SelectedItem.Equals(element))
+        {
+            selectedRowNumber = rowNumber;
+            return "selected";
+        }
+        else
+        {
+            return string.Empty;
+        }
+    }
+}

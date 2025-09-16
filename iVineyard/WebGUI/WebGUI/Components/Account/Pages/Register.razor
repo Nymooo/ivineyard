@@ -1,0 +1,88 @@
+﻿@page "/Account/Register"
+
+@using Microsoft.AspNetCore.Identity
+@using Model.Configurations
+@using Services.Implementations
+@using Models
+
+@inject UserManager<ApplicationUser> UserManager
+@inject IUserStore<ApplicationUser> UserStore
+@inject SignInManager<ApplicationUser> SignInManager
+@inject IEmailSender<ApplicationUser> EmailSender
+@inject ILogger<Register> Logger
+@inject NavigationManager NavigationManager
+@inject IdentityRedirectManager RedirectManager
+
+@inject RegisterService RegisterService
+
+<PageTitle>Register</PageTitle>
+
+<style>
+    body {
+        background-image: url("BackgroundImageLogin.png");
+    }
+
+    .mud-main-content {
+        padding-top: 0 !important;
+    }
+</style>
+
+<div class="d-flex justify-content-center align-items-center w-100 position-absolute" style="height: 20vh">
+    <h1>
+        <b>Manage your Vineyards as efficiently as possible</b>
+    </h1>
+</div>
+
+<div class="d-flex justify-content-evenly align-items-center w-100" style="height: 100vh">
+    <MudCard Style="width: 670px" Class="shadow-lg rounded-3 p-3">
+        <h3 class="mb-3"><b>Register a new Account!</b></h3>
+        <EditForm asp-route-returnUrl="@_returnUrl" Model="_registerModel" method="post" OnValidSubmit="RegisterUser" FormName="register">
+            <DataAnnotationsValidator/>
+            <div class="form-floating mb-3">
+                <InputText @bind-Value="_registerModel.Email" class="form-control" aria-required="true" placeholder="name@example.com"/>
+                <label for="email" class="form-label">Email</label>
+                <ValidationMessage For="() => _registerModel.Email" class="text-danger"/>
+            </div>
+            <div class="form-floating mb-3">
+                <InputText type="password" @bind-Value="_registerModel.Password" class="form-control" autocomplete="current-password" aria-required="true" placeholder="password"/>
+                <label for="password" class="form-label">Password</label>
+                <ValidationMessage For="() => _registerModel.Password" class="text-danger"/>
+            </div>
+            <div class="form-floating mb-3">
+                <InputText type="password" @bind-Value="_registerModel.ConfirmPassword" class="form-control" aria-required="true" placeholder="password"/>
+                <label for="confirmpassword" class="form-label">Confirm Password</label>
+                <ValidationMessage For="() => _registerModel.ConfirmPassword" class="text-danger"/>
+            </div>
+            <div>
+                <p>
+                    Already have an Account? <a href="@(NavigationManager.GetUriWithQueryParameters("Account/Login", new Dictionary<string, object?> { ["ReturnUrl"] = _returnUrl }))">Login now</a>
+                </p>
+            </div>
+            <div>
+                <MudButton Variant="Variant.Filled" Color="Color.Primary" ButtonType="ButtonType.Submit" Class="w-100">
+                    <MudText Typo="Typo.h5">Register now</MudText>
+                </MudButton>
+            </div>
+        </EditForm>
+    </MudCard>
+    <div>
+        <video style="width: 600px; border-radius: 15px !important;" muted autoplay loop onloadstart="this.playbackRate = 2.5;">
+            <source src="MiniworldAnimation.mp4" type="video/mp4"/>
+        </video>
+        <div style="width: 600px; height: 20px" class="position-absolute d-flex justify-content-center">
+            <MudButton ButtonType="ButtonType.Button" Variant="Variant.Text" Class="p-3">
+                <MudIcon Icon="@Icons.Material.Outlined.Info"></MudIcon>
+            </MudButton>
+        </div>
+    </div>
+</div>
+
+@code {
+    [SupplyParameterFromForm] private RegisterModel _registerModel { get; set; } = new();
+    [SupplyParameterFromForm] private string _returnUrl { get; set; } = String.Empty;
+
+    public async Task RegisterUser(EditContext editContext)
+    {
+        await RegisterService.RegisterUser(editContext, _returnUrl);
+    }
+}

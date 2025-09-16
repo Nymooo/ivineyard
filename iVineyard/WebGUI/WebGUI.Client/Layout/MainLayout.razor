@@ -1,0 +1,196 @@
+﻿@using Microsoft.AspNetCore.Components.Sections
+@inherits LayoutComponentBase
+
+@* Required *@
+<MudThemeProvider Theme="vineyardTheme"/>
+<MudPopoverProvider />
+
+@* Needed for dialogs *@
+<MudDialogProvider />
+
+@* Needed for snackbars *@
+<MudSnackbarProvider />
+
+@inject NavigationManager NavigationManager
+
+<style>
+    .mud-nav-link:hover {
+        color: #5CAB7D;
+    }
+
+    .mud-list-item:hover {
+        color: #5CAB7D;
+    }
+
+    .mud-nav-link {
+        font-family: 'Segoe UI Light', Tahoma, Geneva, sans-serif;
+        font-size: 20px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .mud-nav-link svg{
+        height: 27px;
+        width: 27px;
+    }
+
+    .mud-main-content {
+        padding-top: 114px !important;
+    }
+</style>
+
+<MudLayout>
+    @if (!_isLoginOrRegisterPage)
+    {
+    <MudAppBar Class="shadow-lg" Elevation="0" Style="min-height: 114px !important; background-color: white !important; color: black !important;">
+        <div class="d-flex justify-content-between align-items-center w-100">
+            <SectionOutlet SectionName="headbar"></SectionOutlet>
+            <MudMenu>
+                <ActivatorContent>
+                    <MudAvatar Color="Color.Primary"><AuthorizeView>@context.User.Identity?.Name?.ToUpper().ToCharArray()[0]</AuthorizeView></MudAvatar>
+                </ActivatorContent>
+                <ChildContent>
+                    <MudMenuItem Href="Account/Manage">Profile</MudMenuItem>
+                </ChildContent>
+            </MudMenu>
+        </div>
+    </MudAppBar>
+    <MudDrawer @bind-Open="_isOpen" Elevation="2" Width="350px">
+        <MudDrawerHeader Style="min-height: 200px;" Class="d-flex justify-content-center align-items-center">
+            <b>
+                <MudText Typo="Typo.h3" Class="mt-1 heading">iVineyard</MudText>
+            </b>
+        </MudDrawerHeader>
+        <NavMenu/>
+    </MudDrawer>
+    }
+    <MudMainContent>
+        @Body
+    </MudMainContent>
+</MudLayout>
+
+<div id="blazor-error-ui">
+    An unhandled error has occurred.
+    <a href="" class="reload">Reload</a>
+    <a class="dismiss">🗙</a>
+</div>
+
+@code
+{
+    private bool _isLoginOrRegisterPage { get; set; }
+    private bool _isOpen = true;
+    private string? currentUrl;
+
+
+    protected override void OnInitialized()
+    {
+        currentUrl = NavigationManager.ToBaseRelativePath(NavigationManager.Uri);
+        NavigationManager.LocationChanged += OnLocationChanged;
+        _isLoginOrRegisterPage = NavigationManager.Uri.Contains("Account/Login") || NavigationManager.Uri.Contains("Account/Register");
+    }
+
+    private void OnLocationChanged(object? sender, LocationChangedEventArgs e)
+    {
+        currentUrl = NavigationManager.ToBaseRelativePath(e.Location);
+        StateHasChanged();
+    }
+    
+    // MUDBLAZOR
+
+    private readonly MudTheme vineyardTheme = new MudTheme()
+    {
+        PaletteLight = new PaletteLight()
+        {
+            Primary = "#5A9367",
+            PrimaryContrastText = "#FFFFFF",
+            Secondary = "#5CAB7D",
+            Background = "#EFEFEF",
+            DrawerBackground = "#3F4B3B",
+            DrawerText = "#FFFFFF",
+            DrawerIcon = "#FFFFFF",
+            TextPrimary = "#000000",
+            Surface = "#ffffff" /*,
+            AppbarBackground = "#343a40",
+            DrawerText = "rgba(255,255,255, 0.50)",
+            DrawerIcon = "rgba(255,255,255, 0.50)",
+            Success = "#28a745",
+            Warning = "#ffc107",
+            Error = "#dc3545",
+            Info = "#17a2b8"*/
+        },
+        Typography = new Typography()
+        {
+            Default = new Default()
+            {
+                FontFamily = new[]
+                {
+                    "Segoe UI",
+                    "Tahoma",
+                    "Geneva",
+                    "Verdana",
+                    "sans-serif"
+                },
+            },
+            H1 = new H1()
+            {
+                FontFamily = new[]
+                {
+                    "Segoe UI Black",
+                    "Tahoma",
+                    "Geneva",
+                    "Verdana",
+                    "sans-serif"
+                },
+            },
+            H3 = new H3()
+            {
+                FontFamily = new[]
+                {
+                    "Segoe UI Black",
+                    "Tahoma",
+                    "Geneva",
+                    "Verdana",
+                    "sans-serif"
+                },
+            },
+            H4 = new H4()
+            {
+                FontFamily = new[]
+                {
+                    "Segoe UI Black",
+                    "Tahoma",
+                    "Geneva",
+                    "Verdana",
+                    "sans-serif"
+                },
+            },
+            H6 = new H6()
+            {
+                FontFamily = new[]
+                {
+                    "Segoe UI Semibold",
+                    "Tahoma",
+                    "Geneva",
+                    "Verdana",
+                    "sans-serif"
+                }
+            },
+            Subtitle1 = new Subtitle1()
+            {
+                FontFamily = new[]
+                {
+                    "Segoe UI SemiLight",
+                    "Tahoma",
+                    "Geneva",
+                    "Verdana",
+                    "sans-serif"
+                }
+            }
+        },
+        LayoutProperties = new LayoutProperties()
+        {
+            AppbarHeight = "114px"
+        }
+    };
+}

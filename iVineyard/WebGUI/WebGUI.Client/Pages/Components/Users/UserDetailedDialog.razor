@@ -1,0 +1,113 @@
+@using Model.Configurations
+@using Model.Entities.Bookingobjects.Vineyard
+@using WebGUI.Client.ClientServices
+@using WebGUI.Client.Pages.Components.Records
+
+@inject WorkinformationService WorkInformationService
+
+
+<MudDialog MaxWidth="MaxWidth.Small" CloseButton="true">
+    <DialogContent>
+        
+        @if (UserData is null)
+        {
+            <p>Loading</p>
+        }
+        else
+        {
+            <MudGrid Class="d-flex" Spacing="2">
+            <MudItem xs="6" sm="6" md="6" lg="6">
+                <MudCard Class="shadow-lg flex-column" Elevation="0">
+                    <MudCardHeader>
+                        <MudText Typo="Typo.h6">Working History <MudText Inline Typo="Typo.caption">[for this month]</MudText></MudText>
+                    </MudCardHeader>
+                    <MudCardContent Class="d-flex justify-content-center align-items-center">
+                        <ul>
+                            @foreach (var workInfo in UserWorkInformation)
+                            {
+
+                                <li><p>@workInfo.ApplicationUser.UserName | @workInfo.Vineyard.Name</p></li>
+                            }
+                        </ul >
+                    </MudCardContent>
+                </MudCard>
+            </MudItem>
+
+            <MudItem xs="6" sm="6" md="6" lg="6">
+                <MudCard Class="shadow-lg flex-column" Elevation="0">
+                    <MudCardHeader>
+                        <MudText Typo="Typo.h6">Working Hours <MudText Inline Typo="Typo.caption">[for this month]</MudText></MudText>
+                    </MudCardHeader>
+                    <MudCardContent Class="d-flex justify-content-center align-items-center">
+                        <MudText Typo="Typo.h1">@Math.Round(TotalWorkedHours, 2)</MudText>
+                    </MudCardContent>
+                </MudCard>
+            </MudItem>
+
+            <MudItem xs="6" sm="6" md="6" lg="6">
+                <MudCard Class="shadow-lg flex-column" Elevation="0">
+                    <MudCardHeader>
+                        <MudText Typo="Typo.h6">Working Hours <MudText Inline Typo="Typo.caption">[today]</MudText></MudText>
+                    </MudCardHeader>
+                    <MudCardContent Class="d-flex justify-content-center align-items-center">
+                        <MudText Typo="Typo.h1">@Math.Round(TodayWorkedHours, 2)</MudText>
+                    </MudCardContent>
+                </MudCard>
+            </MudItem>
+
+            <MudItem xs="6" sm="6" md="6" lg="6">
+                <MudCard Class="shadow-lg flex-column" Elevation="0">
+                    <MudCardHeader>
+                        <MudText Typo="Typo.h6">Cost <MudText Inline Typo="Typo.caption">[for this month]</MudText></MudText>
+                    </MudCardHeader>
+                    <MudCardContent Class="d-flex justify-content-center align-items-center">
+                        <MudText Typo="Typo.h1">€ @Math.Round(TotalCost, 2)</MudText>
+                    </MudCardContent>
+                </MudCard>
+            </MudItem>
+        </MudGrid>
+        }
+
+    </DialogContent>
+</MudDialog>
+
+
+@code {
+    [CascadingParameter] private MudDialogInstance MudDialog { get; set; }
+    [Parameter] public UserWithRoleRecord? UserData { get; set; } = new();
+    private List<WorkInformation> UserWorkInformation { get; set; } = new();
+    private double TotalWorkedHours { get; set; } = 0;
+    private double TodayWorkedHours { get; set; } = 0;
+    private double TotalCost { get; set; } = 0;
+
+    protected override async Task OnInitializedAsync()
+    {
+        UserWorkInformation = await WorkInformationService.GetUserWorkInformationMonth(UserData.UserData.Id);
+
+        // Gesamte Arbeitszeit im Monat berechnen
+        TotalWorkedHours = UserWorkInformation
+            .Where(w => w.StartedAt.HasValue && w.FinishedAt.HasValue)
+            .Sum(w => CalculateWorkedHours(w.StartedAt.Value, w.FinishedAt.Value));
+
+        // Arbeitszeit des heutigen Tages berechnen
+        var today = DateTime.UtcNow.Date;
+        TodayWorkedHours = UserWorkInformation
+            .Where(w => w.StartedAt.HasValue && w.FinishedAt.HasValue 
+                                             && w.StartedAt.Value.Date == today)
+            .Sum(w => CalculateWorkedHours(w.StartedAt.Value, w.FinishedAt.Value));
+
+        // Kosten berechnen
+        TotalCost = TotalWorkedHours * UserData.UserData.Salary;
+    }
+
+    public double CalculateWorkedHours(DateTime startDate, DateTime endDate)
+    {
+        if (endDate < startDate)
+        {
+            throw new ArgumentException("End date must be greater than or equal to the start date.");
+        }
+
+        var timeWorked = endDate - startDate;
+        return timeWorked.TotalHours;
+    }
+}

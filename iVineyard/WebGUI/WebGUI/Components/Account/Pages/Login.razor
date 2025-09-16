@@ -1,0 +1,95 @@
+﻿@page "/Account/Login"
+
+@using Microsoft.AspNetCore.Authentication
+@using Microsoft.AspNetCore.Identity
+@using Services.Implementations
+@using Models
+
+@inject NavigationManager NavigationManager
+
+@inject LoginService LoginService
+
+<PageTitle>Log in</PageTitle>
+
+<style>
+    body {
+        background-image: url("BackgroundImageLogin.png");
+    }
+
+    .mud-main-content {
+        padding-top: 0 !important;
+    }
+</style>
+
+<div class="d-flex justify-content-center align-items-center w-100 position-absolute" style="height: 20vh">
+    <h1>
+        <b>Start working right now</b>
+    </h1>
+</div>
+<div class="d-flex justify-content-evenly align-items-center w-100" style="height: 100vh">
+    <MudCard Style="height: 390px; width: 670px" Class="shadow-lg rounded-3 p-3">
+        <h3 class="mb-3"><b>Log into an existing account!</b></h3>
+        <EditForm Model="_loginModel" method="post" OnValidSubmit="LoginUser" FormName="login">
+            <DataAnnotationsValidator/>
+            <div class="form-floating mb-3">
+                <InputText @bind-Value="_loginModel.Email" class="form-control" autocomplete="username" aria-required="true" placeholder="username"/>
+                <label for="username" class="form-label">E-Mail</label>
+                <ValidationMessage For="() => _loginModel.Email" class="text-danger"/>
+            </div>
+            <div class="form-floating mb-3">
+                <InputText type="password" @bind-Value="_loginModel.Password" class="form-control" autocomplete="current-password" aria-required="true" placeholder="password"/>
+                <label for="password" class="form-label">Password</label>
+                <ValidationMessage For="() => _loginModel.Password" class="text-danger"/>
+            </div>
+            <div class="checkbox mb-3">
+                <label class="form-label">
+                    <InputCheckbox @bind-Value="_loginModel.RememberMe" class="darker-border-checkbox form-check-input"/>
+                    Remember me
+                </label>
+            </div>
+            <div>
+                @*<p>
+                    <a href="Account/ForgotPassword">Forgot your password?</a>
+                </p>*@
+                <p>
+                    No Account? <a href="@(NavigationManager.GetUriWithQueryParameters("Account/Register", new Dictionary<string, object?> { ["ReturnUrl"] = _returnUrl }))">Register now</a>
+                </p>
+            </div>
+            <div>
+                <MudButton Variant="Variant.Filled" Color="Color.Primary" ButtonType="ButtonType.Submit" Class="w-100">
+                    <MudText Typo="Typo.h5">Log In</MudText>
+                </MudButton>
+            </div>
+        </EditForm>
+    </MudCard>
+    <div>
+        <video style="width: 600px; border-radius: 15px !important;" muted autoplay loop onloadstart="this.playbackRate = 2.5;">
+            <source src="MiniworldAnimation.mp4" type="video/mp4"/>
+        </video>
+        <div style="width: 600px; height: 20px" class="position-absolute d-flex justify-content-center">
+            <MudButton ButtonType="ButtonType.Button" Variant="Variant.Text" Class="p-3">
+                <MudIcon Icon="@Icons.Material.Outlined.Info"></MudIcon>
+            </MudButton>
+        </div>
+    </div>
+</div>
+
+@code {
+    [CascadingParameter] private HttpContext HttpContext { get; set; } = default!;
+    [SupplyParameterFromForm] private LoginModel _loginModel { get; set; } = new();
+    [SupplyParameterFromForm] private string _returnUrl { get; set; } = String.Empty;
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (HttpMethods.IsGet(HttpContext.Request.Method))
+        {
+            // Clear the existing external cookie to ensure a clean login process
+            await HttpContext.SignOutAsync(IdentityConstants.ExternalScheme);
+        }
+    }
+
+    public async Task LoginUser(EditContext editContext)
+    {
+        await LoginService.LoginUser(editContext, _returnUrl);
+    }
+}

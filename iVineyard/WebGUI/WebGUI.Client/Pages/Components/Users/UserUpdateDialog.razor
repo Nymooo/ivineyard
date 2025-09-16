@@ -1,0 +1,83 @@
+@using Mapster
+@using Microsoft.AspNetCore.Identity
+@using Model.Configurations
+@using WebGUI.Client.ClientServices
+@using WebGUI.Client.Pages.Components.Records
+@inject UserService UserService
+@inject NavigationManager Navigation
+
+<MudDialog MaxWidth="MaxWidth.Small" CloseButton="true">
+    <DialogContent>
+        @if (User is not null)
+        {
+            <MudForm>
+                <MudTextField Label="E-Mail" Disabled @bind-Value="NewEmployee.Email" Variant="Variant.Outlined" FullWidth="true" Placeholder=@(NewEmployee?.Email)></MudTextField>
+                <MudTextField Label="Tel." Disabled @bind-Value="NewEmployee.PhoneNumber" Variant="Variant.Outlined" FullWidth="true" Placeholder=@(NewEmployee?.PhoneNumber)></MudTextField>
+                <MudTextField Required="true" T="double" Label="Salary" InputType="InputType.Number" @bind-Value="NewEmployee.Salary" Variant="Variant.Outlined" FullWidth="true" Placeholder=@(NewEmployee?.Salary.ToString())></MudTextField>
+                <MudSelect Required="true" @bind-Value="newSelectedRole" Variant="Variant.Outlined" Margin="Margin.None" Label="Select new role" Placeholder="Please Select Role" AdornmentIcon="@Icons.Material.Filled.VerifiedUser" AdornmentColor="Color.Primary">
+                    @foreach (var role in IdentityRoles)
+                    {
+                        <MudSelectItem Value="@(role)">@role.Name</MudSelectItem>
+                    }
+                </MudSelect>
+            </MudForm>
+        }
+    </DialogContent>
+
+    <DialogActions>
+        <MudButton OnClick="Cancel" Color="Color.Default">Cancel</MudButton>
+        <MudButton OnClick="Update" Color="Color.Primary" Variant="Variant.Filled">Update Employee</MudButton>
+    </DialogActions>
+</MudDialog>
+
+
+@code {
+    [CascadingParameter] MudDialogInstance Dialog { get; set; } = new();
+    [Parameter] public UserWithRoleRecord UserData { get; set; } = new();
+    private ApplicationUser User = new();
+    [Parameter] public List<IdentityRole> IdentityRoles { get; set; } = new();
+    private IdentityRole newSelectedRole;
+    private ApplicationUser NewEmployee { get; set; } = new();
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        User = UserData.UserData;
+        NewEmployee = User.Adapt<ApplicationUser>();
+    }
+
+
+    private async Task Update()
+    {
+        if (UserData == null)
+        {
+            Dialog.Close(DialogResult.Cancel());
+            return;
+        }
+
+        var responseUserUpdate = await UserService.UpdateUser(NewEmployee.Id, NewEmployee, newSelectedRole);
+            
+        if (responseUserUpdate.IsSuccessStatusCode)
+        {
+            // Refresh and close the dialog
+            Dialog.Close(DialogResult.Ok(true));
+            RefreshPage();
+        }
+        else
+        {
+            Dialog.Close(DialogResult.Ok(false));
+        }
+    }
+
+    private void Cancel()
+    {
+        NewEmployee = new();
+        Dialog.Cancel();
+    }
+
+    private void RefreshPage()
+    {
+        Navigation.NavigateTo(Navigation.Uri, forceLoad: true);
+    }
+
+}

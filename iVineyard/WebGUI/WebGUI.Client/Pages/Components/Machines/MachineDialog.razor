@@ -1,0 +1,74 @@
+@using WebGUI.Client.ClientServices
+@inject MachineService _service;
+@inject NavigationManager Navigation
+
+
+<MudDialog MaxWidth="500px">
+    <DialogContent>
+        <MudText Typo="Typo.h6">Add Machine</MudText>
+
+        <MudGrid>
+            <MudItem xs="6">
+                <MudButton Variant="Variant.Text" Color="@GetButtonColor(true)" OnClick="@(() => SelectMachineType(true))" Class="full-width-button">
+                    Tractor
+                </MudButton>
+            </MudItem>
+            <MudItem xs="6">
+                <MudButton Variant="Variant.Text" Color="@GetButtonColor(false)" OnClick="@(() => SelectMachineType(false))" Class="full-width-button">
+                    Machine
+                </MudButton>
+            </MudItem>
+        </MudGrid>
+
+        <MudInput @bind-Value="name" InputType="InputType.Text" Variant="Variant.Outlined" FullWidth="true" Placeholder="name" />
+
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="Cancel" Color="Color.Default">Cancel</MudButton>
+        <MudButton OnClick="CreateMachine" Color="Color.Primary" Variant="Variant.Filled">Add Machine</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    
+    [CascadingParameter]
+    private MudDialogInstance MudDialog { get; set; }
+
+    [Parameter]
+    public string ContentText { get; set; }
+
+    [Parameter]
+    public string ButtonText { get; set; }
+
+    [Parameter]
+    public Color Color { get; set; }
+    private bool isTractorSelected = true;
+    private string name { get; set; } = "";
+    public async void CreateMachine()
+    {
+        await _service.CreateMachineAsync(name);
+        
+       
+        MudDialog.Close(DialogResult.Ok(true));
+        RefreshPage();
+        
+    }
+
+    private void Cancel() => MudDialog.Cancel();
+    
+    
+
+    private Color GetButtonColor(bool isTractorButton)
+    {
+        return isTractorButton == isTractorSelected ? Color.Primary : Color.Default;
+    }
+
+    private void SelectMachineType(bool selectTractor)
+    {
+        isTractorSelected = selectTractor;
+    }
+    private void RefreshPage()
+    {
+        Navigation.NavigateTo(Navigation.Uri, forceLoad: true);
+    }
+}

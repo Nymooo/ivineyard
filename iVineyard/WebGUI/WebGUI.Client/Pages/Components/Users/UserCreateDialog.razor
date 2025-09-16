@@ -1,0 +1,64 @@
+@using Microsoft.AspNetCore.Identity
+@using Model.Configurations
+@using WebGUI.Client.ClientServices
+
+@inject UserService UserService
+@inject NavigationManager Navigation
+
+<MudDialog>
+    <DialogContent>
+        <MudForm Spacing="6">
+            <MudInput Required @bind-Value="NewUser.Email" Variant="Variant.Outlined" FullWidth="true" Placeholder="E-Mail"/>
+            <MudInput T="double" InputType="InputType.Number" Required @bind-Value="NewUser.Salary" Variant="Variant.Outlined" FullWidth="true" Placeholder="Salary [hourly]"/>
+            <MudInput Required InputType="InputType.Password" @bind-Value="_password" Variant="Variant.Outlined" FullWidth="true" Placeholder="Password"/>
+            <MudSelect Required @bind-Value="NewSelectedRole" Variant="Variant.Outlined" Margin="Margin.None" Label="Select new role" Placeholder="Please Select Role" AdornmentIcon="@Icons.Material.Filled.VerifiedUser" AdornmentColor="Color.Primary">
+                @foreach (var role in IdentityRoles)
+                {
+                    <MudSelectItem Value="role">@role.Name</MudSelectItem>
+                }
+            </MudSelect>
+        </MudForm>
+    </DialogContent>
+
+    <DialogActions>
+        <MudButton OnClick="Cancel" Color="Color.Default">Cancel</MudButton>
+        <MudButton OnClick="Create" Color="Color.Primary" Variant="Variant.Filled">Add Worker</MudButton>
+    </DialogActions>
+</MudDialog>
+
+
+@code {
+    [CascadingParameter] private MudDialogInstance MudDialog { get; set; }
+    [Parameter] public List<IdentityRole> IdentityRoles { get; set; } = new();
+    private IdentityRole NewSelectedRole { get; set; } = new();
+    private ApplicationUser NewUser { get; set; } = new();
+    private string _password;
+
+    private async void Create()
+    {
+        var createdUser = await UserService.CreateUserAsync(_password, NewUser, NewSelectedRole);
+        
+        if (createdUser.IsSuccessStatusCode)
+        {
+            // Refresh and close the dialog
+            MudDialog.Close(DialogResult.Ok(true));
+            RefreshPage();
+        }
+        else
+        {
+            MudDialog.Close(DialogResult.Ok(false));
+        }
+    }
+
+    private void Cancel()
+    {
+        NewUser = new();
+        _password = string.Empty;
+        MudDialog.Cancel();
+    }
+
+    private void RefreshPage()
+    {
+        Navigation.NavigateTo(Navigation.Uri, forceLoad: true);
+    }
+}

@@ -1,0 +1,54 @@
+@using Model.Configurations
+@using WebGUI.Client.ClientServices
+@using WebGUI.Client.Pages.Components.Records
+@inject IDialogService DialogService
+@inject UserService UserService
+@inject NavigationManager Navigation
+
+<MudDialog>
+    <DialogContent>
+        <MudText>Do you really want to delete this Employee? This process cannot be undone.</MudText>
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="CancelAction">Cancel</MudButton>
+        <MudButton OnClick="DeleteEmployeeAsync" Color="Color.Error" Variant="Variant.Filled" ButtonType="ButtonType.Button">Delete</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter] MudDialogInstance Dialog { get; set; }
+    [Parameter] public UserWithRoleRecord UserData { get; set; }
+    private ApplicationUser User = new();
+
+    protected override Task OnInitializedAsync()
+    {
+        User = UserData.UserData;
+        Dialog.Options.CloseButton = true;
+        Dialog.Options.MaxWidth = MaxWidth.ExtraSmall;
+        Dialog.Title = "Delete";
+        return base.OnInitializedAsync();
+    }
+
+    private void CancelAction()
+    {
+        User = new();
+        Dialog.Cancel(); // Closes the dialog
+    }
+
+    private async void DeleteEmployeeAsync()
+    {
+        var response = await UserService.DeleteUser(User);
+
+        if (response?.IsSuccessStatusCode == true)
+        {
+            User = new();
+            Dialog.Close();
+            RefreshPage();
+        }
+    }
+    
+    private void RefreshPage()
+    {
+        Navigation.NavigateTo(Navigation.Uri, forceLoad: true);
+    }
+}

@@ -1,0 +1,264 @@
+@using Model.Entities.Bookingobjects
+@using Model.Entities.Bookingobjects.Machine
+@using Model.Entities.Company
+@using WebGUI.Client.ClientServices
+@using WebGUI.Client.Pages.Components.Records
+@inject FinanceService FinanceService
+@inject UserService UserService
+@inject MachineService MachineService
+@inject EquipmentService EquipmentService
+@inject ISnackbar Snackbar
+
+<style>
+    .selected {
+        background-color: #1E88E5 !important;
+    }
+    .selected > td {
+        color: white !important;
+    }
+    .selected > td .mud-input {
+        color: white !important;
+    }
+</style>
+
+<MudForm Spacing="6">
+    <!-- MudTabs für die Auswahl der Finanzierungsart -->
+    <MudTabs Color="Color.Primary" ActivePanelIndexChanged="OnTabChanged" ActivePanelIndex="@_activeTab">
+        <MudTabPanel Text="User Finance">
+            <MudTable @ref="userTable" T="UserWithRoleRecord" Items="@Users" SelectionChangeable="true" Hover="true"
+                      @bind-SelectedItem="_selectedUser" SelectOnRowClick="true" RowClassFunc="SelectedRowClassFuncUser" RowClass="cursor-pointer">
+                <HeaderContent>
+                    <MudTh>E-Mail</MudTh>
+                    <MudTh>Role</MudTh>
+                </HeaderContent>
+                <RowTemplate>
+                    <MudTd DataLabel="E-Mail">@context.UserData.Email</MudTd>
+                    <MudTd DataLabel="Role">@context.RoleData?.Name</MudTd>
+                </RowTemplate>
+                <PagerContent>
+                    <MudTablePager PageSizeOptions="new int[] { 10, 25, 50, 100 }"/>
+                </PagerContent>
+            </MudTable>
+            <!-- Input für den Betrag des Benutzers -->
+            <div class="d-flex flex-column m-3" style="margin-top: 10px">
+                <MudInput Required @bind-Value="_invoice.Price" Variant="Variant.Outlined" FullWidth="true" Placeholder="Amount [EUR]" Label="Amount [EUR]" Style="margin-bottom: 5px"/>
+                <MudInput InputType="InputType.Text" Required @bind-Value="_invoice.Description" Variant="Variant.Outlined" FullWidth="true" Placeholder="Description" Label="Description" Style=" margin-bottom: 5px"/>
+                <MudDatePicker @bind-Date="_invoice.BoughAt" Label="Bought At" Required="true" Style="margin-bottom: 5px"/>
+            </div>
+        </MudTabPanel>
+
+        <MudTabPanel Text="Machine Finance">
+            <MudTable @ref="machineTable" T="Machine" Items="@Machines" MultiSelection="false" SelectionChangeable="true" Hover="true"
+                      @bind-SelectedItem="_selectedMachine" SelectOnRowClick="true" RowClassFunc="@SelectedRowClassFuncMachines" RowClass="cursor-pointer">
+                <HeaderContent>
+                    <MudTh>Name</MudTh>
+                </HeaderContent>
+                <RowTemplate>
+                    <MudTd DataLabel="Name">@context.Name</MudTd>
+                </RowTemplate>
+                <PagerContent>
+                    <MudTablePager PageSizeOptions="new int[] { 10, 25, 50, 100 }"/>
+                </PagerContent>
+            </MudTable>
+            <!-- Input für den Betrag der Maschine -->
+            <div class="d-flex flex-column m-3" style="margin-top: 10px">
+                <MudInput Required @bind-Value="_invoice.Price" Variant="Variant.Outlined" FullWidth="true" Placeholder="Amount [EUR]" Label="Amount [EUR]" Style="margin-bottom: 5px"/>
+                <MudInput InputType="InputType.Text" Required @bind-Value="_invoice.Description" Variant="Variant.Outlined" FullWidth="true" Placeholder="Description" Label="Description" Style=" margin-bottom: 5px"/>
+                <MudDatePicker @bind-Date="_invoice.BoughAt" Label="Bought At" Required="true" Style="margin-bottom: 5px"/>
+            </div>
+        </MudTabPanel>
+
+        <MudTabPanel Text="Equipment Finance">
+            <MudTable @ref="equipmentTable" T="Equipment" Items="@Equipment" SelectionChangeable="true" Hover="true"
+                      @bind-SelectedItem="_selectedEquipment" SelectOnRowClick="true" RowClassFunc="SelectedRowClassFuncEquipment" RowClass="cursor-pointer">
+                <HeaderContent>
+                    <MudTh>Name</MudTh>
+                </HeaderContent>
+                <RowTemplate>
+                    <MudTd DataLabel="E-Mail">@context.Name</MudTd>
+                </RowTemplate>
+                <PagerContent>
+                    <MudTablePager PageSizeOptions="new int[] { 10, 25, 50, 100 }"/>
+                </PagerContent>
+            </MudTable>
+            <!-- Input für den Betrag des Benutzers -->
+            <div class="d-flex flex-column m-3" style="margin-top: 10px">
+                <MudInput Required @bind-Value="_invoice.Price" Variant="Variant.Outlined" FullWidth="true" Placeholder="Amount [EUR]" Label="Amount [EUR]" Style="margin-bottom: 5px"/>
+                <MudInput InputType="InputType.Text" Required @bind-Value="_invoice.Description" Variant="Variant.Outlined" FullWidth="true" Placeholder="Description" Label="Description" Style=" margin-bottom: 5px"/>
+                <MudDatePicker @bind-Date="_invoice.BoughAt" Label="Bought At" Required="true" Style="margin-bottom: 5px"/>
+            </div>
+        </MudTabPanel>
+
+        <MudTabPanel Text="Fuel">
+            <div class="d-flex flex-column m-3" style="margin-top: 10px">
+                <MudInput InputType="InputType.Number" Required @bind-Value="_invoice.Price" Variant="Variant.Outlined" FullWidth="true" Placeholder="Amount [EUR]" Label="Amount [EUR]" Style="margin-bottom: 5px"/>
+                <MudInput InputType="InputType.Number" Required @bind-Value="_invoice.Description" Variant="Variant.Outlined" FullWidth="true" Placeholder="Gas Amount [L]" Label="Description" Style=" margin-bottom: 5px"/>
+                <MudDatePicker @bind-Date="_invoice.BoughAt" Label="Bought At" Required="true" Style="margin-bottom: 5px"/>
+            </div>
+        </MudTabPanel>
+
+        <MudTabPanel Text="Income">
+            <div class="d-flex flex-column m-3" style="margin-top: 10px">
+                <MudInput Required @bind-Value="_invoice.Price" Variant="Variant.Outlined" FullWidth="true" Placeholder="Amount [EUR]" Label="Amount [EUR]" Style="margin-bottom: 5px"/>
+                <MudInput InputType="InputType.Text" Required @bind-Value="_invoice.Description" Variant="Variant.Outlined" FullWidth="true" Placeholder="Income Description" Label="Income Description" Style=" margin-bottom: 5px"/>
+                <MudDatePicker @bind-Date="_invoice.BoughAt" Label="Payed At" Required="true" Style="margin-bottom: 5px"/>
+            </div>
+        </MudTabPanel>
+    </MudTabs>
+    <MudButton OnClick="Submit" Color="Color.Primary" Variant="Variant.Filled">Add</MudButton>
+</MudForm>
+<MudButton OnClick="Cancel" Color="Color.Default">Cancel</MudButton>
+
+
+@code {
+    [CascadingParameter] private MudDialogInstance MudDialog { get; set; }
+
+    [Parameter] public string ContentText { get; set; }
+
+    [Parameter] public string ButtonText { get; set; }
+
+    [Parameter] public Color Color { get; set; }
+
+    private int selectedRowNumber = -1;
+    private MudTable<UserWithRoleRecord> userTable = new();
+    private MudTable<Machine> machineTable = new();
+    private MudTable<Equipment> equipmentTable = new();
+
+    private Invoice _invoice = new();
+    private List<UserWithRoleRecord>? Users = new();
+    private UserWithRoleRecord _selectedUser = null;
+    private List<Machine>? Machines = new();
+    private Machine _selectedMachine = null;
+    private List<Equipment>? Equipment = new();
+    private Equipment _selectedEquipment = null;
+
+    private int _activeTab = 0; // Standardmäßig auf den ersten Tab setzen
+
+    protected override async Task OnInitializedAsync()
+    {
+        Users = await UserService.GetUsersWithRole();
+        Machines = await MachineService.GetMachinesAsync();
+        Equipment = await EquipmentService.GetEquipmentAsync();
+    }
+
+    private void Submit()
+    {
+        Create();
+    }
+
+    private void Cancel() => MudDialog.Cancel();
+
+    private async void Create()
+    {
+        if (_activeTab == 0) // User Finance Tab
+        {
+            _invoice.BookingObject = _selectedUser.UserData.BookingObject;
+            _invoice.BookingObjectId = _selectedUser.UserData.BookingObjectId;
+            _invoice.Price *= -1;
+        }
+        else if (_activeTab == 1) // Machine Finance Tab
+        {
+            _invoice.BookingObject = _selectedMachine.BookingObject;
+            _invoice.BookingObjectId = _selectedMachine.BookingObjectId;
+            _invoice.Price *= -1;
+        }
+        else if (_activeTab == 2) // Equipment Finance Tab
+        {
+            _invoice.BookingObject = _selectedEquipment.BookingObject;
+            _invoice.BookingObjectId = _selectedEquipment.BookingObjectId;
+            _invoice.Price *= -1;
+        }
+        else if (_activeTab == 3) // Fuel Tab
+        {
+            _invoice.Description = _invoice.Description.Insert(0, "FUEL; ");
+            _invoice.Price *= -1;
+        }
+
+        var createdInvoice = await FinanceService.CreateInvoiceAsync(_invoice);
+
+        Console.WriteLine(createdInvoice.IsSuccessStatusCode);
+
+        if (createdInvoice.IsSuccessStatusCode)
+        {
+            // Refresh und Dialog schließen
+            Snackbar.Add("Invoice created successfully.", Severity.Success);
+            MudDialog.Close(DialogResult.Ok(true));
+            RefreshPage();
+        }
+        else
+        {
+            MudDialog.Close(DialogResult.Ok(false));
+        }
+    }
+
+    private void RefreshPage()
+    {
+        // Implementiere die Logik, um die Seite zu aktualisieren (z. B. Daten neu laden)
+    }
+
+    private string SelectedRowClassFuncUser(UserWithRoleRecord element, int rowNumber)
+    {
+        if (selectedRowNumber == rowNumber)
+        {
+            selectedRowNumber = -1;
+            return string.Empty;
+        }
+        else if (userTable.SelectedItem != null && userTable.SelectedItem.Equals(element))
+        {
+            selectedRowNumber = rowNumber;
+            return "selected";
+        }
+        else
+        {
+            return string.Empty;
+        }
+    }
+
+    private string SelectedRowClassFuncMachines(Machine element, int rowNumber)
+    {
+        if (selectedRowNumber == rowNumber)
+        {
+            selectedRowNumber = -1;
+            return string.Empty;
+        }
+        else if (machineTable.SelectedItem != null && machineTable.SelectedItem.Equals(element))
+        {
+            selectedRowNumber = rowNumber;
+            return "selected";
+        }
+        else
+        {
+            return string.Empty;
+        }
+    }
+    
+    private string SelectedRowClassFuncEquipment(Equipment element, int rowNumber)
+    {
+        if (selectedRowNumber == rowNumber)
+        {
+            selectedRowNumber = -1;
+            return string.Empty;
+        }
+        else if (equipmentTable.SelectedItem != null && equipmentTable.SelectedItem.Equals(element))
+        {
+            selectedRowNumber = rowNumber;
+            return "selected";
+        }
+        else
+        {
+            return string.Empty;
+        }
+    }
+
+    private void OnTabChanged(int newIndex)
+    {
+        // Setze den Index des ausgewählten Eintrags auf null
+        _selectedUser = new();
+        _selectedMachine = new();
+        _selectedEquipment = new();
+
+        // Aktualisiere den aktiven Tab Index
+        _activeTab = newIndex;
+    }
+
+}

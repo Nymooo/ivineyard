@@ -1,0 +1,200 @@
+﻿@page "/DashboardEmployee"
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Components.Sections
+@using Model.Entities.Bookingobjects.Vineyard
+@using WebGUI.Client.ClientServices
+@using WebGUI.Client.Pages.Components.Records
+
+@rendermode InteractiveAuto
+
+@attribute [Authorize]
+
+@inject IJSRuntime JsRuntime
+@inject NavigationManager NavManager
+@inject WorkinformationService WorkInformationService
+@inject AuthenticationStateProvider AuthenticationStateProvider
+
+<SectionContent SectionName="headbar">
+    <MudText Typo="Typo.h4">Dashboard</MudText>
+</SectionContent>
+
+<div class="d-flex flex-column w-100">
+    <div class="d-flex flex-row w-100">
+        <MudCard Class="d-flex flex-grow-1 shadow-lg flex-column" Elevation="0" Style="margin: 25px 15px 15px 30px; height: 33vh;">
+            <MudCardHeader>
+                <i>
+                    <MudText Typo="Typo.h6">Today's Tasks</MudText>
+                </i>
+            </MudCardHeader>
+            <MudCardContent Class="d-flex justify-content-center align-items-center flex-column">
+                <MudCarousel AutoCycleTime="new TimeSpan(0,0,0,10)" @bind-SelectedIndex="carouselIndex" Class="mud-width-full" Style="height:100%" ShowArrows ShowBullets EnableSwipeGesture AutoCycle TData="WorkInformation">
+                    @if (WorkInformationOngoing != null && WorkInformationOngoing.Any())
+                    {
+                        @foreach (var work in WorkInformationOngoing)
+                        {
+                            <MudCarouselItem Transition="Transition.Slide" Color="@Color.Primary">
+                                <div class="d-flex flex-column align-items-center justify-content-center" style="height:100%">
+                                    <MudText Typo="Typo.h1" Class="text-white">@work.Vineyard?.Name</MudText>
+                                    <MudText Typo="Typo.body1" Class="text-white">Start: @work.StartedAt.ToString()</MudText>
+                                </div>
+                            </MudCarouselItem>
+                        }
+                    }
+                    else
+                    {
+                        <MudCarouselItem Transition="Transition.Slide" Color="@Color.Secondary">
+                            <div class="d-flex flex-column align-items-center justify-content-center" style="height:100%">
+                                <MudText Typo="Typo.h5" Class="text-white">No Ongoing Tasks</MudText>
+                            </div>
+                        </MudCarouselItem>
+                    }
+                </MudCarousel>
+            </MudCardContent>
+        </MudCard>
+        <MudCard Class="d-flex flex-grow-1 shadow-lg" Elevation="0" Style="margin: 25px 30px 15px 15px; height: 33vh;">
+            <MudCardContent Class="p-0">
+                <div @onmouseup="OnMouseUp" @onmousedown="OnMouseDown" @onmousemove="OnMouseMove" class="rounded" id="dashboardMap" style="width: 100%; height: 100%"></div>
+            </MudCardContent>
+        </MudCard>
+    </div>
+    <div class="d-flex flex-row w-100">
+        @if (IsCurrentDateInWorkRange)
+        {
+            <MudCard Class="d-flex flex-grow-1 shadow-lg" Elevation="0" Style="margin: 15px 15px 30px 30px; height: 47.2vh; background-color: #5CAB7D !important;">
+                <MudCardContent Class="d-flex align-items-center justify-content-center" Style="overflow-x: hidden; overflow-y: hidden">
+                    <MudText Class="mb-5" Typo="Typo.h1" Style="color: white !important;">Working</MudText>
+                </MudCardContent>
+            </MudCard>
+        }
+        else
+        {
+            <MudCard Class="d-flex flex-grow-1 shadow-lg" Elevation="0" Style="margin: 15px 15px 30px 30px; height: 47.2vh; background-color: #C54949 !important;">
+                <MudCardContent Class="d-flex align-items-center justify-content-center" Style="overflow-x: hidden; overflow-y: hidden">
+                    <MudText Class="mb-5" Typo="Typo.h1" Style="color: white !important;">Not Working</MudText>
+                </MudCardContent>
+            </MudCard>
+        }
+        <MudCard Class="d-flex flex-grow-1 shadow-lg" Elevation="0" Style="margin: 15px 30px 30px 15px; height: 47.2vh;">
+            <MudCardHeader>
+                <i>
+                    <MudText Typo="Typo.h6">Task Description</MudText>
+                </i>
+            </MudCardHeader>
+            <MudCardContent Class="d-flex align-items-center justify-content-center" Style="overflow-x: hidden; overflow-y: hidden">
+                <MudCarousel AutoCycleTime="new TimeSpan(0,0,0,10)" @bind-SelectedIndex="carouselIndex" Class="mud-width-full" Style="height:100%" ShowArrows ShowBullets="false" EnableSwipeGesture AutoCycle TData="WorkInformation">
+                    @if (WorkInformationOngoing != null && WorkInformationOngoing.Any())
+                    {
+                    @foreach (var work in WorkInformationOngoing)
+                    {
+                    <MudCarouselItem Transition="Transition.Slide" Color="@Color.Primary">
+                        <div class="d-flex flex-column align-items-center justify-content-center" style="height:100%">
+                            <MudText Typo="Typo.h6" Class="text-white">@work.Description</MudText>
+                        </div>
+                    </MudCarouselItem>
+                    }
+                    }
+                    else
+                    {
+                    <MudCarouselItem Transition="Transition.Slide" Color="@Color.Secondary">
+                        <div class="d-flex flex-column align-items-center justify-content-center" style="height:100%">
+                            <MudText Typo="Typo.h5" Class="text-white">No Ongoing Tasks</MudText>
+                        </div>
+                    </MudCarouselItem>
+                    }
+                </MudCarousel>
+            </MudCardContent>
+        </MudCard>
+    </div>
+</div>
+
+@code {
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            if (JsRuntime is not null)
+            {
+                var dotNetObjectReference = DotNetObjectReference.Create(this);
+                _module = await JsRuntime.InvokeAsync<IJSObjectReference>("import", "./map.js");
+                if (_module is not null)
+                {
+                    await _module.InvokeVoidAsync("MapFunction", dotNetObjectReference);
+                }
+            }
+        }
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+
+        if (user.Identity is not null && user.Identity.IsAuthenticated)
+        {
+            userId = user.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+        }
+
+        if (userId != null)
+        {
+            WorkInformation = await WorkInformationService.GetUserWorkInformation(userId);
+            WorkInformationOngoing = WorkInformationService.FilterOngoingWorkInformation(WorkInformation);
+            IsCurrentDateInWorkRange = WorkInformationService.CheckIfCurrentDateIsInWorkRange(WorkInformation);
+        }
+    }
+
+    private List<WorkInformation>? WorkInformation { get; set; } = new();
+    private List<WorkInformation>? WorkInformationOngoing { get; set; } = new();
+    private int carouselIndex = 0;
+
+    private string? userId;
+    private bool IsCurrentDateInWorkRange = false;
+
+    private IJSObjectReference? _module;
+    private bool _isDragging = false;
+    private bool _mouseDown = false;
+
+    private void CheckIfCurrentDateIsInWorkRange()
+    {
+        if (WorkInformation != null && WorkInformation.Any())
+        {
+            var currentDate = DateTime.Now;
+            foreach (var work in WorkInformation)
+            {
+                if (work.StartedAt <= currentDate && work.FinishedAt >= currentDate)
+                {
+                    IsCurrentDateInWorkRange = true;
+                    break;
+                }
+            }
+        }
+    }
+
+    private void OnMouseDown()
+    {
+        _mouseDown = true;
+        _isDragging = false;
+    }
+
+    private void OnMouseUp()
+    {
+        if (!_isDragging)
+        {
+            // Navigation nur bei einfachem Klick
+            NavManager.NavigateTo("Vineyards");
+        }
+
+        // Zurücksetzen
+        _mouseDown = false;
+        _isDragging = false;
+    }
+
+    private void OnMouseMove()
+    {
+        if (_mouseDown)
+        {
+            _isDragging = true;
+        }
+    }
+
+}

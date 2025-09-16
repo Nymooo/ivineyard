@@ -1,0 +1,375 @@
+﻿@page "/specificVineyard/{Id:int}"
+@using System.Diagnostics.Metrics
+@using Microsoft.AspNetCore.Authorization
+@using Model.Entities.Bookingobjects.Vineyard
+@using WebGUI.Client.ClientServices
+@using Microsoft.AspNetCore.Components.Sections
+@using Model.Entities.Bookingobjects
+@using WebGUI.Client.Pages.Components.Records
+@using WebGUI.Client.Pages.Components.Vineyard
+@inject WorkinformationService WorkinformationService
+@inject VineyardService Vineyardservice;
+@inject NavigationManager NavigationManager;
+@inject StateService StateService;
+@inject VineyardHasStatusService _VineyardHasStatusService;
+@inject WeatherService _WeatherService;
+
+@attribute [Authorize(Roles = "Admin")]
+
+<style>
+    .flex-grid {
+        display: flex;
+    }
+
+    .col {
+        flex: 1;
+    }
+    
+    .row {
+    display: flex;
+    flex-wrap: wrap;
+}
+
+.col-6 {
+    flex: 0 0 50%;
+    max-width: 50%;
+    padding: 5px;
+}
+
+</style>
+@if (_vineyard == null)
+    {
+        <SectionContent SectionName="headbar">
+        <MudText Typo="Typo.h4">Load Data ...</MudText>
+        </SectionContent>
+        
+    }
+else
+    {
+    <SectionContent SectionName="headbar">
+        <MudText Typo="Typo.h4">Vineyard Overview @_vineyard.Name</MudText>
+        <MudButton OnClick="DeleteVineyard" Variant="Variant.Filled" ButtonType="ButtonType.Button"
+                    Color="Color.Error">Delete Vineyard
+        </MudButton>
+    </SectionContent>
+    }
+
+
+<div class="d-flex flex-column w-100">
+    <div class="flex-grid">
+        <div class="col">
+            <MudCard Class="d-flex flex-grow-1 shadow-lg flex-column rounded-3" Elevation="0"
+                     Style="margin: 25px 15px 15px 30px; height: 15vh; background-color: #44633F; color: white">
+                <MudCardContent Class="d-flex justify-content-center align-items-center">
+                    <div class="d-flex flex-row">
+                        <div class="d-flex flex-column m-auto">
+                            <MudText Typo="Typo.h5">Current Temperature</MudText>
+                            <strong>
+                                <MudText Typo="Typo.h3">
+                                    @(_measurements?.Any() == true && _measurements.Last().TEMPERATURE != null 
+                                        ? $"{_measurements.Last().TEMPERATURE} C°" 
+                                        : "keine Daten")
+                                </MudText>
+                            </strong>
+                        </div>
+                    </div>
+                </MudCardContent>
+            </MudCard>
+        </div>
+        <div class="col">
+            <MudCard Class="d-flex flex-grow-1 shadow-lg flex-column rounded-3" Elevation="0"
+                     Style="margin: 25px 15px 15px 15px; height: 15vh; background-color: #5A9367; color: white">
+                <MudCardContent Class="d-flex justify-content-center align-items-center">
+                    <div class="d-flex flex-row">
+                        <div class="d-flex flex-column m-auto">
+                            <MudText Typo="Typo.h5">Current Humidity</MudText>
+                            <strong>
+                                <MudText Typo="Typo.h3">
+                                    @(_measurements?.Any() == true && _measurements.Last().HUMIDITY != null 
+                                        ? $"{_measurements.Last().HUMIDITY} %" 
+                                        : "keine Daten")
+                                </MudText>
+                            </strong>
+                        </div>
+                    </div>
+                </MudCardContent>
+            </MudCard>
+        </div>
+        <div class="col">
+            <MudCard Class="d-flex flex-grow-1 shadow-lg flex-column rounded-3" Elevation="0"
+                     Style="margin: 25px 15px 15px 15px; height: 15vh; background-color: #5CAB7D; color: white">
+                <MudCardContent Class="d-flex justify-content-center align-items-center">
+                    <div class="d-flex flex-row">
+                        <div class="d-flex flex-column m-auto">
+                            <MudText Typo="Typo.h5">Current Pressure</MudText>
+                            <strong>
+                                <MudText Typo="Typo.h3">
+                                    @(_measurements?.Any() == true && _measurements.Last().PRESSURE != null 
+                                        ? $"{_measurements.Last().PRESSURE} mBar" 
+                                        : "keine Daten")
+                                </MudText>
+                            </strong>                        </div>
+                    </div>
+                </MudCardContent>
+            </MudCard>
+        </div>
+        <div class="col">
+            <MudCard Class="d-flex flex-grow-1 shadow-lg flex-column rounded-3" Elevation="0"
+                     Style="margin: 25px 30px 15px 15px; height: 15vh; background-color: #4ADBC8; color: white">
+                <MudCardContent Class="d-flex justify-content-center align-items-center">
+                    <div class="d-flex flex-row">
+                        <div class="d-flex flex-column m-auto">
+                            <MudText Typo="Typo.h5">Current Dew Point</MudText>
+                            <strong>
+                                <MudText Typo="Typo.h3">
+                                    @(_measurements?.Any() == true && _measurements.Last().DEW_POINT != null 
+                                        ? $"{_measurements.Last().DEW_POINT} C°" 
+                                        : "keine Daten")
+                                </MudText>
+                            </strong>                          </div>
+                    </div>
+                </MudCardContent>
+            </MudCard>
+        </div>
+    </div>
+    <div class="flex-grid w-100 justify-content-evenly">
+        <div class="col d-flex flex-column align-content-center">
+            <MudCard Class="d-flex flex-grow-1 shadow-lg flex-column rounded-3" Elevation="0"
+                     Style="margin: 25px 30px 15px 28px; height: 35vh; color: white">
+                <MudCardContent Class="d-flex justify-content-center align-items-center" Style="color: black !important;">
+                    @if (Series != null && Series.Any(s => s.Data != null && s.Data.Any()))
+                    {
+                    <MudChart ChartType="ChartType.Line" ChartSeries="@Series" @bind-SelectedIndex="IndexLineChart"
+                              XAxisLabels="@XAxisLabels" Width="100%" Height="350px" />
+                    }
+                    else
+                    {
+                    <MudText Style="color:#000;" Typo="Typo.h3">Keine Daten</MudText>
+                    }
+                </MudCardContent>
+            </MudCard>
+        </div>
+        <div class="col">
+            <MudCard Class="d-flex flex-column shadow-lg rounded-3" Elevation="4"
+                     Style="margin: 25px 30px 15px 15px; height: 35vh; background-color: white; color: black; text-align: center;">
+                <MudCardContent Class="d-flex flex-column" Style="position: relative;">
+                    <MudText Typo="Typo.h4" Class="mt-3">Current Workers</MudText>
+                    <div class="d-flex flex-grow-1 justify-content-center align-items-center">
+                        <MudText Typo="Typo.h1"><strong>@(_workInformation != null ? _workInformation.Count : 0)</strong></MudText> <!--ich kann hier direkt auf den Count gehen, da ich nur die bkomme die jetzt arbeiten  -->
+                    </div>
+                </MudCardContent>
+            </MudCard>
+        </div>
+        <div class="col">
+            <MudCard Class="d-flex flex-column shadow-lg rounded-3" Elevation="4"
+                     Style="margin: 25px 30px 15px 15px; height: 35vh; background-color: white; color: black; text-align: center;">
+                <MudCardContent Class="d-flex flex-column" Style="position: relative;">
+                    <MudText Typo="Typo.h4" Class="mt-3">Machines in use here</MudText>
+                    <div class="d-flex flex-grow-1 justify-content-center align-items-center">
+                        <MudText Typo="Typo.h1"><strong>@(_workInformation != null ? _workInformation.Count(w => w.MachineId != null) : 0)</strong></MudText>
+                    </div>
+                </MudCardContent>
+            </MudCard>
+        </div>
+
+
+    </div>
+    <!-- Embed the VineyardStatusComponent -->
+    <VineyardStatusComponent Id="Id"
+                              />
+
+    @*<div class="flex-grid w-100 justify-content-evenly">
+        <div class="col">
+            <MudCard Class="d-flex flex-column shadow-lg rounded-3" Elevation="4"
+                     Style="margin: 25px 30px 15px 15px; height: 30vh; background-color: white; color: black; text-align: center;">
+                <MudCardContent Class="d-flex flex-column" Style="position: relative;">
+                    <MudText Typo="Typo.h4" Class="mt-3">Status</MudText>
+                    @foreach (var status in _vineyard.StatusList
+                    .OrderBy(s => s.EndDate.HasValue ? 1 : 0) // Null-EndDates zuerst
+                    .ThenBy(s => s.EndDate)                  // Nach EndDate sortieren
+                    .ThenBy(s => s.StartDate)                  // Nach EndDate sortieren
+                    .Take(7))                               // Maximal 7 Elemente
+                    {
+                    <MudText>
+                        <b>@status.VineyardStatusType.Type</b> seit
+                        <b>@status.StartDate.ToString("dd.MM.yyyy")</b> bis
+                        <b>@(status.EndDate?.ToString("dd.MM.yyyy") ?? "/")</b>
+                    </MudText>
+                    }
+
+                </MudCardContent>
+            </MudCard>
+        </div>
+        <div class="col">
+            <MudCard Class="d-flex flex-column shadow-lg rounded-3" Elevation="4"
+                     Style="margin: 25px 30px 15px 15px; height: 30vh; background-color: white; color: black; text-align: center; ">
+                <MudCardContent Class="d-flex flex-column" Style="position: relative; padding: 20px; padding-left: 40px; padding-right: 40px;">
+                    <MudText Typo="Typo.h4" Class="mb-4">Edit Status</MudText>
+                    <div class="row g-3">
+                        <div class="row g-3">
+                            @foreach (var status in _statusType) {
+
+                            var isChecked = _vineyard.StatusList.Any(s => s.VineyardStatusType.Id == status.Id && s.EndDate == null);
+                            matchingEntity = _vineyard.StatusList.FirstOrDefault(s => s.VineyardStatusType.Id == status.Id);
+
+                            <div class="col-6 d-flex align-items-center">
+                                @if (matchingEntity != null)
+                                {
+                                <input type="checkbox" class="me-2" style="transform: scale(1.3);"
+                                       checked="@isChecked"
+                                       @onclick="() => OnCheckboxClicked(status.Id, isChecked, matchingEntity.StartDate)"
+                                />
+                                }
+                                else
+                                {
+                                <input type="checkbox" class="me-2" style="transform: scale(1.3);"
+                                       checked="@isChecked"
+                                       @onclick="() => OnCheckboxClicked(status.Id, isChecked, DateTime.Now)"
+                                />
+                                }
+
+                                <MudText Typo="Typo.body1" style="font-size: 1.1rem; font-weight: 500;">
+                                    <strong>@status.Type</strong>
+                                </MudText>
+                            </div>
+                            }
+                        </div>
+
+                    </div>
+                </MudCardContent>
+            </MudCard>
+
+
+        </div>
+
+    </div>*@
+</div>
+
+@code {
+    [Parameter]
+    public int Id { get; set; }
+
+    List<Measurement>? _measurements = new();
+    VineyardHasStatusRecord? matchingEntity = new();
+    VineyardHasStatus? x = new();
+    private List<WorkInformation>? _workInformation = new();
+    private VineyardRecord _vineyard = new();
+    private List<VineyardStatusType> _statusType = new();
+    protected override async Task OnParametersSetAsync() {
+        _measurements = await _WeatherService.WeatherData();
+        _workInformation = await WorkinformationService.GetVineyardInfobyIdAsync(Id);
+        _vineyard = await Vineyardservice.GetVineyardbyIdAsync(Id);
+        _statusType = await StateService.GetState();
+        if (_vineyard == null)
+            {
+                Console.WriteLine($"Vineyard with ID {Id} not found.");
+            }
+        if (_measurements != null && _measurements.Any()) {
+            PopulateChartData();
+        }
+
+    }
+    protected override Task OnInitializedAsync()
+    {
+        Options.LineStrokeWidth = 4;
+        Options.InterpolationOption = InterpolationOption.Straight;
+        Options.YAxisFormat = "c2";
+        return base.OnInitializedAsync();
+    }
+
+    public async Task DeleteVineyard()
+    {
+        try
+        {
+            // Warten, bis der Löschvorgang abgeschlossen ist
+            await Vineyardservice.DeleteVineyardbyIdAsync(_vineyard.BookingObjectId);
+
+            // Nach erfolgreichem Löschen die Seite forcieren neu zu laden
+            NavigationManager.NavigateTo("/Vineyards", forceLoad: true);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Fehler beim Löschen: {ex.Message}");
+        }
+    }
+    
+    
+    /*private async void OnCheckboxClicked(int statusId, bool isChecked, DateTime startDate)
+    {
+        
+        if (isChecked) // Checkbox war ausgewählt -> Status wird entfernt (Update)
+        {
+            
+            Console.WriteLine($"Status {statusId} wird aktualisiert...");
+            x = await _VineyardHasStatusService.FindAsync(_vineyard.BookingObjectId, statusId);
+            
+            await _VineyardHasStatusService.UpdateVineyardhasStatus(x);
+
+        }
+        else // Checkbox war nicht ausgewählt -> Status wird hinzugefügt (Create)
+        {
+            var Data = new Dictionary<string, object>()
+            {
+                { "VineyardId", _vineyard.BookingObjectId }, // ID des Weingartens
+                { "StatusId", statusId },
+                { "StartDate", DateTime.Now }
+            };
+            Console.WriteLine($"Status {statusId} wird erstellt...");
+            await _VineyardHasStatusService.CreateVineyardhasStatus(Data);
+        }
+    }*/
+
+    
+    
+    
+    // Line
+    // Line chart data population
+    private int IndexLineChart; //default value cannot be 0 -> first selectedindex is 0.
+    public ChartOptions Options = new();
+    public List<ChartSeries> Series = new();
+    public string[] XAxisLabels = new string[1];
+    private void PopulateChartData() {
+        // Clear previous chart series before adding new ones
+        Series.Clear();
+        // Sicherstellen, dass es Messdaten gibt, bevor du fortfährst
+        if (_measurements != null && _measurements.Any()) {
+            XAxisLabels = new string[_measurements.Count];
+
+            // Extract temperature data and convert to double[]
+            var temperatureData = _measurements
+                .Where(m => m?.TEMPERATURE != null) // Nur Werte mit gültiger Temperatur
+                .Select(m => (double)m.TEMPERATURE)
+                .ToArray();
+
+            // Extract the hour from TIME_STAMP (assumed format is "yyyy-MM-dd HH:mm:ss")
+            var timestamps = _measurements
+                .Where(m => !string.IsNullOrEmpty(m.TIME_STAMP)) // Sicherstellen, dass TIME_STAMP nicht null ist
+                .Select(m => {
+                    var timeParts = m.TIME_STAMP?.Split(' ') ?? new string[] {};
+                    return timeParts.Length > 1 ? timeParts[1].Substring(0, 2) : ""; // Get the hour (HH) part
+                })
+                .ToList();
+
+            // Add temperature data series
+            if (temperatureData.Any() && timestamps.Any()) {
+                Series.Add(new ChartSeries
+                {
+                    Name = "Temperature (°C)",
+                    Data = temperatureData
+                });
+
+                // Set x-axis labels to the formatted timestamps (hours)
+                XAxisLabels = timestamps.ToArray(); // sicherstellen, dass XAxisLabels gesetzt ist
+            } else {
+                Console.WriteLine("No valid temperature or timestamp data available.");
+            }
+        } else {
+            Console.WriteLine("No measurements available.");
+        }
+    }
+
+
+    public List<string> stati = new(){"gemäht", "geschnitten"};
+}
+
+

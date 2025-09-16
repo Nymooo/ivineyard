@@ -1,0 +1,294 @@
+@page "/machines"
+@using Microsoft.AspNetCore.Authorization
+@using WebGUI.Client.Pages.Components
+@using Microsoft.AspNetCore.Components.Sections
+@using Model.Entities.Bookingobjects.Machine
+@using WebGUI.Client.ClientServices
+@using WebGUI.Client.Pages.Components.Machines
+@using WebGUI.Client.Pages.Components.Records
+@inject IDialogService DialogService
+@inject MachineService MachineService;
+@inject MachineHasStatusService MachineHasStatusService;
+
+@rendermode InteractiveAuto
+@attribute [Authorize(Roles = "Admin")]
+
+<style>
+    .flex-grid {
+        display: flex;
+    }
+
+    .col {
+        flex: 1;
+    }
+
+    .green-text {
+        color: green;
+    }
+
+    .red-text {
+        color: red;
+    }
+
+    .mud-chart .mud-chart-legend {
+        display: none; /*für pie chart*/
+    }
+</style>
+
+<SectionContent SectionName="headbar">
+    <MudText Typo="Typo.h4">Machines</MudText>
+    <MudButton OnClick="AddMachineModal" Variant="Variant.Filled" ButtonType="ButtonType.Button"
+               StartIcon="@Icons.Material.Filled.Construction" Color="Color.Primary">Add Machine
+    </MudButton>
+</SectionContent>
+
+
+<div class="d-flex flex-column w-100">
+    <div class="flex-grid">
+        @if (machines == null) {
+            <MudText>Keine Maschinen</MudText>
+        }
+        else{
+        @foreach (MachineRecord? machine in machines) {
+        <div class="col">
+            <MudCard Class="mx-auto mt-12" Style="width: 35vw;">
+                <MudCardHeader Style="height:15vh;">
+                    <div class="row d-flex m-auto">
+                        <MudText Typo="Typo.h3" Style="height:5vh;">@machine.Name</MudText>
+                        <MudSelect T="string" Value="machine.MachineHasStatusList
+                            .OrderByDescending(m => m.StartDate)
+                            .FirstOrDefault()?.MachineStatusType.Type"
+                             Label="Status"  ValueChanged="(newStatus) => changeStatus(newStatus, machine)">
+                            <MudSelectItem Value="aktiv.Type">AKTIV</MudSelectItem>
+                            <MudSelectItem Value="defekt.Type">DEFEKT</MudSelectItem>
+                        </MudSelect>
+
+
+
+                        <div class="d-flex justify-content-center align-items-center" style="margin-top: 1vh;">
+                            <MudButton OnClick="() => DeleteMachine(machine)" Variant="Variant.Filled" ButtonType="ButtonType.Button"
+                                       Color="Color.Error">Delete Machine
+                            </MudButton>
+                        </div>
+                    </div>
+
+                </MudCardHeader>
+
+                <MudCardContent Style="background-color: #e6e6e6; height:60vh">
+                    <div class="col">
+                        <MudGrid>
+                            <MudItem xs="6">
+                                <MudPaper Class="pa-4" Style="height:23vh;">
+                                    <MudText Typo="Typo.subtitle1">Usage (in days / month)</MudText>
+                                    <MudPaper Class="d-flex justify-center align-center"
+                                              Style="height: 7vw;  box-shadow: none;">
+                                        <MudText Typo="Typo.h1" Align="Align.Center">@GetMachineUsageDaysForCurrentMonth(machine.WorkInformation)</MudText>
+                                    </MudPaper>
+                                </MudPaper>
+                            </MudItem>
+                            <MudItem xs="6">
+                                <MudPaper Class="pa-4" Style="height:23vh;">
+                                    <MudText Typo="Typo.subtitle2" Align="Align.Center" Style="margin-bottom: 10px">
+                                        Employee Usage [monthly]
+                                    </MudText>
+
+                                    @if (GetPieCahrtInfo(machine.WorkInformation).Item1 == null || 
+                                    GetPieCahrtInfo(machine.WorkInformation).Item2 == null )
+                                    {
+                                    <MudText Align="Align.Center" Typo="Typo.h6">Keine Arbeitszeit</MudText>
+                                    }
+                                    else
+                                    {
+                                    <!-- Pie Chart -->
+                                    <MudChart ChartType="ChartType.Pie" Class="small-labels" InputData="@GetPieCahrtInfo(machine.WorkInformation).Item2"
+                                              @bind-SelectedIndex="@IndexPieChart" InputLabels="@GetPieCahrtInfo(machine.WorkInformation).Item1" Width="7vw"
+                                              Height="7vw"/>
+                                    <MudText Align="Align.Center" Typo="Typo.subtitle1">
+                                        @if (IndexPieChart >= 0 && IndexPieChart < GetPieCahrtInfo(machine.WorkInformation).Item1.Length)
+                                        {
+                                            <MudText Align="Align.Center" Typo="Typo.subtitle1">
+                                                @GetPieCahrtInfo(machine.WorkInformation).Item1[IndexPieChart] :
+                                                @Math.Round(GetPieCahrtInfo(machine.WorkInformation).Item2[IndexPieChart], 2)
+                                            </MudText>
+                                        }
+                                        else
+                                        {
+                                        <MudText Align="Align.Center" Typo="Typo.h6">Keine Arbeitszeit</MudText>
+                                        }
+                                    </MudText>
+
+                                    }
+                                </MudPaper>
+
+                            </MudItem>
+                        </MudGrid>
+
+                    </div>
+                    <div class="col">
+                        <MudPaper Class="rounded-3 pa-4" Style="margin-top:15px; height:33vh">
+                            <div class="col">
+                                <MudText Typo="Typo.h5">Expenses</MudText>
+                            </div>
+                            <div class="col">
+                                <MudTable Items="@machine.BookingObject.Invoice.Take(7)" Striped="true" Hover="true" Style="box-shadow: none;">
+                                    <HeaderContent>
+                                        <MudTh><b>Price</b></MudTh>
+                                        <MudTh><b>Description</b></MudTh>
+                                        <MudTh><b>Date</b></MudTh>
+                                    </HeaderContent>
+                                    <RowTemplate>
+                                        <MudTd>@context.Price</MudTd>
+                                        <MudTd>@context.Description</MudTd>
+                                        <MudTd>@context.BoughAt.ToString("yyyy-MM-dd")
+                                        </MudTd> <!-- Format für Datum -->
+                                    </RowTemplate>
+                                </MudTable>
+                            </div>
+                        </MudPaper>
+                    </div>
+                </MudCardContent>
+            </MudCard>
+        </div>
+        }
+        }
+        
+
+
+    </div>
+</div>
+
+
+@code {
+    string aktive = "AKTIV";
+    MachineStatusType aktiv = new MachineStatusType() {
+        Id = 1,
+        Type = "AKTIV"
+    };
+    MachineStatusType defekt = new MachineStatusType() {
+        Id = 2,
+        Type = "DEFEKT"
+    };
+List<MachineRecord>? machines = new List<MachineRecord>();
+protected override async Task OnInitializedAsync()
+{
+    try
+    {
+        machines = await MachineService.GetMachinesInfoAsync();
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine($"Fehler beim Laden der Maschinen: {ex.Message}");
+    }
+}
+
+private Task AddMachineModal()
+{
+/*var parameters = new DialogParameters<EmployeeDialog>
+{
+    { x => x.ContentText, "test" },
+    { x => x.ButtonText, "Add Employee" },
+    { x => x.Color, Color.Info }
+};*/
+
+return DialogService.ShowAsync<MachineDialog>();
+}
+
+
+
+private string _selectedStatus = "active"; // Default value is active
+
+private void changeStatus(string newStatus, MachineRecord machine)
+{
+    Console.WriteLine($"Status geändert für Maschine '{machine.Name}' auf '{newStatus}'");
+    machine.MachineHasStatusList.OrderByDescending(m => m.StartDate).FirstOrDefault().MachineStatusType.Type = newStatus;
+    if (newStatus == "AKTIV") {
+        MachineHasStatusService.CreateVineyardhasStatus(machine.BookingObjectId, 1);
+    }
+    else {
+        MachineHasStatusService.CreateVineyardhasStatus(machine.BookingObjectId, 2);
+    }
+}
+
+
+
+
+private int IndexPieChart; //default value cannot be 0 -> first selectedindex is 0.
+
+//table
+public class Item
+{
+public double Price { get; set; }
+public string Description { get; set; }
+public DateTime Date { get; set; }
+}
+
+
+
+private int GetMachineUsageDaysForCurrentMonth(List<WorkInformationRecord> workInformations)
+{
+    var currentMonthStart = new DateTime(DateTime.Now.Year, DateTime.Now.Month, 1); // Erster Tag des aktuellen Monats
+    var currentMonthEnd = currentMonthStart.AddMonths(1).AddDays(-1); // Letzter Tag des aktuellen Monats
+
+    int totalDaysUsed = 0;
+
+    foreach (var workInfo in workInformations)
+    {
+        if (workInfo.StartedAt.HasValue)
+        {
+            var startDate = workInfo.StartedAt.Value.Date;
+            var endDate = workInfo.FinishedAt?.Date ?? DateTime.Now.Date;
+
+            // Überprüfen, ob der Arbeitszeitraum im aktuellen Monat liegt
+            if (startDate.Month == currentMonthStart.Month && startDate.Year == currentMonthStart.Year)
+            {
+                // Zähle alle Tage zwischen Start- und Enddatum, die im aktuellen Monat liegen
+                for (var date = startDate; date <= endDate; date = date.AddDays(1))
+                {
+                    if (date.Month == currentMonthStart.Month)
+                    {
+                        totalDaysUsed++;
+                    }
+                }
+            }
+        }
+    }
+
+    return totalDaysUsed;
+}
+
+public Task DeleteMachine(MachineRecord machine) {
+    var parameters = new DialogParameters<MachineDeleteDialog>()
+    {
+        { x => x.Data, machine }
+    };
+
+    return DialogService.ShowAsync<MachineDeleteDialog>("Delete Machine", parameters);
+}
+
+
+
+public (string[], double[]) chartdata = new();
+
+public (string[],double[]) GetPieCahrtInfo(List<WorkInformationRecord> work){
+    var userIds = work.Select(w => w.ApplicationUser.UserName).Distinct().ToList();
+    var currentMonthStart = new DateTime(DateTime.Now.Year, DateTime.Now.Month, 1); // Erster Tag des aktuellen Monats
+    var currentMonthEnd = currentMonthStart.AddMonths(1).AddDays(-1); // Letzter Tag des aktuellen Monats
+
+    var userHours = work
+        .Where(w => userIds.Contains( w.ApplicationUser.UserName) &&
+                    w.StartedAt.HasValue && // Sicherstellen, dass das Startdatum vorhanden ist
+                    w.StartedAt.Value.Month == DateTime.Now.Month && // Nur Einträge aus dem aktuellen Monat
+                    w.StartedAt.Value.Year == DateTime.Now.Year) // Nur Einträge aus dem aktuellen Jahr
+        .GroupBy(w => w.ApplicationUser.UserName) // Gruppiert nach UserId
+        .ToDictionary(
+            g => g.Key, // Schlüssel ist die UserId
+            g => g.Sum(w => (w.FinishedAt ?? DateTime.Now).Subtract(w.StartedAt.Value).TotalHours) // Summiert die Stunden
+        );
+    var userIdsArray = userHours.Keys.ToArray();
+    var userHoursArray = userHours.Values.ToArray();
+    return (userIdsArray, userHoursArray);
+
+
+}
+
+}

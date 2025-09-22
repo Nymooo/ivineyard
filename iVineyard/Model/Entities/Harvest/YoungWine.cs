@@ -1,8 +1,11 @@
-namespace Model.Entities.Harvest;
+using System.ComponentModel.DataAnnotations.Schema;
 
+namespace Model.Entities.Harvest;
+[Table("YOUNG_WINE")]
 public class YoungWine : Informations
 {
-    public int YoungWineId { get; set; }
+    [Column("ALCOHOL")]
     public double Alcohol { get; set; }
+    [Column("RESIDUAL_SUGAR")]
     public double ResidualSugar { get; set; }
 }

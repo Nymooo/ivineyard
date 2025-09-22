@@ -4,6 +4,7 @@ using Model.Entities.Bookingobjects;
 using Model.Entities.Bookingobjects.Machine;
 using Model.Entities.Bookingobjects.Vineyard;
 using Model.Entities.Company;
+using Model.Entities.Harvest;
 
 namespace Model.Configurations;
 
@@ -21,6 +22,10 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
 
         builder.Entity<VineyardStatusType>()
             .Property(vhs => vhs.Type)
+            .HasConversion<string>();
+        
+        builder.Entity<Treatment>()
+            .Property(t => t.Type)
             .HasConversion<string>();
 
         #endregion
@@ -131,6 +136,71 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
 
         #endregion
 
+        #region VineyardHasWineBatch
+
+        builder.Entity<VineyardHasBatch>()
+            .HasOne(vhb => vhb.Vineyard)
+            .WithMany()
+            .HasForeignKey(vhb => vhb.VineyardId);
+        
+        builder.Entity<VineyardHasBatch>()
+            .HasOne(vhb => vhb.Batch)
+            .WithMany()
+            .HasForeignKey(vhb => vhb.BatchId);
+        
+        #endregion
+        
+        #region TankHasWineBatch
+        
+        builder.Entity<TankHasWineBatch>()
+            .HasOne(vhb => vhb.Batch)
+            .WithMany()
+            .HasForeignKey(vhb => vhb.BatchId);
+        
+        builder.Entity<TankHasWineBatch>()
+            .HasOne(vhb => vhb.Tank)
+            .WithMany()
+            .HasForeignKey(vhb => vhb.TankId);
+        
+        #endregion
+        
+        #region WineBatchHasTreatment
+        
+        builder.Entity<WineBatchHasTreatment>()
+            .HasOne(vhb => vhb.Batch)
+            .WithMany()
+            .HasForeignKey(vhb => vhb.BatchId);
+        
+        builder.Entity<WineBatchHasTreatment>()
+            .HasOne(vhb => vhb.Treatment)
+            .WithMany()
+            .HasForeignKey(vhb => vhb.TreatementId);
+        
+        #endregion
+        
+        #region Information
+        
+        builder.Entity<Informations>()
+            .HasOne(vhb => vhb.Batch)
+            .WithMany()
+            .HasForeignKey(vhb => vhb.BatchId);
+        
+        #endregion
+        
+        #region TankMovement
+        
+        builder.Entity<TankMovement>()
+            .HasOne(vhb => vhb.FromTank)
+            .WithMany()
+            .HasForeignKey(vhb => vhb.FromTakId);
+        
+        builder.Entity<TankMovement>()
+            .HasOne(vhb => vhb.ToTank)
+            .WithMany()
+            .HasForeignKey(vhb => vhb.ToTankId);
+        
+        #endregion
+        
         #endregion
         
         base.OnModelCreating(builder);

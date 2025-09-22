@@ -1,0 +1,146 @@
+﻿@page "/weinbereitung"
+@using System.Text.Json
+@using MudBlazor
+
+<MudContainer Class="pa-4">
+
+    <MudText Typo="Typo.h4" Class="mb-4">Weißwein- & Rotwein-Bereitung</MudText>
+
+    <MudGrid Gutter="3">
+        <!-- Links: Weißwein -->
+        <MudItem xs="12" md="6">
+            <MudPaper Class="pa-4 mb-4">
+                <MudText Typo="Typo.h5" Class="mb-2">Weißwein</MudText>
+
+                @foreach (var sec in WhiteSections)
+                {
+                    <MudText Typo="Typo.h6" Class="mt-3 mb-2">
+                        @sec.Title
+                        </MudText>
+
+                    @foreach (var item in sec.Items)
+                    {
+                        <MudGrid Class="mb-2" AlignItems="Center">
+                            <!-- Label -->
+                            <MudItem xs="12" md="4">
+                                <MudText Typo="Typo.body1">@item.Name</MudText>
+                            </MudItem>
+
+                            <!-- Datum -->
+                            <MudItem xs="4" md="3">
+                                <MudDatePicker T="DateTime?" @bind-Date="item.Datum" Label="Datum" Dense="true" />
+                            </MudItem>
+
+                            <!-- Mittel -->
+                            <MudItem xs="4" md="3">
+                                <MudTextField T="string" @bind-Value="item.Mittel" Label="Mittel" Dense="true" />
+                            </MudItem>
+
+                            <!-- Menge -->
+                            <MudItem xs="4" md="2">
+                                <MudTextField T="decimal?" @bind-Value="item.Menge" Label="Menge" Dense="true" />
+                            </MudItem>
+                        </MudGrid>
+                    }
+                }
+            </MudPaper>
+        </MudItem>
+
+      
+    </MudGrid>
+
+    <MudStack Direction="Row"  Class="mt-4">
+        <MudButton OnClick="Save">Speichern</MudButton>
+    </MudStack>
+
+    @if (!string.IsNullOrEmpty(OutputJson))
+    {
+        <MudPaper Class="pa-3 mt-4">
+            <MudText Typo="Typo.h6">Debug / gespeicherte Daten (JSON)</MudText>
+            <MudTextField T="string" Value="@OutputJson" Lines="10" ReadOnly="true" FullWidth="true" />
+        </MudPaper>
+    }
+</MudContainer>
+
+@code {
+    // Modell für einzelne Zeile (ein Eintrag mit Datum/Mittel/Menge)
+    public class ItemEntry
+    {
+        public string Name { get; set; } = "";
+        public DateTime? Datum { get; set; }
+        public string Mittel { get; set; } = "";
+        public decimal? Menge { get; set; }
+    }
+
+    // Abschnitt mit mehreren Einträgen
+    public class Section
+    {
+        public string Title { get; set; } = "";
+        public List<ItemEntry> Items { get; set; } = new();
+        public Section(string title, IEnumerable<string> itemNames)
+        {
+            Title = title;
+            Items = itemNames.Select(n => new ItemEntry { Name = n }).ToList();
+        }
+    }
+
+    // Abschnitte für Weißwein (basierend auf deinem Bild / typischen Labels)
+    List<Section> WhiteSections = new();
+    // Abschnitte für Rotwein
+    List<Section> RedSections = new();
+
+    string OutputJson = string.Empty;
+
+    protected override void OnInitialized()
+    {
+        // Weißwein - Abschnitte & Einträge (verlässt sich auf deine Fotoinhalte)
+        WhiteSections = new List<Section>
+        {
+            new Section("Weingarten", new [] { "Sorte", "Menge", "Erntedatum" }),
+
+            new Section("Most / Maische", new []
+            {
+                "Einmaischen Datum", "Mostgewicht", "Maischeerwärmung", "Maischestandzeit",
+                "Pressprogramm", "Mostbehandlung", "Klärzeitraum", "Mostklärung",
+                "Ansatz der Hefe", "Hefenährstoff", "Gärverlauf"
+            }),
+
+            new Section("Behandlungen (Most / Maische)", new []
+            {
+                "Schwefelung", "Schönung", "Bentonit", "Weitere Zusätze"
+            }),
+
+            new Section("Behandlungsschritte", new []
+            {
+                "Behandlungsdatum", "Behandlungsart", "Bemerkungen"
+            }),
+
+            new Section("Daten Jungwein", new []
+            {
+                "Alkohol", "pH-Wert", "Säure", "Schwefel"
+            }),
+
+            new Section("Daten Weißwein/Rotwein", new []
+            {
+                "Alkohol (End)", "pH-Wert (End)", "Säure (End)", "Schwefel (End)"
+            }),
+
+            new Section("Abfüllen / Filtration", new []
+            {
+                "Vorfiltration", "Füllung", "Umgießen in Tank"
+            })
+        };
+
+    }
+
+    // Speichern (hier: serialisiert als JSON zur Sichtprüfung)
+    void Save()
+    {
+        var all = new
+        {
+            Weißwein = WhiteSections.Select(s => new { s.Title, Items = s.Items }).ToList(),
+        };
+
+        OutputJson = JsonSerializer.Serialize(all, new JsonSerializerOptions { WriteIndented = true });
+    }
+}

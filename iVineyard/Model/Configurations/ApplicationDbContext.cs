@@ -123,19 +123,6 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
 
         #endregion
 
-        #region KEYS
-
-        builder.Entity<VineyardHasStatus>()
-            .HasKey(vhs => new { vhs.VineyardId, vhs.StatusId, vhs.StartDate });
-
-        builder.Entity<MachineHasStatus>()
-            .HasKey(mhs => new { mhs.MachineId, mhs.StatusId, mhs.StartDate });
-
-        builder.Entity<WorkInformation>()
-            .HasKey(wi => new { wi.Id, wi.VineyardId, wi.UserId, wi.StartedAt });
-
-        #endregion
-
         #region VineyardHasWineBatch
 
         builder.Entity<VineyardHasBatch>()
@@ -199,6 +186,28 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
             .WithMany()
             .HasForeignKey(vhb => vhb.ToTankId);
         
+        #endregion
+        
+        #region KEYS
+
+        builder.Entity<VineyardHasStatus>()
+            .HasKey(vhs => new { vhs.VineyardId, vhs.StatusId, vhs.StartDate });
+
+        builder.Entity<MachineHasStatus>()
+            .HasKey(mhs => new { mhs.MachineId, mhs.StatusId, mhs.StartDate });
+
+        builder.Entity<WorkInformation>()
+            .HasKey(wi => new { wi.Id, wi.VineyardId, wi.UserId, wi.StartedAt });
+        
+        builder.Entity<TankHasWineBatch>()
+            .HasKey(thwb => new { thwb.BatchId, thwb.TankId });
+        
+        builder.Entity<VineyardHasBatch>()
+            .HasKey(vhb => new { vhb.BatchId, vhb.VineyardId });
+        
+        builder.Entity<WineBatchHasTreatment>()
+            .HasKey(wbht => new { wbht.BatchId, wbht.TreatementId });
+
         #endregion
         
         #endregion

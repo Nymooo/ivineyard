@@ -24,6 +24,8 @@ builder.Services.AddScoped<MachineService>();
 builder.Services.AddScoped<WeatherService>();
 builder.Services.AddScoped<EquipmentService>();
 builder.Services.AddScoped<MachineHasStatusService>();
+builder.Services.AddScoped<TankService>();
+builder.Services.AddScoped<BatchService>();
 
 builder.Services.AddMudServices();
 

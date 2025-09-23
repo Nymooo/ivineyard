@@ -47,6 +47,8 @@ builder.Services.AddScoped<WeatherService>();
 builder.Services.AddScoped<FinanceService>();
 builder.Services.AddScoped<EquipmentService>();
 builder.Services.AddScoped<MachineHasStatusService>();
+builder.Services.AddScoped<TankService>();
+builder.Services.AddScoped<BatchService>();
 
 
 builder.Services.AddMudServices();

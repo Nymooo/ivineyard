@@ -40,6 +40,7 @@ builder.Services.AddScoped<IMachineRepository, MachineRepository>();
 builder.Services.AddScoped<IRabbitMQRepository, RabbitMQRepository>();
 builder.Services.AddScoped<IEquipmentRepository, EquipmentRepository>();
 builder.Services.AddScoped<IMachineHasStatuRepository, MachineHasStatusRepository>();
+builder.Services.AddScoped<ITankRepository, TankRepository>();
 
 builder.Services.AddDbContextFactory<ApplicationDbContext>(
     options => options.UseMySql(

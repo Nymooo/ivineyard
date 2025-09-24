@@ -38,6 +38,9 @@
               <MudNumericField T="double" @bind-Value="Vm.Amount" Label="Menge (L)" Dense="true" Required="true"/>
             </MudItem>
             <MudItem xs="6" md="2">
+                      <MudTextField T="string" @bind-Value="Vm.Variety" Label="Sorte" Dense="true" Required="true"/>
+            </MudItem>
+            <MudItem xs="6" md="2">
               <MudDatePicker T="DateTime?" @bind-Date="Vm.HarvestDate" Label="Erntedatum" Dense="true"/>
             </MudItem>
           </MudGrid>
@@ -45,20 +48,39 @@
           <MudText Typo="Typo.h6" Class="mt-3 mb-1">Behandlungen (Trauben)</MudText>
           @foreach (var t in Vm.GrapeTreatments)
           {
-            <MudGrid Class="mb-2">
-              <MudItem xs="4"><MudDatePicker T="DateTime?" @bind-Date="t.Date" Label="Datum" Dense="true"/></MudItem>
-              <MudItem xs="4"><MudTextField @bind-Value="t.Agent" Label="Mittel" Dense="true"/></MudItem>
-              <MudItem xs="4"><MudNumericField T="double?" @bind-Value="t.Amount" Label="Menge" Dense="true"/></MudItem>
-            </MudGrid>
+              <MudGrid Class="mb-2">
+                  <MudItem xs="3">
+                     <MudText Typo="Typo.body1">@t.Type</MudText>
+                  </MudItem>
+                  <MudItem xs="3">
+                      <MudDatePicker T="DateTime?" @bind-Date="t.Date" Label="Datum" Dense="true"/>
+                  </MudItem>
+                  <MudItem xs="3">
+                      <MudTextField @bind-Value="t.Agent" Label="Mittel" Dense="true"/>
+                  </MudItem>
+                  <MudItem xs="3">
+                      <MudNumericField T="double?" @bind-Value="t.Amount" Label="Menge" Dense="true"/>
+                  </MudItem>
+              </MudGrid>
           }
+
 
           <MudText Typo="Typo.h6" Class="mt-3 mb-1">Most / Maische</MudText>
           @foreach (var t in Vm.MashTreatments)
           {
             <MudGrid Class="mb-2">
-              <MudItem xs="4"><MudDatePicker T="DateTime?" @bind-Date="t.Date" Label="Datum" Dense="true"/></MudItem>
-              <MudItem xs="4"><MudTextField @bind-Value="t.Agent" Label="Mittel" Dense="true"/></MudItem>
-              <MudItem xs="4"><MudNumericField T="double?" @bind-Value="t.Amount" Label="Menge" Dense="true"/></MudItem>
+                   <MudItem xs="3">
+                       <MudText Typo="Typo.body1">@t.Type</MudText>
+                              </MudItem>
+                              <MudItem xs="3">
+                                  <MudDatePicker T="DateTime?" @bind-Date="t.Date" Label="Datum" Dense="true"/>
+                              </MudItem>
+                              <MudItem xs="3">
+                                  <MudTextField @bind-Value="t.Agent" Label="Mittel" Dense="true"/>
+                              </MudItem>
+                          <MudItem xs="3">
+                      <MudNumericField T="double?" @bind-Value="t.Amount" Label="Menge" Dense="true"/>
+                  </MudItem>
             </MudGrid>
           }
 
@@ -66,10 +88,19 @@
           @foreach (var t in Vm.YoungTreatments)
           {
             <MudGrid Class="mb-2">
-              <MudItem xs="4"><MudDatePicker T="DateTime?" @bind-Date="t.Date" Label="Datum" Dense="true"/></MudItem>
-              <MudItem xs="4"><MudTextField @bind-Value="t.Agent" Label="Mittel" Dense="true"/></MudItem>
-              <MudItem xs="4"><MudNumericField T="double?" @bind-Value="t.Amount" Label="Menge" Dense="true"/></MudItem>
-            </MudGrid>
+                <MudItem xs="3">
+                    <MudText Typo="Typo.body1">@t.Type</MudText>
+                        </MudItem>
+                    <MudItem xs="3">
+                        <MudDatePicker T="DateTime?" @bind-Date="t.Date" Label="Datum" Dense="true"/>
+                             </MudItem>
+                         <MudItem xs="3">
+                             <MudTextField @bind-Value="t.Agent" Label="Mittel" Dense="true"/>
+                             </MudItem>
+                         <MudItem xs="3">
+                    <MudNumericField T="double?" @bind-Value="t.Amount" Label="Menge" Dense="true"/>
+                 </MudItem>
+              </MudGrid>
           }
 
         </MudPaper>
@@ -91,12 +122,16 @@
             <MudItem xs="12" md="3"><MudTextField @bind-Value="Vm.Weather" Label="Wetter" Dense="true"/></MudItem>
           </MudGrid>
 
-          <MudText Typo="Typo.h6" Class="mt-3 mb-1">Daten Ausgangsmust</MudText>
+          <MudText Typo="Typo.h6" Class="mt-3 mb-1">Daten Ausgangsmost</MudText>
           <MudGrid Class="mb-2">
             <MudItem xs="6" md="3"><MudDatePicker T="DateTime?" @bind-Date="Vm.MustDate" Label="Datum" Dense="true"/></MudItem>
             <MudItem xs="6" md="3"><MudNumericField T="double?" @bind-Value="Vm.MustAcidity" Label="Säure" Dense="true"/></MudItem>
             <MudItem xs="6" md="3"><MudNumericField T="double?" @bind-Value="Vm.MustPh" Label="pH-Wert" Dense="true"/></MudItem>
             <MudItem xs="6" md="3"><MudNumericField T="double?" @bind-Value="Vm.KMW_OE" Label="KMW/°Oe" Dense="true"/></MudItem>
+            <MudItem xs="12"><MudTextField @bind-Value="Vm.Rebel" Label="Rebeln" Dense="true"/></MudItem>
+            <MudItem xs="12"><MudTextField @bind-Value="Vm.Squeeze" Label="Quetschen" Dense="true"/></MudItem>
+            <MudItem xs="12"><MudTextField @bind-Value="Vm.MashLife" Label="Maischestandzeit" Dense="true"/></MudItem>
+
             <MudItem xs="12"><MudTextField @bind-Value="Vm.MustNotes" Label="weitere Behandlungsschritte" Dense="true"/></MudItem>
           </MudGrid>
 
@@ -261,14 +296,20 @@
     Vm.MashTreatments = new()
     {
       new() { Type = "Schwefelung" }, new() { Type = "Safentzug" }, new() { Type = "Maischestandzeit" }, new() { Type = "Ent-/Säuerung" }, new() { Type = "Mostbehandlung" },
-      new() { Type = "Klärenzym" }, new() { Type = "Maischeantanin" }, new() { Type = "Aufzuckerung" }, new() { Type = "Hefe" }, new() { Type = "Hefenährstoff" },
+      new() { Type = "Klärenzym" }, new() { Type = "Maischeantannin" }, new() { Type = "Aufzuckerung" }, new() { Type = "Hefe" }, new() { Type = "Hefenährstoff" },
       new() { Type = "Belüften" }, new() { Type = "Abgezogen" }
     };
     Vm.YoungTreatments = new()
     {
-      new() { Type = "Ent-/Säuerung" }, new() { Type = "Biolog. Säureabbau" }, new() { Type = "Schwefelung" }, new() { Type = "Schönung" },
-      new() { Type = "Vorfiltration/Filtration" }, new() { Type = "Füllung" }
+      new() { Type = "Ent-/Säuerung" },
+      new() { Type = "Biolog. Säureabbau" },
+      new() { Type = "Schwefelung" },
+      new() { Type = "Schönung" },
+      new() { Type = "Vorfiltration" },
+      new() { Type = "Filtration" },
+      new() { Type = "Füllung" }
     };
+
     Vm.Movements.Add(new());
   }
 

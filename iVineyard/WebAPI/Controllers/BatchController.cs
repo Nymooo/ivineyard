@@ -1,3 +1,4 @@
+using Domain.Repositories.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -13,11 +14,13 @@ public class BatchController : ControllerBase
 {
     private readonly ApplicationDbContext _db;
     private readonly ILogger<BatchController> _logger;
+    private readonly IBatchRepository _repository;
 
-    public BatchController(ApplicationDbContext db, ILogger<BatchController> logger)
+    public BatchController(ApplicationDbContext db, ILogger<BatchController> logger, IBatchRepository repository)
     {
         _db = db;
         _logger = logger;
+        _repository = repository;
     }
 
     // POST /batches/create
@@ -146,6 +149,15 @@ public class BatchController : ControllerBase
         var batch = await _db.Set<Batch>().FirstOrDefaultAsync(b => b.BatchId == id, ct);
         if (batch is null) return NotFound();
         return Ok(batch);
+    }
+    
+    // GET /batches/batches
+    [HttpGet("batches")]
+    public async Task<ActionResult<List<Batch>>> ReadAllVineyards() {
+        var batches = _repository.ReadAllAsync();
+
+        _logger.LogInformation($"data found: {batches}");
+        return Ok(batches);
     }
 }
 

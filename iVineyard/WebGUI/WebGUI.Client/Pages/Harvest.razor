@@ -40,8 +40,46 @@
                StartIcon="@Icons.Material.Filled.Construction" Color="Color.Primary">Add Batch
     </MudButton>
 </SectionContent>
+
+
+
+<div class="d-flex flex-column w-100">
+    <div class="flex-grid">
+        @if (batches == null) {
+            <MudText>Keine Erntetage</MudText>
+        }
+        else{
+        @foreach (Batch? batch in batches) {
+            <p>@batch.Date</p>
+            <p>@batch.Variety</p>
+        }
+        }
+        
+
+
+    </div>
+</div>
+
+
+
  
 @code{
+List<Batch>? batches = new List<Batch>();
+
+protected override async Task OnInitializedAsync()
+{
+    try
+    {
+        batches = await BatchService.GetBatchesAsync();
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine($"Fehler beim Laden der Maschinen: {ex.Message}");
+    }
+}
+
+
+
 private Task AddHarvestModal()
 {
 /*var parameters = new DialogParameters<EmployeeDialog>
@@ -53,5 +91,52 @@ private Task AddHarvestModal()
 
 return DialogService.ShowAsync<CreateBatch>();
 }
+
+
+
+ class BatchCreateDto
+  {
+    public int VineyardId { get; set; }
+    public double Amount { get; set; }
+    public DateTime? HarvestDate { get; set; }
+    public string Variety { get; set; } = string.Empty;
+    public string? MaturityHealth { get; set; }
+    public string? Weather { get; set; }
+    public int? TankId { get; set; }
+
+    public List<TreatmentLineDto> GrapeTreatments { get; set; } = new();
+    public List<TreatmentLineDto> MashTreatments  { get; set; } = new();
+    public List<TreatmentLineDto> YoungTreatments { get; set; } = new();
+
+    public DateTime? MustDate { get; set; }
+    public double? KMW_OE { get; set; }
+    public double? MustAcidity { get; set; }
+    public double? MustPh { get; set; }
+    public string? MustNotes { get; set; }
+    public string? Rebel { get; set; }
+    public string? Squeeze { get; set; }
+    public string? MashLife { get; set; }
+
+    public DateTime? YoungDate { get; set; }
+    public double? YoungAcidity { get; set; }
+    public double? YoungSugar { get; set; }
+    public double? YoungAlcohol { get; set; }
+    public double? YoungPh { get; set; }
+    public string? YoungNotes { get; set; }
+
+    public DateTime? FinalDate { get; set; }
+    public double? FinalAcidity { get; set; }
+    public double? FinalSugar { get; set; }
+    public double? FinalAlcohol { get; set; }
+    public double? FinalPh { get; set; }
+    public double? FinalSulfur { get; set; }
+    public string? FinalNotes { get; set; }
+
+    public List<MovementLineDto> Movements { get; set; } = new();
+  }
+  
+  class TreatmentLineDto { public string Type { get; set; } = ""; public string? Agent { get; set; } public double? Amount { get; set; } public DateTime? Date { get; set; } }
+    class MovementLineDto { public int? ToTankId { get; set; } public double? Volume { get; set; } public DateTime? Date { get; set; } }
+
 
 }

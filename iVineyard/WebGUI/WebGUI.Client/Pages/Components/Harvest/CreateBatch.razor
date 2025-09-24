@@ -9,8 +9,10 @@
 @inject VineyardService VineyardService
 @inject TankService TankService
 @inject BatchService BatchService
+@inject NavigationManager Navigation
 
-<h3>CreateHarvest</h3>
+
+
 <MudDialog Style="width:60vw; max-width:60vw;">
         <DialogContent>
 
@@ -188,6 +190,10 @@
   // Lookups
   List<VineyardRecord>? Vineyards = new();
   List<Tank>? Tanks = new();
+      
+  [Parameter] 
+  public MudDialogInstance? MudDialog { get; set; }
+
 
   // VM
   class TreatmentLine { public string Type { get; set; } = ""; public string? Agent { get; set; } public double? Amount { get; set; } public DateTime? Date { get; set; } }
@@ -359,7 +365,8 @@
 
     var resp = await BatchService.CreateBatchAsync(dto);
     resp.EnsureSuccessStatusCode();
-
+    
+    RefreshPage();
     Reset();
   }
 
@@ -369,4 +376,8 @@
     Prefill();
     StateHasChanged();
   }
+  private void RefreshPage()
+      {
+          Navigation.NavigateTo(Navigation.Uri, forceLoad: true);
+      }
 }

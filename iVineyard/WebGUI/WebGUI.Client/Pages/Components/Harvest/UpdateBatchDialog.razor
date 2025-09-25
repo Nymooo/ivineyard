@@ -281,13 +281,12 @@
     if (!Vm.Movements.Any()) Vm.Movements.Add(new());
   }
 
-  async Task LoadFromVineyardHasBatchAsync()
+async Task LoadFromVineyardHasBatchAsync()
 {
-    // API muss EINEN Datensatz liefern (BatchInformationRecord)
     var link = await VineyardBatchService.GetVineyardsWithBatchesByIdAsync(Id);
     if (link is null || link.Batch is null) return;
 
-    // Kopfdaten
+    // Kopf
     Vm.VineyardId     = link.VineyardId;
     Vm.Amount         = link.Batch.Amount;
     Vm.Variety        = link.Batch.Variety;
@@ -295,9 +294,9 @@
     Vm.MaturityHealth = link.Batch.Maturity_Health;
     Vm.Weather        = link.Batch.Weather;
 
+    // ----- Informations (wie gehabt) -----
     var infos = link.Batch.InformationsList ?? new();
 
-    // Ausgangsmost
     var must = infos.FirstOrDefault(i => i.StartingMust is not null);
     if (must is not null)
     {
@@ -311,7 +310,6 @@
         Vm.MashLife     = must.StartingMust!.MashLife;
     }
 
-    // Jungwein
     var young = infos.FirstOrDefault(i => i.YoungWine is not null);
     if (young is not null)
     {
@@ -323,7 +321,6 @@
         Vm.YoungSugar    = young.YoungWine!.ResidualSugar;
     }
 
-    // Weiß-/Rotwein (Endwerte)
     var finalW = infos.FirstOrDefault(i => i.WhiteWineRedWine is not null);
     if (finalW is not null)
     {
@@ -335,6 +332,35 @@
         Vm.FinalSugar    = finalW.WhiteWineRedWine!.ResidualSugar;
         Vm.FinalSulfur   = finalW.WhiteWineRedWine!.Sulfur;
     }
+
+    // ----- Treatments befüllen -----
+    var srcTreats = link.Batch.batchHasTreatmentsList ?? new();
+
+    // Falls gleiche "Type" mehrfach vorkommt, nehmen wir den ersten Eintrag
+    var byType = srcTreats
+        .Where(t => t.Treatment is not null)
+        .GroupBy(t => t.Treatment!.Type.Trim(), StringComparer.OrdinalIgnoreCase)
+        .ToDictionary(g => g.Key, g => g.First(), StringComparer.OrdinalIgnoreCase);
+
+    void FillTreatments(List<TreatmentLine> target)
+    {
+        foreach (var row in target)
+        {
+            var key = row.Type?.Trim();
+            if (string.IsNullOrEmpty(key)) continue;
+
+            if (byType.TryGetValue(key, out var hit))
+            {
+                row.Agent  = hit.Agent;
+                row.Amount = hit.Amount;
+                row.Date   = hit.Date;
+            }
+        }
+    }
+
+    FillTreatments(Vm.GrapeTreatments);
+    FillTreatments(Vm.MashTreatments);
+    FillTreatments(Vm.YoungTreatments);
 
     await InvokeAsync(StateHasChanged);
 }

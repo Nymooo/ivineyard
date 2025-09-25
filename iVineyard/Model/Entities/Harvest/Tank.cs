@@ -8,4 +8,7 @@ public class Tank
     [Key,DatabaseGenerated(DatabaseGeneratedOption.Identity)]
     [Column("TANK_ID")]
     public int TankId { get; set; }
+    
+    [Column("TANK_NAME")]
+    public string Name { get; set; }
 }

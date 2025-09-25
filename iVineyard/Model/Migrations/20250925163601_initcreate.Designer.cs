@@ -12,8 +12,8 @@ using Model.Configurations;
 namespace Model.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250925153332_initCreate")]
-    partial class initCreate
+    [Migration("20250925163601_initcreate")]
+    partial class initcreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -580,8 +580,36 @@ namespace Model.Migrations
                     b.HasIndex("BatchId");
 
                     b.ToTable("INFORMATIONS");
+                });
 
-                    b.UseTptMappingStrategy();
+            modelBuilder.Entity("Model.Entities.Harvest.StartingMust", b =>
+                {
+                    b.Property<int>("Id")
+                        .HasColumnType("int")
+                        .HasColumnName("INFORMATION_ID");
+
+                    b.Property<double>("KMW_OE")
+                        .HasColumnType("double")
+                        .HasColumnName("KMW/OE");
+
+                    b.Property<string>("MashLife")
+                        .IsRequired()
+                        .HasColumnType("longtext")
+                        .HasColumnName("MASH_LIFE");
+
+                    b.Property<string>("Rebel")
+                        .IsRequired()
+                        .HasColumnType("longtext")
+                        .HasColumnName("REBEL");
+
+                    b.Property<string>("Squeeze")
+                        .IsRequired()
+                        .HasColumnType("longtext")
+                        .HasColumnName("SQUEEZE");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("STARTING_MUST");
                 });
 
             modelBuilder.Entity("Model.Entities.Harvest.Tank", b =>
@@ -592,6 +620,11 @@ namespace Model.Migrations
                         .HasColumnName("TANK_ID");
 
                     MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("TankId"));
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("longtext")
+                        .HasColumnName("TANK_NAME");
 
                     b.HasKey("TankId");
 
@@ -685,6 +718,29 @@ namespace Model.Migrations
                     b.ToTable("VINEYARD_HAS_BATCH");
                 });
 
+            modelBuilder.Entity("Model.Entities.Harvest.WhiteWine_RedWine", b =>
+                {
+                    b.Property<int>("Id")
+                        .HasColumnType("int")
+                        .HasColumnName("INFORMATION_ID");
+
+                    b.Property<double>("Alcohol")
+                        .HasColumnType("double")
+                        .HasColumnName("ALCOHOL");
+
+                    b.Property<double>("ResidualSugar")
+                        .HasColumnType("double")
+                        .HasColumnName("RESIDUAL_SUGAR");
+
+                    b.Property<double>("Sulfur")
+                        .HasColumnType("double")
+                        .HasColumnName("SULFUR");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("WHITE_WINE_RED_WINE");
+                });
+
             modelBuilder.Entity("Model.Entities.Harvest.WineBatchHasTreatment", b =>
                 {
                     b.Property<int>("BatchId")
@@ -715,86 +771,21 @@ namespace Model.Migrations
                     b.ToTable("WINE_BATCH_has_TREATMENT");
                 });
 
-            modelBuilder.Entity("Model.Entities.Harvest.StartingMust", b =>
-                {
-                    b.HasBaseType("Model.Entities.Harvest.Informations");
-
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnUpdateSometimes()
-                        .HasColumnType("int")
-                        .HasColumnName("INFORMATION_ID");
-
-                    b.Property<double>("KMW_OE")
-                        .HasColumnType("double")
-                        .HasColumnName("KMW/OE");
-
-                    b.Property<string>("MashLife")
-                        .IsRequired()
-                        .HasColumnType("longtext")
-                        .HasColumnName("MASH_LIFE");
-
-                    b.Property<string>("Rebel")
-                        .IsRequired()
-                        .HasColumnType("longtext")
-                        .HasColumnName("REBEL");
-
-                    b.Property<string>("Squeeze")
-                        .IsRequired()
-                        .HasColumnType("longtext")
-                        .HasColumnName("SQUEEZE");
-
-                    b.HasIndex("Id")
-                        .IsUnique();
-
-                    b.ToTable("STARTING_MUST");
-                });
-
-            modelBuilder.Entity("Model.Entities.Harvest.WhiteWine_RedWine", b =>
-                {
-                    b.HasBaseType("Model.Entities.Harvest.Informations");
-
-                    b.Property<double>("Alcohol")
-                        .HasColumnType("double")
-                        .HasColumnName("ALCOHOL");
-
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnUpdateSometimes()
-                        .HasColumnType("int")
-                        .HasColumnName("INFORMATION_ID");
-
-                    b.Property<double>("ResidualSugar")
-                        .HasColumnType("double")
-                        .HasColumnName("RESIDUAL_SUGAR");
-
-                    b.Property<double>("Sulfur")
-                        .HasColumnType("double")
-                        .HasColumnName("SULFUR");
-
-                    b.HasIndex("Id")
-                        .IsUnique();
-
-                    b.ToTable("WHITE_WINE_RED_WINE");
-                });
-
             modelBuilder.Entity("Model.Entities.Harvest.YoungWine", b =>
                 {
-                    b.HasBaseType("Model.Entities.Harvest.Informations");
+                    b.Property<int>("Id")
+                        .HasColumnType("int")
+                        .HasColumnName("INFORMATION_ID");
 
                     b.Property<double>("Alcohol")
                         .HasColumnType("double")
                         .HasColumnName("ALCOHOL");
 
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnUpdateSometimes()
-                        .HasColumnType("int")
-                        .HasColumnName("INFORMATION_ID");
-
                     b.Property<double>("ResidualSugar")
                         .HasColumnType("double")
                         .HasColumnName("RESIDUAL_SUGAR");
 
-                    b.HasIndex("Id")
-                        .IsUnique();
+                    b.HasKey("Id");
 
                     b.ToTable("YOUNG_WINE");
                 });
@@ -989,6 +980,17 @@ namespace Model.Migrations
                     b.Navigation("Batch");
                 });
 
+            modelBuilder.Entity("Model.Entities.Harvest.StartingMust", b =>
+                {
+                    b.HasOne("Model.Entities.Harvest.Informations", "Informations")
+                        .WithOne("StartingMust")
+                        .HasForeignKey("Model.Entities.Harvest.StartingMust", "Id")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Informations");
+                });
+
             modelBuilder.Entity("Model.Entities.Harvest.TankHasWineBatch", b =>
                 {
                     b.HasOne("Model.Entities.Harvest.Batch", "Batch")
@@ -1046,6 +1048,17 @@ namespace Model.Migrations
                     b.Navigation("Vineyard");
                 });
 
+            modelBuilder.Entity("Model.Entities.Harvest.WhiteWine_RedWine", b =>
+                {
+                    b.HasOne("Model.Entities.Harvest.Informations", "Informations")
+                        .WithOne("WhiteWineRedWine")
+                        .HasForeignKey("Model.Entities.Harvest.WhiteWine_RedWine", "Id")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Informations");
+                });
+
             modelBuilder.Entity("Model.Entities.Harvest.WineBatchHasTreatment", b =>
                 {
                     b.HasOne("Model.Entities.Harvest.Batch", "Batch")
@@ -1065,51 +1078,11 @@ namespace Model.Migrations
                     b.Navigation("Treatment");
                 });
 
-            modelBuilder.Entity("Model.Entities.Harvest.StartingMust", b =>
-                {
-                    b.HasOne("Model.Entities.Harvest.Informations", "Informations")
-                        .WithOne("StartingMust")
-                        .HasForeignKey("Model.Entities.Harvest.StartingMust", "Id")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Model.Entities.Harvest.Informations", null)
-                        .WithOne()
-                        .HasForeignKey("Model.Entities.Harvest.StartingMust", "InformationId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Informations");
-                });
-
-            modelBuilder.Entity("Model.Entities.Harvest.WhiteWine_RedWine", b =>
-                {
-                    b.HasOne("Model.Entities.Harvest.Informations", "Informations")
-                        .WithOne("WhiteWineRedWine")
-                        .HasForeignKey("Model.Entities.Harvest.WhiteWine_RedWine", "Id")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Model.Entities.Harvest.Informations", null)
-                        .WithOne()
-                        .HasForeignKey("Model.Entities.Harvest.WhiteWine_RedWine", "InformationId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Informations");
-                });
-
             modelBuilder.Entity("Model.Entities.Harvest.YoungWine", b =>
                 {
                     b.HasOne("Model.Entities.Harvest.Informations", "Informations")
                         .WithOne("YoungWine")
                         .HasForeignKey("Model.Entities.Harvest.YoungWine", "Id")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Model.Entities.Harvest.Informations", null)
-                        .WithOne()
-                        .HasForeignKey("Model.Entities.Harvest.YoungWine", "InformationId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 

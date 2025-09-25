@@ -17,7 +17,16 @@
   <DialogContent>
 
     <MudContainer Class="pa-4">
-      <MudText Typo="Typo.h4" Class="mb-4">Weißwein- & Rotwein-Bereitung</MudText>
+      <div class="d-flex align-center mb-2 w-100">
+          <h2>Weißwein- & Rotwein-Bereitung</h2>
+          <MudSpacer />
+          <MudIconButton Icon="@Icons.Material.Filled.PictureAsPdf"
+                         Color="Color.Primary"
+                         Size="Size.Large"
+                         Style="font-size:34px"
+                         AriaLabel="PDF drucken" />
+      </div>
+
 
       <EditForm Model="@Vm" OnValidSubmit="@SaveAsync">
         <MudGrid Spacing="3">
@@ -28,24 +37,28 @@
 
               <MudText Typo="Typo.h5" Class="mb-2">Weingarten</MudText>
               <MudGrid Class="mb-2">
-                <MudItem xs="12" md="8">
-                  <MudSelect T="int" @bind-Value="Vm.VineyardId" Label="Weingarten" Dense="true" Required="true">
-                    @foreach (var v in Vineyards)
-                    {
-                      <MudSelectItem Value="@v.BookingObjectId">@v.Name</MudSelectItem>
-                    }
-                  </MudSelect>
-                </MudItem>
-                <MudItem xs="6" md="2">
-                  <MudNumericField T="double" @bind-Value="Vm.Amount" Label="Menge (L)" Dense="true" Required="true"/>
-                </MudItem>
-                <MudItem xs="6" md="2">
-                  <MudTextField T="string" @bind-Value="Vm.Variety" Label="Sorte" Dense="true" Required="true"/>
-                </MudItem>
-                <MudItem xs="6" md="2">
-                  <MudDatePicker T="DateTime?" @bind-Date="Vm.HarvestDate" Label="Erntedatum" Dense="true"/>
-                </MudItem>
+                  <!-- Erste Zeile: Weingarten + Menge -->
+                  <MudItem xs="12" md="8">
+                      <MudSelect T="int" @bind-Value="Vm.VineyardId" Label="Weingarten" Dense="true" Required="true">
+                          @foreach (var v in Vineyards)
+                          {
+                              <MudSelectItem Value="@v.BookingObjectId">@v.Name</MudSelectItem>
+                          }
+                      </MudSelect>
+                  </MudItem>
+                  <MudItem xs="12" md="4">
+                      <MudNumericField T="double" @bind-Value="Vm.Amount" Label="Menge (L)" Dense="true" Required="true"/>
+                  </MudItem>
+              
+                  <!-- Zweite Zeile: Sorte + Datum -->
+                  <MudItem xs="12" md="6">
+                      <MudTextField T="string" @bind-Value="Vm.Variety" Label="Sorte" Dense="true" Required="true"/>
+                  </MudItem>
+                  <MudItem xs="12" md="6">
+                      <MudDatePicker T="DateTime?" @bind-Date="Vm.HarvestDate" Label="Erntedatum" Dense="true"/>
+                  </MudItem>
               </MudGrid>
+
 
               <MudText Typo="Typo.h6" Class="mt-3 mb-1">Behandlungen (Trauben)</MudText>
               @foreach (var t in Vm.GrapeTreatments)

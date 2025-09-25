@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace Model.Migrations
 {
     /// <inheritdoc />
-    public partial class initCreate : Migration
+    public partial class initcreate : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -97,7 +97,9 @@ namespace Model.Migrations
                 columns: table => new
                 {
                     TANK_ID = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn)
+                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
+                    TANK_NAME = table.Column<string>(type: "longtext", nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4")
                 },
                 constraints: table =>
                 {
@@ -772,12 +774,6 @@ namespace Model.Migrations
                 column: "STATUS_ID");
 
             migrationBuilder.CreateIndex(
-                name: "IX_STARTING_MUST_INFORMATION_ID",
-                table: "STARTING_MUST",
-                column: "INFORMATION_ID",
-                unique: true);
-
-            migrationBuilder.CreateIndex(
                 name: "IX_TANK_has_WINE_BATCH_TANK_ID",
                 table: "TANK_has_WINE_BATCH",
                 column: "TANK_ID");
@@ -823,21 +819,9 @@ namespace Model.Migrations
                 column: "COMPANY_ID");
 
             migrationBuilder.CreateIndex(
-                name: "IX_WHITE_WINE_RED_WINE_INFORMATION_ID",
-                table: "WHITE_WINE_RED_WINE",
-                column: "INFORMATION_ID",
-                unique: true);
-
-            migrationBuilder.CreateIndex(
                 name: "IX_WINE_BATCH_has_TREATMENT_TREATMENT_ID",
                 table: "WINE_BATCH_has_TREATMENT",
                 column: "TREATMENT_ID");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_YOUNG_WINE_INFORMATION_ID",
-                table: "YOUNG_WINE",
-                column: "INFORMATION_ID",
-                unique: true);
         }
 
         /// <inheritdoc />

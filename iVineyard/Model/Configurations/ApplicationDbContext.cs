@@ -11,6 +11,30 @@ namespace Model.Configurations;
 public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
     : IdentityDbContext<ApplicationUser>(options)
 {
+    public DbSet<Machine> Machines { get; set; }
+    public DbSet<MachineHasStatus> MachineHasStatus { get; set; }
+    public DbSet<MachineStatusType> MachineStatusTypes { get; set; }
+    public DbSet<Vineyard> Vineyards { get; set; }
+    public DbSet<VineyardHasStatus> VineyardHasStati { get; set; }
+    public DbSet<VineyardStatusType> VineyardStatusTypes { get; set; }
+    public DbSet<WorkInformation> WorkInformation { get; set; }
+    public DbSet<BookingObject> BookingObjects { get; set; }
+    public DbSet<Equipment> Equipment { get; set; }
+    //public DbSet<Measurement> Measurements { get; set; }
+    public DbSet<Company> Companies { get; set; }
+    public DbSet<Invoice> Invoices { get; set; }
+    public DbSet<Batch> Batches { get; set; }
+    public DbSet<Informations> Informations { get; set; }
+    public DbSet<StartingMust> StartingMusts { get; set; }
+    public DbSet<Tank> Tanks { get; set; }
+    public DbSet<TankHasWineBatch> TankHasWineBatches { get; set; }
+    public DbSet<TankMovement> TankMovements { get; set; }
+    public DbSet<Treatment> Treatments { get; set; }
+    public DbSet<VineyardHasBatch> VineyardHasBatches { get; set; }
+    public DbSet<WhiteWine_RedWine> WhiteWineRedWines { get; set; }
+    public DbSet<WineBatchHasTreatment> WineBatchHasTreatments { get; set; }
+    public DbSet<YoungWine> YoungWines { get; set; }
+    
     
     protected override void OnModelCreating(ModelBuilder builder)
     {
@@ -155,7 +179,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
         
         builder.Entity<WineBatchHasTreatment>()
             .HasOne(vhb => vhb.Batch)
-            .WithMany()
+            .WithMany(b => b.batchHasTreatmentsList)
             .HasForeignKey(vhb => vhb.BatchId);
         
         builder.Entity<WineBatchHasTreatment>()
@@ -169,7 +193,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
         
         builder.Entity<Informations>()
             .HasOne(vhb => vhb.Batch)
-            .WithMany()
+            .WithMany(b => b.InformationsList)
             .HasForeignKey(vhb => vhb.BatchId);
         
         #endregion
@@ -186,6 +210,33 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
             .WithMany()
             .HasForeignKey(vhb => vhb.ToTankId);
         
+        #endregion
+
+        #region StartingMust
+
+        builder.Entity<StartingMust>()
+            .HasOne(b => b.Informations)
+            .WithOne(u => u.StartingMust)
+            .HasForeignKey<StartingMust>(u => u.Id);
+
+        #endregion
+
+        #region YoungWine
+
+        builder.Entity<YoungWine>()
+            .HasOne(b => b.Informations)
+            .WithOne(u => u.YoungWine)
+            .HasForeignKey<YoungWine>(u => u.Id);
+
+        #endregion
+
+        #region WhiteWineRedWine
+
+        builder.Entity<WhiteWine_RedWine>()
+            .HasOne(b => b.Informations)
+            .WithOne(u => u.WhiteWineRedWine)
+            .HasForeignKey<WhiteWine_RedWine>(u => u.Id);
+
         #endregion
         
         #region KEYS

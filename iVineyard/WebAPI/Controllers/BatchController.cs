@@ -49,54 +49,80 @@ public class BatchController : ControllerBase
             _db.Add(new TankHasWineBatch { TankId = tid, BatchId = batch.BatchId });
 
         // 4) Ausgangsmust
-        if (dto.KMW_OE.HasValue || dto.MustAcidity.HasValue || dto.MustPh.HasValue || !string.IsNullOrWhiteSpace(dto.MustNotes)
-            || !string.IsNullOrWhiteSpace(dto.Rebel) || !string.IsNullOrWhiteSpace(dto.Squeeze) || !string.IsNullOrWhiteSpace(dto.MashLife))
-        {
-            _db.Add(new StartingMust
-            {
-                BatchId      = batch.BatchId,
-                Date         = dto.MustDate ?? dto.HarvestDate ?? DateTime.UtcNow,
-                KMW_OE       = dto.KMW_OE ?? 0,
-                Rebel        = dto.Rebel ?? string.Empty,
-                Squeeze      = dto.Squeeze ?? string.Empty,
-                MashLife     = dto.MashLife ?? string.Empty,
-                Acidity      = dto.MustAcidity ?? 0,
-                PhValue      = dto.MustPh ?? 0,
-                FurtherSteps = dto.MustNotes ?? string.Empty
-            });
-        }
+if (dto.KMW_OE.HasValue || dto.MustAcidity.HasValue || dto.MustPh.HasValue
+    || !string.IsNullOrWhiteSpace(dto.MustNotes)
+    || !string.IsNullOrWhiteSpace(dto.Rebel) || !string.IsNullOrWhiteSpace(dto.Squeeze) || !string.IsNullOrWhiteSpace(dto.MashLife))
+{
+    var info = new Informations
+    {
+        BatchId      = batch.BatchId,
+        Date         = dto.MustDate ?? dto.HarvestDate ?? DateTime.UtcNow,
+        Acidity      = dto.MustAcidity ?? 0,
+        PhValue      = dto.MustPh ?? 0,
+        FurtherSteps = dto.MustNotes ?? string.Empty
+    };
+    _db.Add(info);
+    await _db.SaveChangesAsync(); // erzeugt InformationId
 
-        // 5) Jungwein
-        if (dto.YoungAlcohol.HasValue || dto.YoungSugar.HasValue || dto.YoungAcidity.HasValue || dto.YoungPh.HasValue || !string.IsNullOrWhiteSpace(dto.YoungNotes))
-        {
-            _db.Add(new YoungWine
-            {
-                BatchId      = batch.BatchId,
-                Date         = dto.YoungDate ?? DateTime.UtcNow,
-                Alcohol      = dto.YoungAlcohol ?? 0,
-                ResidualSugar= dto.YoungSugar ?? 0,
-                Acidity      = dto.YoungAcidity ?? 0,
-                PhValue      = dto.YoungPh ?? 0,
-                FurtherSteps = dto.YoungNotes ?? string.Empty
-            });
-        }
+    _db.Add(new StartingMust
+    {
+        Id       = info.InformationId,        // shared PK ↔ FK
+        KMW_OE   = dto.KMW_OE ?? 0,
+        Rebel    = dto.Rebel ?? "",
+        Squeeze  = dto.Squeeze ?? "",
+        MashLife = dto.MashLife ?? ""
+    });
+}
 
-        // 6) Endwerte
-        if (dto.FinalAlcohol.HasValue || dto.FinalSugar.HasValue || dto.FinalSulfur.HasValue
-            || dto.FinalAcidity.HasValue || dto.FinalPh.HasValue || !string.IsNullOrWhiteSpace(dto.FinalNotes))
-        {
-            _db.Add(new WhiteWine_RedWine
-            {
-                BatchId      = batch.BatchId,
-                Date         = dto.FinalDate ?? DateTime.UtcNow,
-                Alcohol      = dto.FinalAlcohol ?? 0,
-                ResidualSugar= dto.FinalSugar ?? 0,
-                Sulfur       = dto.FinalSulfur ?? 0,
-                Acidity      = dto.FinalAcidity ?? 0,
-                PhValue      = dto.FinalPh ?? 0,
-                FurtherSteps = dto.FinalNotes ?? string.Empty
-            });
-        }
+// 5) Jungwein
+if (dto.YoungAlcohol.HasValue || dto.YoungSugar.HasValue || dto.YoungAcidity.HasValue
+    || dto.YoungPh.HasValue || !string.IsNullOrWhiteSpace(dto.YoungNotes))
+{
+    var info = new Informations
+    {
+        BatchId      = batch.BatchId,
+        Date         = dto.YoungDate ?? DateTime.UtcNow,
+        Acidity      = dto.YoungAcidity ?? 0,
+        PhValue      = dto.YoungPh ?? 0,
+        FurtherSteps = dto.YoungNotes ?? string.Empty
+    };
+    _db.Add(info);
+    await _db.SaveChangesAsync();
+
+    _db.Add(new YoungWine
+    {
+        Id           = info.InformationId,
+        Alcohol      = dto.YoungAlcohol ?? 0,
+        ResidualSugar= dto.YoungSugar   ?? 0
+    });
+}
+
+// 6) Endwerte
+if (dto.FinalAlcohol.HasValue || dto.FinalSugar.HasValue || dto.FinalSulfur.HasValue
+    || dto.FinalAcidity.HasValue || dto.FinalPh.HasValue || !string.IsNullOrWhiteSpace(dto.FinalNotes))
+{
+    var info = new Informations
+    {
+        BatchId      = batch.BatchId,
+        Date         = dto.FinalDate ?? DateTime.UtcNow,
+        Acidity      = dto.FinalAcidity ?? 0,
+        PhValue      = dto.FinalPh ?? 0,
+        FurtherSteps = dto.FinalNotes ?? string.Empty
+    };
+    _db.Add(info);
+    await _db.SaveChangesAsync();
+
+    _db.Add(new WhiteWine_RedWine
+    {
+        Id           = info.InformationId,
+        Alcohol      = dto.FinalAlcohol ?? 0,
+        ResidualSugar= dto.FinalSugar   ?? 0,
+        Sulfur       = dto.FinalSulfur  ?? 0
+    });
+}
+
+await _db.SaveChangesAsync();
+
 
         // 7) Behandlungen
         async Task StoreTreatments(IEnumerable<TreatmentLineDto> lines)
@@ -154,7 +180,7 @@ public class BatchController : ControllerBase
     // GET /batches/batches
     [HttpGet("batches")]
     public async Task<ActionResult<List<Batch>>> ReadAllVineyards() {
-        var batches = _repository.ReadAllAsync();
+        var batches = await _repository.ReadAllAsync();
 
         _logger.LogInformation($"data found: {batches}");
         return Ok(batches);

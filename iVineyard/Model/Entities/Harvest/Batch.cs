@@ -19,4 +19,7 @@ public class Batch
     public string Maturity_Health { get; set; }
     [Column("WEATHER")]
     public string Weather { get; set; }
+    
+    public List<WineBatchHasTreatment>? batchHasTreatmentsList { get; set; }
+    public List<Informations>? InformationsList { get; set; }
 }

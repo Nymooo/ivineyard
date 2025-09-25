@@ -42,6 +42,7 @@ builder.Services.AddScoped<IEquipmentRepository, EquipmentRepository>();
 builder.Services.AddScoped<IMachineHasStatuRepository, MachineHasStatusRepository>();
 builder.Services.AddScoped<IBatchRepository, BatchRepository>();
 builder.Services.AddScoped<ITankRepository, TankRepository>();
+builder.Services.AddScoped<IVineyardHasBatchRepository, VineyardHasBatchRepositoryRepository>();
 
 builder.Services.AddDbContextFactory<ApplicationDbContext>(
     options => options.UseMySql(

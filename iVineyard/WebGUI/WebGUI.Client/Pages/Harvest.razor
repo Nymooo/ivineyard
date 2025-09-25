@@ -3,140 +3,118 @@
 @using System.Net.Http.Json
 @using MudBlazor
 @using Model.Entities.Harvest
-@using Model.Entities.Bookingobjects.Vineyard
 @using WebGUI.Client.ClientServices
 @using Microsoft.AspNetCore.Components.Sections
-
-@using WebGUI.Client.Pages.Components.Records
-@using WebGUI.Client.Pages.Components
 @using WebGUI.Client.Pages.Components.Harvest
+@using WebGUI.Client.Pages.Components.Records
 
-@inject HttpClient Http
-@inject VineyardService VineyardService
-@inject TankService TankService
-@inject BatchService BatchService
+@inject VineyardHasBatchService VineyardHasBatchService
 @inject IDialogService DialogService
-
-
+@inject NavigationManager Nav
 
 @rendermode InteractiveAuto
 @attribute [Authorize(Roles = "Admin")]
 
-<style>
-    .flex-grid {
-        display: flex;
-    }
-
-    .col {
-        flex: 1;
-    }
-</style>
-
-
- 
 <SectionContent SectionName="headbar">
     <MudText Typo="Typo.h4">Harvest</MudText>
-    <MudButton OnClick="AddHarvestModal" Variant="Variant.Filled" ButtonType="ButtonType.Button"
-               StartIcon="@Icons.Material.Filled.Construction" Color="Color.Primary">Add Batch
+    <MudButton OnClick="AddHarvestModal" Variant="Variant.Filled"
+               StartIcon="@Icons.Material.Filled.Construction" Color="Color.Primary">
+        Add Batch
     </MudButton>
 </SectionContent>
 
+<MudContainer Class="pa-4">
 
-
-<div class="d-flex flex-column w-100">
-    <div class="flex-grid">
-        @if (batches == null) {
-            <MudText>Keine Erntetage</MudText>
+    <MudStack Row="true" Spacing="2" Class="mb-3">
+        <MudTextField @bind-Value="search" Placeholder="Suche: Sorte, Wetter, Reife..."
+                      Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" />
+        <MudDatePicker @bind-Date="from" Label="von" Dense="true" />
+        <MudDatePicker @bind-Date="to" Label="bis" Dense="true" />
+        <MudButton Variant="Variant.Outlined" OnClick="ResetFilters">Reset</MudButton>
+    </MudStack>
+    <MudGrid Spacing="3">
+        @if (loading)
+        {
+            <MudItem xs="12"><MudProgressLinear Indeterminate="true" /></MudItem>
         }
-        else{
-        @foreach (Batch? batch in batches) {
-            <p>@batch.Date</p>
-            <p>@batch.Variety</p>
+        else if (batches is null || !Filtered.Any())
+        {
+            <MudItem xs="12"><MudAlert Severity="Severity.Info">Keine Batches gefunden.</MudAlert></MudItem>
         }
+        else
+        {
+            @foreach (var b in Filtered)
+            {
+                <MudItem xs="12" sm="6" md="4" lg="4">
+                    <MudCard Class="pa-3" Style="border-radius:18px;">
+                        <MudCardContent>
+                            <MudText Typo="Typo.h6">@b.Vineyard.Name</MudText>
+                            <MudText Typo="Typo.h6">@b.Batch.Variety</MudText>
+                            <MudText Typo="Typo.caption">@b.Batch.Date.ToString("dd.MM.yyyy")</MudText>
+                            <MudDivider Class="my-2"/>
+                            <MudStack Row="true" Spacing="1">
+                                <MudChip T="string" Icon="@Icons.Material.Filled.Scale">@($"{b.Batch.Amount:0.#} kg")</MudChip>
+                                @if (!string.IsNullOrWhiteSpace(b.Batch.Maturity_Health))
+                                {
+                                    <MudChip T="string">@b.Batch.Maturity_Health</MudChip>
+                                }
+                                @if (!string.IsNullOrWhiteSpace(b.Batch.Weather))
+                                {
+                                    <MudChip T="string" Variant="Variant.Outlined">@b.Batch.Weather</MudChip>
+                                }
+                            </MudStack>
+                        </MudCardContent>
+                        <MudCardActions>
+                            <MudButton Size="Size.Small" OnClick="@(() => Edit(b.BatchId))">Öffnen</MudButton>
+                        </MudCardActions>
+                    </MudCard>
+                </MudItem>
+            }
         }
-        
+    </MudGrid>
+</MudContainer>
 
-
-    </div>
-</div>
-
-
-
- 
 @code{
-List<Batch>? batches = new List<Batch>();
+    List<BatchInformationRecord>? batches;
+    bool loading;
 
-protected override async Task OnInitializedAsync()
-{
-    try
+    string search = "";
+    DateTime? from;
+    DateTime? to;
+
+    IEnumerable<BatchInformationRecord> Filtered => (batches ?? Enumerable.Empty<BatchInformationRecord>())
+        .Where(b => string.IsNullOrWhiteSpace(search)
+                 || (b.Batch.Variety?.Contains(search, StringComparison.OrdinalIgnoreCase) ?? false)
+                 || (b.Batch.Weather?.Contains(search, StringComparison.OrdinalIgnoreCase) ?? false)
+                 || (b.Batch.Maturity_Health?.Contains(search, StringComparison.OrdinalIgnoreCase) ?? false))
+        .Where(b => !from.HasValue || b.Batch.Date.Date >= from.Value.Date)
+        .Where(b => !to.HasValue   || b.Batch.Date.Date <= to.Value.Date)
+        .OrderByDescending(b => b.Batch.Date);
+
+    protected override async Task OnInitializedAsync() => await LoadBatches();
+
+    async Task LoadBatches()
     {
-        batches = await BatchService.GetBatchesAsync();
+        loading = true;
+        try { batches = await VineyardHasBatchService.GetVineyardsWithBatchesAsync(); }
+        finally { loading = false; }
     }
-    catch (Exception ex)
+
+    void ResetFilters() { search = ""; from = null; to = null; }
+
+    async Task AddHarvestModal()
     {
-        Console.WriteLine($"Fehler beim Laden der Maschinen: {ex.Message}");
+        var dlg = await DialogService.ShowAsync<CreateBatchDialog>();
+        var res = await dlg.Result;
+        if (!res.Canceled) await LoadBatches();
     }
-}
 
-
-
-private Task AddHarvestModal()
-{
-/*var parameters = new DialogParameters<EmployeeDialog>
-{
-    { x => x.ContentText, "test" },
-    { x => x.ButtonText, "Add Employee" },
-    { x => x.Color, Color.Info }
-};*/
-
-return DialogService.ShowAsync<CreateBatch>();
-}
-
-
-
- class BatchCreateDto
-  {
-    public int VineyardId { get; set; }
-    public double Amount { get; set; }
-    public DateTime? HarvestDate { get; set; }
-    public string Variety { get; set; } = string.Empty;
-    public string? MaturityHealth { get; set; }
-    public string? Weather { get; set; }
-    public int? TankId { get; set; }
-
-    public List<TreatmentLineDto> GrapeTreatments { get; set; } = new();
-    public List<TreatmentLineDto> MashTreatments  { get; set; } = new();
-    public List<TreatmentLineDto> YoungTreatments { get; set; } = new();
-
-    public DateTime? MustDate { get; set; }
-    public double? KMW_OE { get; set; }
-    public double? MustAcidity { get; set; }
-    public double? MustPh { get; set; }
-    public string? MustNotes { get; set; }
-    public string? Rebel { get; set; }
-    public string? Squeeze { get; set; }
-    public string? MashLife { get; set; }
-
-    public DateTime? YoungDate { get; set; }
-    public double? YoungAcidity { get; set; }
-    public double? YoungSugar { get; set; }
-    public double? YoungAlcohol { get; set; }
-    public double? YoungPh { get; set; }
-    public string? YoungNotes { get; set; }
-
-    public DateTime? FinalDate { get; set; }
-    public double? FinalAcidity { get; set; }
-    public double? FinalSugar { get; set; }
-    public double? FinalAlcohol { get; set; }
-    public double? FinalPh { get; set; }
-    public double? FinalSulfur { get; set; }
-    public string? FinalNotes { get; set; }
-
-    public List<MovementLineDto> Movements { get; set; } = new();
-  }
-  
-  class TreatmentLineDto { public string Type { get; set; } = ""; public string? Agent { get; set; } public double? Amount { get; set; } public DateTime? Date { get; set; } }
-    class MovementLineDto { public int? ToTankId { get; set; } public double? Volume { get; set; } public DateTime? Date { get; set; } }
-
-
+    async Task Edit(int id)
+    {
+        var parameters = new DialogParameters<UpdateBatchDialog> { { x => x.Id, id } };
+        
+        var dlg = await DialogService.ShowAsync<UpdateBatchDialog>("Edit Batch", parameters);
+        var res = await dlg.Result;
+        if (!res.Canceled) await LoadBatches();
+    }
 }

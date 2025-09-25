@@ -49,6 +49,7 @@ builder.Services.AddScoped<EquipmentService>();
 builder.Services.AddScoped<MachineHasStatusService>();
 builder.Services.AddScoped<TankService>();
 builder.Services.AddScoped<BatchService>();
+builder.Services.AddScoped<VineyardHasBatchService>();
 
 
 builder.Services.AddMudServices();

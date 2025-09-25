@@ -10,11 +10,11 @@ public record MachineRecord(
 {
     // Parameterloser Konstruktor
     public MachineRecord() : this(
-        0,                // Standardwert für BookingObjectId
-        string.Empty,     // Standardwert für Name
+        0, // Standardwert für BookingObjectId
+        string.Empty, // Standardwert für Name
         new BookingObjectRecord(),
         new List<MachineHasStatusRecord>(), // Leere Liste für MachineStatuses
-        new List<WorkInformationRecord>()  // Leere Liste für WorkInformation
+        new List<WorkInformationRecord>() // Leere Liste für WorkInformation
     )
     {
     }
@@ -27,7 +27,7 @@ public record BookingObjectRecord(
 {
     // Parameterloser Konstruktor
     public BookingObjectRecord() : this(
-        0,                  // Standardwert für Id
+        0, // Standardwert für Id
         new List<InvoiceRecord>() // Leere Liste für Invoices
     )
     {
@@ -43,8 +43,8 @@ public record InvoiceRecord(
 {
     // Parameterloser Konstruktor
     public InvoiceRecord() : this(
-        0,               // Standardwert für InvoiceId
-        0,                // Standardwert für Price
+        0, // Standardwert für InvoiceId
+        0, // Standardwert für Price
         DateTime.MinValue, // Standardwert für BoughtAt
         ""
     )
@@ -61,9 +61,9 @@ public record MachineHasStatusRecord(
 {
     // Parameterloser Konstruktor
     public MachineHasStatusRecord() : this(
-        0,                // Standardwert für StatusId
+        0, // Standardwert für StatusId
         DateTime.MinValue, // Standardwert für StartDate
-        null,             // Standardwert für EndDate
+        null, // Standardwert für EndDate
         new MachineStatusTypeRecord() // Standardwert für Status
     )
     {
@@ -77,11 +77,12 @@ public record MachineStatusTypeRecord(
 {
     // Parameterloser Konstruktor
     public MachineStatusTypeRecord() : this(
-        0,               // Standardwert für StatusId
-        string.Empty     // Standardwert für Type
+        0, // Standardwert für StatusId
+        string.Empty // Standardwert für Type
     )
     {
     }
+
     public string Type { get; set; } = string.Empty;
 }
 
@@ -96,11 +97,11 @@ public record WorkInformationRecord(
 {
     // Parameterloser Konstruktor
     public WorkInformationRecord() : this(
-        string.Empty,     // Standardwert für UserId
-        0,                // Standardwert für VineyardId
-        null,             // Standardwert für MachineId
-        null,             // Standardwert für StartedAt
-        null,             // Standardwert für FinishedAt
+        string.Empty, // Standardwert für UserId
+        0, // Standardwert für VineyardId
+        null, // Standardwert für MachineId
+        null, // Standardwert für StartedAt
+        null, // Standardwert für FinishedAt
         new ApplicationUserRecord() // Standardwert für ApplicationUser
     )
     {
@@ -115,9 +116,9 @@ public record ApplicationUserRecord(
 {
     // Parameterloser Konstruktor
     public ApplicationUserRecord() : this(
-        string.Empty,  // Standardwert für UserName
-        string.Empty,  // Standardwert für Email
-        0              // Standardwert für Salary
+        string.Empty, // Standardwert für UserName
+        string.Empty, // Standardwert für Email
+        0 // Standardwert für Salary
     )
     {
     }

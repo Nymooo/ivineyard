@@ -1,10 +1,16 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.Json.Serialization;
 
 namespace Model.Entities.Harvest;
 [Table("STARTING_MUST")]
-public class StartingMust : Informations
+public class StartingMust
 {
+    [JsonIgnore]
+    public Informations? Informations { get; set; }
+    [Column("INFORMATION_ID"), Required]
+    public int Id { get; set; }
+    
    [Column("KMW/OE")]
     public double KMW_OE { get; set; }
     [Column("REBEL")]

@@ -10,7 +10,7 @@ public class Informations
     [Column("INFORMATION_ID")]
     public int InformationId { get; set; }
     [Column("BATCH")]
-    public Batch Batch { get; set; }
+    public Batch? Batch { get; set; }
     [Column("BATCH_ID")]
     public int BatchId { get; set; }
     [Column("DATE")]
@@ -20,5 +20,9 @@ public class Informations
     [Column("PH_VALUE")]
     public double PhValue { get; set; }
     [Column("FURTHER_STEPS")]
-    public string FurtherSteps { get; set; }    
+    public string FurtherSteps { get; set; }
+
+    public StartingMust? StartingMust { get; set; }
+    public YoungWine? YoungWine { get; set; }
+    public WhiteWine_RedWine? WhiteWineRedWine { get; set; }
 }

@@ -753,8 +753,9 @@ namespace Model.Migrations
                         .HasColumnType("longtext")
                         .HasColumnName("AGENT");
 
-                    b.Property<double>("Amount")
-                        .HasColumnType("double")
+                    b.Property<string>("Amount")
+                        .IsRequired()
+                        .HasColumnType("longtext")
                         .HasColumnName("AMOUNT");
 
                     b.Property<DateTime>("Date")

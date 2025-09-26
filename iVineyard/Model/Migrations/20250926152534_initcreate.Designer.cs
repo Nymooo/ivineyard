@@ -12,7 +12,7 @@ using Model.Configurations;
 namespace Model.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250925163601_initcreate")]
+    [Migration("20250926152534_initcreate")]
     partial class initcreate
     {
         /// <inheritdoc />
@@ -756,8 +756,9 @@ namespace Model.Migrations
                         .HasColumnType("longtext")
                         .HasColumnName("AGENT");
 
-                    b.Property<double>("Amount")
-                        .HasColumnType("double")
+                    b.Property<string>("Amount")
+                        .IsRequired()
+                        .HasColumnType("longtext")
                         .HasColumnName("AMOUNT");
 
                     b.Property<DateTime>("Date")

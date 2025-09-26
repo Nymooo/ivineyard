@@ -18,7 +18,7 @@
 
     <MudContainer Class="pa-4">
       <div class="d-flex align-center mb-2 w-100">
-          <h2>Weißwein- & Rotwein-Bereitung</h2>
+          <h2>Maßnahmendatenblatt</h2>
           <MudSpacer />
           <MudIconButton Icon="@Icons.Material.Filled.PictureAsPdf"
                          Color="Color.Primary"
@@ -47,7 +47,7 @@
                       </MudSelect>
                   </MudItem>
                   <MudItem xs="12" md="4">
-                      <MudNumericField T="double" @bind-Value="Vm.Amount" Label="Menge (L)" Dense="true" Required="true"/>
+                      <MudNumericField T="string" @bind-Value="Vm.Amount" Label="Menge (kg)" Dense="true" Required="true"/>
                   </MudItem>
               
                   <!-- Zweite Zeile: Sorte + Datum -->
@@ -67,7 +67,9 @@
                   <MudItem xs="3"><MudText Typo="Typo.body1">@t.Type</MudText></MudItem>
                   <MudItem xs="3"><MudDatePicker T="DateTime?" @bind-Date="t.Date" Label="Datum" Dense="true"/></MudItem>
                   <MudItem xs="3"><MudTextField @bind-Value="t.Agent" Label="Mittel" Dense="true"/></MudItem>
-                  <MudItem xs="3"><MudNumericField T="double?" @bind-Value="t.Amount" Label="Menge" Dense="true"/></MudItem>
+                    <MudItem xs="3" >
+                        <MudTextField T="string" @bind-Value="t.Amount" Label="Menge" Dense="true"/>
+                    </MudItem>
                 </MudGrid>
               }
 
@@ -78,7 +80,9 @@
                   <MudItem xs="3"><MudText Typo="Typo.body1">@t.Type</MudText></MudItem>
                   <MudItem xs="3"><MudDatePicker T="DateTime?" @bind-Date="t.Date" Label="Datum" Dense="true"/></MudItem>
                   <MudItem xs="3"><MudTextField @bind-Value="t.Agent" Label="Mittel" Dense="true"/></MudItem>
-                  <MudItem xs="3"><MudNumericField T="double?" @bind-Value="t.Amount" Label="Menge" Dense="true"/></MudItem>
+                    <MudItem xs="3" >
+                        <MudTextField T="string" @bind-Value="t.Amount" Label="Menge" Dense="true"/>
+                    </MudItem>
                 </MudGrid>
               }
 
@@ -89,7 +93,9 @@
                   <MudItem xs="3"><MudText Typo="Typo.body1">@t.Type</MudText></MudItem>
                   <MudItem xs="3"><MudDatePicker T="DateTime?" @bind-Date="t.Date" Label="Datum" Dense="true"/></MudItem>
                   <MudItem xs="3"><MudTextField @bind-Value="t.Agent" Label="Mittel" Dense="true"/></MudItem>
-                  <MudItem xs="3"><MudNumericField T="double?" @bind-Value="t.Amount" Label="Menge" Dense="true"/></MudItem>
+                    <MudItem xs="3" >
+                        <MudTextField T="string" @bind-Value="t.Amount" Label="Menge" Dense="true"/>
+                    </MudItem>
                 </MudGrid>
               }
 
@@ -182,13 +188,13 @@
   [Parameter] public int Id { get; set; }
 
   // VM
-  class TreatmentLine { public string Type { get; set; } = ""; public string? Agent { get; set; } public double? Amount { get; set; } public DateTime? Date { get; set; } }
+  class TreatmentLine { public string Type { get; set; } = ""; public string? Agent { get; set; } public string? Amount { get; set; } public DateTime? Date { get; set; } }
   class MovementLine  { public int? ToTankId { get; set; } public double? Volume { get; set; } public DateTime? Date { get; set; } }
 
   class WeinFormVm
   {
     public int VineyardId { get; set; }
-    public double Amount { get; set; }
+    public string Amount { get; set; }
     public DateTime? HarvestDate { get; set; }
     public string Variety { get; set; } = "";
     public string? MaturityHealth { get; set; }
@@ -227,12 +233,12 @@
   }
 
   // DTOs fürs Speichern (Update – später genutzt)
-  class TreatmentLineDto { public string Type { get; set; } = ""; public string? Agent { get; set; } public double? Amount { get; set; } public DateTime? Date { get; set; } }
+  class TreatmentLineDto { public string Type { get; set; } = ""; public string? Agent { get; set; } public string? Amount { get; set; } public DateTime? Date { get; set; } }
   class MovementLineDto  { public int? ToTankId { get; set; } public double? Volume { get; set; } public DateTime? Date { get; set; } }
   class BatchUpdateDto
   {
     public int VineyardId { get; set; }
-    public double Amount { get; set; }
+    public string Amount { get; set; }
     public DateTime? HarvestDate { get; set; }
     public string Variety { get; set; } = string.Empty;
     public string? MaturityHealth { get; set; }

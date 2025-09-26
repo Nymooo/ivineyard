@@ -12,7 +12,7 @@ public class WineBatchHasTreatment
     [Column("TREATMENT_ID")]
     public int TreatementId { get; set; }
     [Column("AMOUNT")]
-    public double Amount { get; set; }
+    public string Amount { get; set; }
     [Column("AGENT")]
     public string Agent { get; set; }
     [Column("DATE")]

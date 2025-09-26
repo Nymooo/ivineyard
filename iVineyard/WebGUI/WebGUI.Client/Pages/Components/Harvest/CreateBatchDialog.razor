@@ -18,7 +18,7 @@
 
     <MudContainer Class="pa-4">
       <p>TestId: @Id</p>
-      <MudText Typo="Typo.h4" Class="mb-4">Weißwein- & Rotwein-Bereitung</MudText>
+      <MudText Typo="Typo.h4" Class="mb-4">Maßnahmendatenblatt</MudText>
 
       <EditForm Model="@Vm" OnValidSubmit="@SaveAsync">
         <MudGrid Spacing="3">
@@ -39,7 +39,7 @@
                                     </MudSelect>
                                 </MudItem>
                                 <MudItem xs="12" md="4">
-                                    <MudNumericField T="double" @bind-Value="Vm.Amount" Label="Menge (L)" Dense="true" Required="true"/>
+                                    <MudNumericField T="string" @bind-Value="Vm.Amount" Label="Menge (kg)" Dense="true" Required="true"/>
                                 </MudItem>
                             
                                 <!-- Zweite Zeile: Sorte + Datum -->
@@ -65,7 +65,8 @@
                     <MudTextField @bind-Value="t.Agent" Label="Mittel" Dense="true"/>
                   </MudItem>
                   <MudItem xs="3">
-                    <MudNumericField T="double?" @bind-Value="t.Amount" Label="Menge" Dense="true"/>
+                        <MudTextField T="string" @bind-Value="t.Amount" Label="Menge" Dense="true"/>
+                 
                   </MudItem>
                 </MudGrid>
               }
@@ -85,7 +86,7 @@
                     <MudTextField @bind-Value="t.Agent" Label="Mittel" Dense="true"/>
                   </MudItem>
                   <MudItem xs="3">
-                    <MudNumericField T="double?" @bind-Value="t.Amount" Label="Menge" Dense="true"/>
+                        <MudTextField T="string" @bind-Value="t.Amount" Label="Menge" Dense="true"/>
                   </MudItem>
                 </MudGrid>
               }
@@ -104,7 +105,7 @@
                     <MudTextField @bind-Value="t.Agent" Label="Mittel" Dense="true"/>
                   </MudItem>
                   <MudItem xs="3">
-                    <MudNumericField T="double?" @bind-Value="t.Amount" Label="Menge" Dense="true"/>
+                        <MudTextField T="string" @bind-Value="t.Amount" Label="Menge" Dense="true"/>
                   </MudItem>
                 </MudGrid>
               }
@@ -261,7 +262,7 @@
   {
     public string Type { get; set; } = "";
     public string? Agent { get; set; }
-    public double? Amount { get; set; }
+    public string? Amount { get; set; }
     public DateTime? Date { get; set; }
   }
 
@@ -275,7 +276,7 @@
   class WeinFormVm
   {
     public int VineyardId { get; set; }
-    public double Amount { get; set; }
+    public string Amount { get; set; }
     public DateTime? HarvestDate { get; set; }
     public string Variety { get; set; } = "";
     public string? MaturityHealth { get; set; }
@@ -317,7 +318,7 @@
   class BatchCreateDto
   {
     public int VineyardId { get; set; }
-    public double Amount { get; set; }
+    public string Amount { get; set; }
     public DateTime? HarvestDate { get; set; }
     public string Variety { get; set; } = string.Empty;
     public string? MaturityHealth { get; set; }
@@ -359,7 +360,7 @@
   {
     public string Type { get; set; } = "";
     public string? Agent { get; set; }
-    public double? Amount { get; set; }
+    public string? Amount { get; set; }
     public DateTime? Date { get; set; }
   }
 

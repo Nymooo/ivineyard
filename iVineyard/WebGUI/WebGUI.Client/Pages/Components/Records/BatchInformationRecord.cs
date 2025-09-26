@@ -18,7 +18,7 @@ public record BatchRecord
 {
     public int BatchId { get; init; }
     public string Variety { get; init; } = string.Empty;
-    public double Amount { get; init; }
+    public string Amount { get; init; }
     public DateTime Date { get; init; }
     public string Maturity_Health { get; init; } = string.Empty;
     public string Weather { get; init; } = string.Empty;
@@ -33,7 +33,7 @@ public record WineBatchHasTreatmentRecord
     public int BatchId { get; init; }
     public TreatmentRecord Treatment { get; init; } = default!;
     public int TreatementId { get; init; }   // Schreibweise wie im Entity
-    public double Amount { get; init; }
+    public string Amount { get; init; }
     public string Agent { get; init; } = string.Empty;
     public DateTime Date { get; init; }
 }

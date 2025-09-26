@@ -396,7 +396,8 @@ namespace Model.Migrations
                 {
                     BATCH_ID = table.Column<int>(type: "int", nullable: false),
                     TREATMENT_ID = table.Column<int>(type: "int", nullable: false),
-                    AMOUNT = table.Column<double>(type: "double", nullable: false),
+                    AMOUNT = table.Column<string>(type: "longtext", nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
                     AGENT = table.Column<string>(type: "longtext", nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     DATE = table.Column<DateTime>(type: "datetime(6)", nullable: false)

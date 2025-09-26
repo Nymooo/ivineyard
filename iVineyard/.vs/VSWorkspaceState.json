@@ -1,0 +1,15 @@
+{
+  "ExpandedNodes": [
+    "",
+    "\\WebAPI",
+    "\\WebGUI",
+    "\\WebGUI\\WebGUI",
+    "\\WebGUI\\WebGUI.Client",
+    "\\WebGUI\\WebGUI.Client\\Pages",
+    "\\WebGUI\\WebGUI\\bin",
+    "\\WebGUI\\WebGUI\\bin\\Debug\\net8.0",
+    "\\WebGUI\\WebGUI\\Components"
+  ],
+  "SelectedNode": "\\WebAPI\\WebAPI.csproj",
+  "PreviewInSolutionExplorer": false
+}

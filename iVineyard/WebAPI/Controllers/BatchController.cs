@@ -127,7 +127,7 @@ await _db.SaveChangesAsync();
         // 7) Behandlungen
         async Task StoreTreatments(IEnumerable<TreatmentLineDto> lines)
         {
-            foreach (var l in lines.Where(x => !string.IsNullOrWhiteSpace(x.Agent) || x.Amount.HasValue || x.Date.HasValue))
+            foreach (var l in lines.Where(x => !string.IsNullOrWhiteSpace(x.Agent) || !string.IsNullOrWhiteSpace(x.Amount) || x.Date.HasValue))
             {
                 var tr = new Treatment { Type = l.Type };
                 _db.Add(tr);
@@ -138,7 +138,7 @@ await _db.SaveChangesAsync();
                     BatchId      = batch.BatchId,
                     TreatementId = tr.TreatmentId,
                     Agent        = l.Agent ?? string.Empty,
-                    Amount       = l.Amount ?? 0,
+                    Amount       = l.Amount ?? string.Empty,
                     Date         = l.Date ?? DateTime.UtcNow
                 });
             }
@@ -241,7 +241,7 @@ public class TreatmentLineDto
 {
     public string Type { get; set; } = string.Empty;
     public string? Agent { get; set; }
-    public double? Amount { get; set; }
+    public string? Amount { get; set; }
     public DateTime? Date { get; set; }
 }
 

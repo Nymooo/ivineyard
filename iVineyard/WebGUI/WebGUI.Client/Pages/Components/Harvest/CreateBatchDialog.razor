@@ -124,10 +124,10 @@
                 </MudItem>
                 <MudItem xs="12" md="4">
                   <MudSelect T="int?" @bind-Value="Vm.TankId" Label="Tank" Dense="true">
-                    <MudSelectItem Value="@((int?)null)">(kein Tank)</MudSelectItem>
+                    <MudSelectItem T="int?" Value="@( (int?)null )">(kein Tank)</MudSelectItem>
                     @foreach (var t in Tanks)
                     {
-                      <MudSelectItem Value="@t.TankId">Tank @t.TankId</MudSelectItem>
+                      <MudSelectItem T="int?" Value="@( (int?)t.TankId )">Tank @t.TankId</MudSelectItem>
                     }
                   </MudSelect>
                 </MudItem>
@@ -217,11 +217,11 @@
               {
                 <MudGrid Class="mb-2">
                   <MudItem xs="4">
-                    <MudSelect T="int?" @bind-Value="m.ToTankId" Label="Ziel-Tank" Dense="true">
-                      <MudSelectItem Value="@((int?)null)">(kein)</MudSelectItem>
+                    <MudSelect T="int?" @bind-Value="m.ToTankId" Label="Tank" Dense="true">
+                      <MudSelectItem T="int?" Value="@( (int?)null )">(kein Tank)</MudSelectItem>
                       @foreach (var t in Tanks)
                       {
-                        <MudSelectItem Value="@t.TankId">Tank @t.TankId</MudSelectItem>
+                        <MudSelectItem T="int?" Value="@( (int?)t.TankId )">Tank @t.TankId</MudSelectItem>
                       }
                     </MudSelect>
                   </MudItem>

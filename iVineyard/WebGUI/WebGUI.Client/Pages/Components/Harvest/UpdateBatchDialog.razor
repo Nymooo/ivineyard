@@ -1,4 +1,5 @@
-﻿@using Microsoft.AspNetCore.Authorization
+﻿@using System.Globalization
+@using Microsoft.AspNetCore.Authorization
 @using Microsoft.AspNetCore.Components
 @using System.Net.Http.Json
 @using MudBlazor
@@ -6,32 +7,31 @@
 @using Model.Entities.Bookingobjects.Vineyard
 @using WebGUI.Client.ClientServices
 @using WebGUI.Client.Pages.Components.Records
-@using System.IO;
-@using iTextSharp.text;
-@using iTextSharp.text.pdf;
-@using Microsoft.JSInterop;
+@using System.IO
+@using iTextSharp.text
+@using iTextSharp.text.pdf
+@using Microsoft.JSInterop
 
 @inject VineyardService VineyardService
 @inject TankService TankService
 @inject BatchService BatchService
 @inject VineyardHasBatchService VineyardBatchService
 @inject NavigationManager Navigation
+@inject IJSRuntime JS
 
 <MudDialog Style="width:60vw; max-width:60vw;">
   <DialogContent>
-
     <MudContainer Class="pa-4">
       <div class="d-flex align-center mb-2 w-100">
-          <h2>Maßnahmendatenblatt</h2>
-          <MudSpacer />
-          <MudIconButton Icon="@Icons.Material.Filled.PictureAsPdf"
-                         Color="Color.Primary"
-                         Size="Size.Large"
-                         Style="font-size:34px"
-                         OnClick="ExportToPdf" 
-                         AriaLabel="PDF drucken" />
+        <h2>Maßnahmendatenblatt</h2>
+        <MudSpacer/>
+        <MudIconButton Icon="@Icons.Material.Filled.PictureAsPdf"
+                       Color="Color.Primary"
+                       Size="Size.Large"
+                       Style="font-size:34px"
+                       OnClick="ExportToPdf"
+                       AriaLabel="PDF drucken"/>
       </div>
-
 
       <EditForm Model="@Vm" OnValidSubmit="@SaveAsync">
         <MudGrid Spacing="3">
@@ -39,42 +39,47 @@
           <!-- Linke Spalte -->
           <MudItem xs="12" md="6">
             <MudPaper Class="pa-4 mb-4">
-
               <MudText Typo="Typo.h5" Class="mb-2">Weingarten</MudText>
-              <MudGrid Class="mb-2">
-                  <!-- Erste Zeile: Weingarten + Menge -->
-                  <MudItem xs="12" md="8">
-                      <MudSelect T="int" @bind-Value="Vm.VineyardId" Label="Weingarten" Dense="true" Required="true">
-                          @foreach (var v in Vineyards)
-                          {
-                              <MudSelectItem Value="@v.BookingObjectId">@v.Name</MudSelectItem>
-                          }
-                      </MudSelect>
-                  </MudItem>
-                  <MudItem xs="12" md="4">
-                      <MudNumericField T="string" @bind-Value="Vm.Amount" Label="Menge (kg)" Dense="true" Required="true"/>
-                  </MudItem>
-              
-                  <!-- Zweite Zeile: Sorte + Datum -->
-                  <MudItem xs="12" md="6">
-                      <MudTextField T="string" @bind-Value="Vm.Variety" Label="Sorte" Dense="true" Required="true"/>
-                  </MudItem>
-                  <MudItem xs="12" md="6">
-                      <MudDatePicker T="DateTime?" @bind-Date="Vm.HarvestDate" Label="Erntedatum" Dense="true"/>
-                  </MudItem>
-              </MudGrid>
 
+              <MudGrid Class="mb-2">
+                <!-- Weingarten + Menge -->
+                <MudItem xs="12" md="8">
+                  <MudSelect T="int" @bind-Value="Vm.VineyardId" Label="Weingarten" Dense="true" Required="true">
+                    @foreach (var v in Vineyards)
+                    {
+                      <MudSelectItem Value="@v.BookingObjectId">@v.Name</MudSelectItem>
+                    }
+                  </MudSelect>
+                </MudItem>
+                <MudItem xs="12" md="4">
+                  <MudNumericField T="string" @bind-Value="Vm.Amount" Label="Menge (kg)" Dense="true" Required="true"/>
+                </MudItem>
+
+                <!-- Sorte + Erntedatum -->
+                <MudItem xs="12" md="6">
+                  <MudTextField T="string" @bind-Value="Vm.Variety" Label="Sorte" Dense="true" Required="true"/>
+                </MudItem>
+                <MudItem xs="12" md="6">
+                  <MudDatePicker T="DateTime?" @bind-Date="Vm.HarvestDate" Label="Erntedatum" Dense="true"/>
+                </MudItem>
+              </MudGrid>
 
               <MudText Typo="Typo.h6" Class="mt-3 mb-1">Behandlungen (Trauben)</MudText>
               @foreach (var t in Vm.GrapeTreatments)
               {
                 <MudGrid Class="mb-2">
-                  <MudItem xs="3"><MudText Typo="Typo.body1">@t.Type</MudText></MudItem>
-                  <MudItem xs="3"><MudDatePicker T="DateTime?" @bind-Date="t.Date" Label="Datum" Dense="true"/></MudItem>
-                  <MudItem xs="3"><MudTextField @bind-Value="t.Agent" Label="Mittel" Dense="true"/></MudItem>
-                    <MudItem xs="3" >
-                        <MudTextField T="string" @bind-Value="t.Amount" Label="Menge" Dense="true"/>
-                    </MudItem>
+                  <MudItem xs="3">
+                    <MudText Typo="Typo.body1">@t.Type</MudText>
+                  </MudItem>
+                  <MudItem xs="3">
+                    <MudDatePicker T="DateTime?" @bind-Date="t.Date" Label="Datum" Dense="true"/>
+                  </MudItem>
+                  <MudItem xs="3">
+                    <MudTextField @bind-Value="t.Agent" Label="Mittel" Dense="true"/>
+                  </MudItem>
+                  <MudItem xs="3">
+                    <MudTextField T="string" @bind-Value="t.Amount" Label="Menge" Dense="true"/>
+                  </MudItem>
                 </MudGrid>
               }
 
@@ -82,12 +87,18 @@
               @foreach (var t in Vm.MashTreatments)
               {
                 <MudGrid Class="mb-2">
-                  <MudItem xs="3"><MudText Typo="Typo.body1">@t.Type</MudText></MudItem>
-                  <MudItem xs="3"><MudDatePicker T="DateTime?" @bind-Date="t.Date" Label="Datum" Dense="true"/></MudItem>
-                  <MudItem xs="3"><MudTextField @bind-Value="t.Agent" Label="Mittel" Dense="true"/></MudItem>
-                    <MudItem xs="3" >
-                        <MudTextField T="string" @bind-Value="t.Amount" Label="Menge" Dense="true"/>
-                    </MudItem>
+                  <MudItem xs="3">
+                    <MudText Typo="Typo.body1">@t.Type</MudText>
+                  </MudItem>
+                  <MudItem xs="3">
+                    <MudDatePicker T="DateTime?" @bind-Date="t.Date" Label="Datum" Dense="true"/>
+                  </MudItem>
+                  <MudItem xs="3">
+                    <MudTextField @bind-Value="t.Agent" Label="Mittel" Dense="true"/>
+                  </MudItem>
+                  <MudItem xs="3">
+                    <MudTextField T="string" @bind-Value="t.Amount" Label="Menge" Dense="true"/>
+                  </MudItem>
                 </MudGrid>
               }
 
@@ -95,15 +106,20 @@
               @foreach (var t in Vm.YoungTreatments)
               {
                 <MudGrid Class="mb-2">
-                  <MudItem xs="3"><MudText Typo="Typo.body1">@t.Type</MudText></MudItem>
-                  <MudItem xs="3"><MudDatePicker T="DateTime?" @bind-Date="t.Date" Label="Datum" Dense="true"/></MudItem>
-                  <MudItem xs="3"><MudTextField @bind-Value="t.Agent" Label="Mittel" Dense="true"/></MudItem>
-                    <MudItem xs="3" >
-                        <MudTextField T="string" @bind-Value="t.Amount" Label="Menge" Dense="true"/>
-                    </MudItem>
+                  <MudItem xs="3">
+                    <MudText Typo="Typo.body1">@t.Type</MudText>
+                  </MudItem>
+                  <MudItem xs="3">
+                    <MudDatePicker T="DateTime?" @bind-Date="t.Date" Label="Datum" Dense="true"/>
+                  </MudItem>
+                  <MudItem xs="3">
+                    <MudTextField @bind-Value="t.Agent" Label="Mittel" Dense="true"/>
+                  </MudItem>
+                  <MudItem xs="3">
+                    <MudTextField T="string" @bind-Value="t.Amount" Label="Menge" Dense="true"/>
+                  </MudItem>
                 </MudGrid>
               }
-
             </MudPaper>
           </MudItem>
 
@@ -113,50 +129,97 @@
 
               <MudText Typo="Typo.h5" Class="mb-2">Reife & Gesundheit / Tank / Wetter</MudText>
               <MudGrid Class="mb-2">
-                <MudItem xs="12" md="5"><MudTextField @bind-Value="Vm.MaturityHealth" Label="Reife/Gesundheit" Dense="true"/></MudItem>
+                <MudItem xs="12" md="5">
+                  <MudTextField @bind-Value="Vm.MaturityHealth" Label="Reife/Gesundheit" Dense="true"/>
+                </MudItem>
                 <MudItem xs="12" md="4">
                   <MudSelect T="int?" @bind-Value="Vm.TankId" Label="Tank" Dense="true">
-                    <MudSelectItem T="int?" Value="@( (int?)null )">(kein Tank)</MudSelectItem>
+                    <MudSelectItem T="int?" Value="@((int?)null)">(kein Tank)</MudSelectItem>
                     @foreach (var t in Tanks)
                     {
-                      <MudSelectItem T="int?" Value="@( (int?)t.TankId )">Tank @t.TankId</MudSelectItem>
+                      <MudSelectItem T="int?"
+                                     Value="@((int?)t.TankId)">@(string.IsNullOrWhiteSpace(t.Name) ? $"Tank {t.TankId}" : t.Name)</MudSelectItem>
                     }
                   </MudSelect>
                 </MudItem>
-                <MudItem xs="12" md="3"><MudTextField @bind-Value="Vm.Weather" Label="Wetter" Dense="true"/></MudItem>
+                <MudItem xs="12" md="3">
+                  <MudTextField @bind-Value="Vm.Weather" Label="Wetter" Dense="true"/>
+                </MudItem>
               </MudGrid>
 
               <MudText Typo="Typo.h6" Class="mt-3 mb-1">Daten Ausgangsmost</MudText>
               <MudGrid Class="mb-2">
-                <MudItem xs="6" md="3"><MudDatePicker  T="DateTime?" @bind-Date="Vm.MustDate"       Label="Datum" Dense="true"/></MudItem>
-                <MudItem xs="6" md="3"><MudNumericField T="double?"   @bind-Value="Vm.MustAcidity"  Label="Säure" Dense="true"/></MudItem>
-                <MudItem xs="6" md="3"><MudNumericField T="double?"   @bind-Value="Vm.MustPh"       Label="pH-Wert" Dense="true"/></MudItem>
-                <MudItem xs="6" md="3"><MudNumericField T="double?"   @bind-Value="Vm.KMW_OE"       Label="KMW/°Oe" Dense="true"/></MudItem>
-                <MudItem xs="12"><MudTextField @bind-Value="Vm.Rebel"     Label="Rebeln" Dense="true"/></MudItem>
-                <MudItem xs="12"><MudTextField @bind-Value="Vm.Squeeze"   Label="Quetschen" Dense="true"/></MudItem>
-                <MudItem xs="12"><MudTextField @bind-Value="Vm.MashLife"  Label="Maischestandzeit" Dense="true"/></MudItem>
-                <MudItem xs="12"><MudTextField @bind-Value="Vm.MustNotes" Label="weitere Behandlungsschritte" Dense="true"/></MudItem>
+                <MudItem xs="6" md="3">
+                  <MudDatePicker T="DateTime?" @bind-Date="Vm.MustDate" Label="Datum" Dense="true"/>
+                </MudItem>
+                <MudItem xs="6" md="3">
+                  <MudNumericField T="double?" @bind-Value="Vm.MustAcidity" Label="Säure" Dense="true"/>
+                </MudItem>
+                <MudItem xs="6" md="3">
+                  <MudNumericField T="double?" @bind-Value="Vm.MustPh" Label="pH-Wert" Dense="true"/>
+                </MudItem>
+                <MudItem xs="6" md="3">
+                  <MudNumericField T="double?" @bind-Value="Vm.KMW_OE" Label="KMW/°Oe" Dense="true"/>
+                </MudItem>
+                <MudItem xs="12">
+                  <MudTextField @bind-Value="Vm.Rebel" Label="Rebeln" Dense="true"/>
+                </MudItem>
+                <MudItem xs="12">
+                  <MudTextField @bind-Value="Vm.Squeeze" Label="Quetschen" Dense="true"/>
+                </MudItem>
+                <MudItem xs="12">
+                  <MudTextField @bind-Value="Vm.MashLife" Label="Maischestandzeit" Dense="true"/>
+                </MudItem>
+                <MudItem xs="12">
+                  <MudTextField @bind-Value="Vm.MustNotes" Label="weitere Behandlungsschritte" Dense="true"/>
+                </MudItem>
               </MudGrid>
 
               <MudText Typo="Typo.h6" Class="mt-3 mb-1">Daten Jungwein</MudText>
               <MudGrid Class="mb-2">
-                <MudItem xs="6" md="3"><MudDatePicker  T="DateTime?" @bind-Date="Vm.YoungDate"      Label="Datum" Dense="true"/></MudItem>
-                <MudItem xs="6" md="3"><MudNumericField T="double?"   @bind-Value="Vm.YoungAcidity" Label="Säure" Dense="true"/></MudItem>
-                <MudItem xs="6" md="3"><MudNumericField T="double?"   @bind-Value="Vm.YoungSugar"   Label="Restzucker" Dense="true"/></MudItem>
-                <MudItem xs="6" md="3"><MudNumericField T="double?"   @bind-Value="Vm.YoungAlcohol" Label="Alkohol" Dense="true"/></MudItem>
-                <MudItem xs="6" md="3"><MudNumericField T="double?"   @bind-Value="Vm.YoungPh"      Label="pH-Wert" Dense="true"/></MudItem>
-                <MudItem xs="12"><MudTextField @bind-Value="Vm.YoungNotes" Label="weitere Behandlungsschritte" Dense="true"/></MudItem>
+                <MudItem xs="6" md="3">
+                  <MudDatePicker T="DateTime?" @bind-Date="Vm.YoungDate" Label="Datum" Dense="true"/>
+                </MudItem>
+                <MudItem xs="6" md="3">
+                  <MudNumericField T="double?" @bind-Value="Vm.YoungAcidity" Label="Säure" Dense="true"/>
+                </MudItem>
+                <MudItem xs="6" md="3">
+                  <MudNumericField T="double?" @bind-Value="Vm.YoungSugar" Label="Restzucker" Dense="true"/>
+                </MudItem>
+                <MudItem xs="6" md="3">
+                  <MudNumericField T="double?" @bind-Value="Vm.YoungAlcohol" Label="Alkohol" Dense="true"/>
+                </MudItem>
+                <MudItem xs="6" md="3">
+                  <MudNumericField T="double?" @bind-Value="Vm.YoungPh" Label="pH-Wert" Dense="true"/>
+                </MudItem>
+                <MudItem xs="12">
+                  <MudTextField @bind-Value="Vm.YoungNotes" Label="weitere Behandlungsschritte" Dense="true"/>
+                </MudItem>
               </MudGrid>
 
               <MudText Typo="Typo.h6" Class="mt-3 mb-1">Daten Weißwein/Rotwein (Endwerte)</MudText>
               <MudGrid Class="mb-2">
-                <MudItem xs="6" md="3"><MudDatePicker  T="DateTime?" @bind-Date="Vm.FinalDate"      Label="Datum" Dense="true"/></MudItem>
-                <MudItem xs="6" md="3"><MudNumericField T="double?"   @bind-Value="Vm.FinalAcidity" Label="Säure" Dense="true"/></MudItem>
-                <MudItem xs="6" md="3"><MudNumericField T="double?"   @bind-Value="Vm.FinalSugar"   Label="Restzucker" Dense="true"/></MudItem>
-                <MudItem xs="6" md="3"><MudNumericField T="double?"   @bind-Value="Vm.FinalAlcohol" Label="Alkohol" Dense="true"/></MudItem>
-                <MudItem xs="6" md="3"><MudNumericField T="double?"   @bind-Value="Vm.FinalPh"      Label="pH-Wert" Dense="true"/></MudItem>
-                <MudItem xs="6" md="3"><MudNumericField T="double?"   @bind-Value="Vm.FinalSulfur"  Label="Schwefel" Dense="true"/></MudItem>
-                <MudItem xs="12"><MudTextField @bind-Value="Vm.FinalNotes" Label="weitere Behandlungsschritte" Dense="true"/></MudItem>
+                <MudItem xs="6" md="3">
+                  <MudDatePicker T="DateTime?" @bind-Date="Vm.FinalDate" Label="Datum" Dense="true"/>
+                </MudItem>
+                <MudItem xs="6" md="3">
+                  <MudNumericField T="double?" @bind-Value="Vm.FinalAcidity" Label="Säure" Dense="true"/>
+                </MudItem>
+                <MudItem xs="6" md="3">
+                  <MudNumericField T="double?" @bind-Value="Vm.FinalSugar" Label="Restzucker" Dense="true"/>
+                </MudItem>
+                <MudItem xs="6" md="3">
+                  <MudNumericField T="double?" @bind-Value="Vm.FinalAlcohol" Label="Alkohol" Dense="true"/>
+                </MudItem>
+                <MudItem xs="6" md="3">
+                  <MudNumericField T="double?" @bind-Value="Vm.FinalPh" Label="pH-Wert" Dense="true"/>
+                </MudItem>
+                <MudItem xs="6" md="3">
+                  <MudNumericField T="double?" @bind-Value="Vm.FinalSulfur" Label="Schwefel" Dense="true"/>
+                </MudItem>
+                <MudItem xs="12">
+                  <MudTextField @bind-Value="Vm.FinalNotes" Label="weitere Behandlungsschritte" Dense="true"/>
+                </MudItem>
               </MudGrid>
 
               <MudText Typo="Typo.h6" Class="mt-3 mb-1">Umgezogen in Tank</MudText>
@@ -165,24 +228,49 @@
                 <MudGrid Class="mb-2">
                   <MudItem xs="4">
                     <MudSelect T="int?" @bind-Value="m.ToTankId" Label="Tank" Dense="true">
-                      <MudSelectItem T="int?" Value="@( (int?)null )">(kein Tank)</MudSelectItem>
+                      <MudSelectItem T="int?" Value="@((int?)null)">(kein Tank)</MudSelectItem>
                       @foreach (var t in Tanks)
                       {
-                        <MudSelectItem T="int?" Value="@( (int?)t.TankId )">Tank @t.TankId</MudSelectItem>
+                        <MudSelectItem T="int?"
+                                       Value="@((int?)t.TankId)">@(string.IsNullOrWhiteSpace(t.Name) ? $"Tank {t.TankId}" : t.Name)</MudSelectItem>
                       }
                     </MudSelect>
                   </MudItem>
-                  <MudItem xs="4"><MudNumericField T="double?" @bind-Value="m.Volume" Label="Volumen (L)" Dense="true"/></MudItem>
-                  <MudItem xs="4"><MudDatePicker  T="DateTime?" @bind-Date="m.Date"   Label="Datum" Dense="true"/></MudItem>
+                  <MudItem xs="4">
+                    <MudNumericField T="double?" @bind-Value="m.Volume" Label="Volumen (L)" Dense="true"/>
+                  </MudItem>
+                  <MudItem xs="4">
+                    <MudDatePicker T="DateTime?" @bind-Date="m.Date" Label="Datum" Dense="true"/>
+                  </MudItem>
                 </MudGrid>
               }
+
+              <MudDivider Class="my-2"/>
+              <MudText Typo="Typo.subtitle2">Bisherige Umzüge</MudText>
+              @if (MovementHistory.Any())
+              {
+                <MudList T="object" Dense="true">
+                  @foreach (var mv in MovementHistory)
+                  {
+                    <MudListItem T="object">
+                      @(GetTankName(mv.FromTakId) ?? $"Tank {mv.FromTakId}") → @(GetTankName(mv.ToTankId) ?? $"Tank {mv.ToTankId}")
+                      · @mv.Date.ToString("dd.MM.yyyy") · @mv.Volume L
+                    </MudListItem>
+                  }
+                </MudList>
+              }
+              else
+              {
+                <MudText Typo="Typo.caption" Class="text-medium-emphasis">Keine Umzüge vorhanden.</MudText>
+              }
+
             </MudPaper>
           </MudItem>
 
         </MudGrid>
 
         <MudStack Row="true" Spacing="2">
-          <MudButton ButtonType="ButtonType.Submit" Color="Color.Primary">Speichern</MudButton>
+          <MudButton ButtonType="ButtonType.Submit" Color="Color.Primary">Update</MudButton>
           <MudButton Variant="Variant.Outlined" OnClick="@Reset">Zurücksetzen</MudButton>
         </MudStack>
       </EditForm>
@@ -192,26 +280,33 @@
 
 @code {
 
-
-
-[Inject] IJSRuntime JS { get; set; }
-
-
   // Lookups
   List<VineyardRecord> Vineyards = new();
   List<Tank> Tanks = new();
 
   [CascadingParameter] public MudDialogInstance? MudDialog { get; set; }
-  [Parameter] public int Id { get; set; }
+  [Parameter] public int Id { get; set; } // BatchId
 
-  // VM
-  class TreatmentLine { public string Type { get; set; } = ""; public string? Agent { get; set; } public string? Amount { get; set; } public DateTime? Date { get; set; } }
-  class MovementLine  { public int? ToTankId { get; set; } public double? Volume { get; set; } public DateTime? Date { get; set; } }
+  // UI-VM
+  class TreatmentLine
+  {
+    public string Type { get; set; } = "";
+    public string? Agent { get; set; }
+    public string? Amount { get; set; }
+    public DateTime? Date { get; set; }
+  }
+
+  class MovementLine
+  {
+    public int? ToTankId { get; set; }
+    public double? Volume { get; set; }
+    public DateTime? Date { get; set; }
+  }
 
   class WeinFormVm
   {
     public int VineyardId { get; set; }
-    public string Amount { get; set; }
+    public string Amount { get; set; } = "";
     public DateTime? HarvestDate { get; set; }
     public string Variety { get; set; } = "";
     public string? MaturityHealth { get; set; }
@@ -219,7 +314,7 @@
     public int? TankId { get; set; }
 
     public List<TreatmentLine> GrapeTreatments { get; set; } = new();
-    public List<TreatmentLine> MashTreatments  { get; set; } = new();
+    public List<TreatmentLine> MashTreatments { get; set; } = new();
     public List<TreatmentLine> YoungTreatments { get; set; } = new();
 
     public DateTime? MustDate { get; set; }
@@ -249,20 +344,33 @@
     public List<MovementLine> Movements { get; set; } = new();
   }
 
-  // DTOs fürs Speichern (Update – später genutzt)
-  class TreatmentLineDto { public string Type { get; set; } = ""; public string? Agent { get; set; } public string? Amount { get; set; } public DateTime? Date { get; set; } }
-  class MovementLineDto  { public int? ToTankId { get; set; } public double? Volume { get; set; } public DateTime? Date { get; set; } }
+  // API-DTO (Update – falls verwendet)
+  class TreatmentLineDto
+  {
+    public string Type { get; set; } = "";
+    public string? Agent { get; set; }
+    public string? Amount { get; set; }
+    public DateTime? Date { get; set; }
+  }
+
+  class MovementLineDto
+  {
+    public int? ToTankId { get; set; }
+    public double? Volume { get; set; }
+    public DateTime? Date { get; set; }
+  }
+
   class BatchUpdateDto
   {
     public int VineyardId { get; set; }
-    public string Amount { get; set; }
+    public string Amount { get; set; } = "";
     public DateTime? HarvestDate { get; set; }
     public string Variety { get; set; } = string.Empty;
     public string? MaturityHealth { get; set; }
     public string? Weather { get; set; }
     public int? TankId { get; set; }
     public List<TreatmentLineDto> GrapeTreatments { get; set; } = new();
-    public List<TreatmentLineDto> MashTreatments  { get; set; } = new();
+    public List<TreatmentLineDto> MashTreatments { get; set; } = new();
     public List<TreatmentLineDto> YoungTreatments { get; set; } = new();
     public DateTime? MustDate { get; set; }
     public double? KMW_OE { get; set; }
@@ -289,21 +397,35 @@
   }
 
   WeinFormVm Vm = new();
+  List<TankMovementRecord> MovementHistory = new();
+
+  bool _lookupsLoaded;
+  bool _prefilled;
 
   protected override async Task OnInitializedAsync()
   {
+    // Lookups
     Vineyards = await VineyardService.GetVineyardsAsync();
-    Tanks     = await TankService.GetTanksAsync();
+    Tanks = await TankService.GetTanksAsync();
+    _lookupsLoaded = true;
 
     PrefillTemplate();
-    await LoadFromVineyardHasBatchAsync();
+  }
+
+  protected override async Task OnParametersSetAsync()
+  {
+    if (Id > 0 && _lookupsLoaded && !_prefilled)
+    {
+      await LoadFromVineyardHasBatchAsync();
+      _prefilled = true;
+    }
   }
 
   void PrefillTemplate()
   {
     Vm.Variety = "";
     Vm.GrapeTreatments = new() { new() { Type = "Trauben" }, new() { Type = "Schwefelung" }, new() { Type = "Extraktionsenzym" }, new() { Type = "Pressprogramm" } };
-    Vm.MashTreatments  = new()
+    Vm.MashTreatments = new()
     {
       new() { Type = "Schwefelung" }, new() { Type = "Safentzug" }, new() { Type = "Maischestandzeit" }, new() { Type = "Ent-/Säuerung" }, new() { Type = "Mostbehandlung" },
       new() { Type = "Klärenzym" }, new() { Type = "Maischeantannin" }, new() { Type = "Aufzuckerung" }, new() { Type = "Hefe" }, new() { Type = "Hefenährstoff" },
@@ -317,126 +439,149 @@
     if (!Vm.Movements.Any()) Vm.Movements.Add(new());
   }
 
-async Task LoadFromVineyardHasBatchAsync()
-{
+  async Task LoadFromVineyardHasBatchAsync()
+  {
     var link = await VineyardBatchService.GetVineyardsWithBatchesByIdAsync(Id);
     if (link is null || link.Batch is null) return;
 
     // Kopf
-    Vm.VineyardId     = link.VineyardId;
-    Vm.Amount         = link.Batch.Amount;
-    Vm.Variety        = link.Batch.Variety;
-    Vm.HarvestDate    = link.Batch.Date;
+    Vm.VineyardId = link.VineyardId;
+    Vm.Amount = link.Batch.Amount;
+    Vm.Variety = link.Batch.Variety;
+    Vm.HarvestDate = link.Batch.Date;
     Vm.MaturityHealth = link.Batch.Maturity_Health;
-    Vm.Weather        = link.Batch.Weather;
+    Vm.Weather = link.Batch.Weather;
 
-    // ----- Informations (wie gehabt) -----
+    // Infos
     var infos = link.Batch.InformationsList ?? new();
 
     var must = infos.FirstOrDefault(i => i.StartingMust is not null);
     if (must is not null)
     {
-        Vm.MustDate     = must.Date;
-        Vm.MustAcidity  = must.Acidity;
-        Vm.MustPh       = must.PhValue;
-        Vm.MustNotes    = must.FurtherSteps;
-        Vm.KMW_OE       = must.StartingMust!.KMW_OE;
-        Vm.Rebel        = must.StartingMust!.Rebel;
-        Vm.Squeeze      = must.StartingMust!.Squeeze;
-        Vm.MashLife     = must.StartingMust!.MashLife;
+      Vm.MustDate = must.Date;
+      Vm.MustAcidity = must.Acidity;
+      Vm.MustPh = must.PhValue;
+      Vm.MustNotes = must.FurtherSteps;
+      Vm.KMW_OE = must.StartingMust!.KMW_OE;
+      Vm.Rebel = must.StartingMust!.Rebel;
+      Vm.Squeeze = must.StartingMust!.Squeeze;
+      Vm.MashLife = must.StartingMust!.MashLife;
     }
 
     var young = infos.FirstOrDefault(i => i.YoungWine is not null);
     if (young is not null)
     {
-        Vm.YoungDate     = young.Date;
-        Vm.YoungAcidity  = young.Acidity;
-        Vm.YoungPh       = young.PhValue;
-        Vm.YoungNotes    = young.FurtherSteps;
-        Vm.YoungAlcohol  = young.YoungWine!.Alcohol;
-        Vm.YoungSugar    = young.YoungWine!.ResidualSugar;
+      Vm.YoungDate = young.Date;
+      Vm.YoungAcidity = young.Acidity;
+      Vm.YoungPh = young.PhValue;
+      Vm.YoungNotes = young.FurtherSteps;
+      Vm.YoungAlcohol = young.YoungWine!.Alcohol;
+      Vm.YoungSugar = young.YoungWine!.ResidualSugar;
     }
 
     var finalW = infos.FirstOrDefault(i => i.WhiteWineRedWine is not null);
     if (finalW is not null)
     {
-        Vm.FinalDate     = finalW.Date;
-        Vm.FinalAcidity  = finalW.Acidity;
-        Vm.FinalPh       = finalW.PhValue;
-        Vm.FinalNotes    = finalW.FurtherSteps;
-        Vm.FinalAlcohol  = finalW.WhiteWineRedWine!.Alcohol;
-        Vm.FinalSugar    = finalW.WhiteWineRedWine!.ResidualSugar;
-        Vm.FinalSulfur   = finalW.WhiteWineRedWine!.Sulfur;
+      Vm.FinalDate = finalW.Date;
+      Vm.FinalAcidity = finalW.Acidity;
+      Vm.FinalPh = finalW.PhValue;
+      Vm.FinalNotes = finalW.FurtherSteps;
+      Vm.FinalAlcohol = finalW.WhiteWineRedWine!.Alcohol;
+      Vm.FinalSugar = finalW.WhiteWineRedWine!.ResidualSugar;
+      Vm.FinalSulfur = finalW.WhiteWineRedWine!.Sulfur;
     }
 
-    // ----- Treatments befüllen -----
+    // --- Treatments automatisch in die linken Zeilen mappen ---
     var srcTreats = link.Batch.batchHasTreatmentsList ?? new();
 
-    // Falls gleiche "Type" mehrfach vorkommt, nehmen wir den ersten Eintrag
+// ggf. Alias/Schreibfehler korrigieren (optional erweitern)
+    string Normalize(string? s)
+    {
+      if (string.IsNullOrWhiteSpace(s)) return "";
+      s = s.Trim();
+      if (s.Equals("Safentzug", StringComparison.OrdinalIgnoreCase)) return "Saftentzug";
+      return s;
+    }
+
+// pro Typ den jüngsten Eintrag nehmen
     var byType = srcTreats
-        .Where(t => t.Treatment is not null)
-        .GroupBy(t => t.Treatment!.Type.Trim(), StringComparer.OrdinalIgnoreCase)
-        .ToDictionary(g => g.Key, g => g.First(), StringComparer.OrdinalIgnoreCase);
+      .Where(t => t.Treatment is not null && !string.IsNullOrWhiteSpace(t.Treatment!.Type))
+      .GroupBy(t => Normalize(t.Treatment!.Type), StringComparer.OrdinalIgnoreCase)
+      .ToDictionary(g => g.Key, g => g.OrderByDescending(x => x.Date).First(), StringComparer.OrdinalIgnoreCase);
 
     void FillTreatments(List<TreatmentLine> target)
     {
-        foreach (var row in target)
-        {
-            var key = row.Type?.Trim();
-            if (string.IsNullOrEmpty(key)) continue;
+      foreach (var row in target)
+      {
+        var key = Normalize(row.Type);
+        if (string.IsNullOrEmpty(key)) continue;
 
-            if (byType.TryGetValue(key, out var hit))
-            {
-                row.Agent  = hit.Agent;
-                row.Amount = hit.Amount;
-                row.Date   = hit.Date;
-            }
+        if (byType.TryGetValue(key, out var hit))
+        {
+          row.Agent  = hit.Agent;
+          row.Amount = hit.Amount;
+          row.Date   = hit.Date;
         }
+      }
     }
 
     FillTreatments(Vm.GrapeTreatments);
     FillTreatments(Vm.MashTreatments);
     FillTreatments(Vm.YoungTreatments);
+    
+    // Historie & aktueller Tank
+    MovementHistory = (link.Batch.TankMovements ?? new())
+      .OrderByDescending(m => m.Date)
+      .ToList();
+
+    var lastMoveTo = link.Batch.TankMovements?
+      .OrderBy(m => m.Date)
+      .LastOrDefault()?.ToTankId;
+
+    var lastLinkedTank = link.Batch.TankList?
+      .Select(x => (int?)x.TankId)
+      .LastOrDefault();
+
+    Vm.TankId = lastMoveTo ?? lastLinkedTank;
 
     await InvokeAsync(StateHasChanged);
-}
-
+  }
 
   async Task SaveAsync()
   {
     var dto = new BatchUpdateDto
     {
-      VineyardId = Vm.VineyardId,
-      Amount = Vm.Amount,
-      HarvestDate = Vm.HarvestDate,
-      Variety = Vm.Variety,
+      VineyardId     = Vm.VineyardId,
+      Amount         = Vm.Amount,           // << string durchreichen, nicht parsen
+      HarvestDate    = Vm.HarvestDate,
+      Variety        = Vm.Variety,
       MaturityHealth = Vm.MaturityHealth,
-      Weather = Vm.Weather,
-      TankId = Vm.TankId,
+      Weather        = Vm.Weather,
+      TankId         = Vm.TankId,
 
-      MustDate = Vm.MustDate,
-      KMW_OE = Vm.KMW_OE,
-      MustAcidity = Vm.MustAcidity,
-      MustPh = Vm.MustPh,
-      MustNotes = Vm.MustNotes,
-      Rebel = Vm.Rebel,
-      Squeeze = Vm.Squeeze,
-      MashLife = Vm.MashLife,
+      MustDate       = Vm.MustDate,
+      KMW_OE         = Vm.KMW_OE,
+      MustAcidity    = Vm.MustAcidity,
+      MustPh         = Vm.MustPh,
+      MustNotes      = Vm.MustNotes,
+      Rebel          = Vm.Rebel,
+      Squeeze        = Vm.Squeeze,
+      MashLife       = Vm.MashLife,
 
-      YoungDate = Vm.YoungDate,
-      YoungAcidity = Vm.YoungAcidity,
-      YoungSugar = Vm.YoungSugar,
-      YoungAlcohol = Vm.YoungAlcohol,
-      YoungPh = Vm.YoungPh,
-      YoungNotes = Vm.YoungNotes,
+      YoungDate      = Vm.YoungDate,
+      YoungAcidity   = Vm.YoungAcidity,
+      YoungSugar     = Vm.YoungSugar,
+      YoungAlcohol   = Vm.YoungAlcohol,
+      YoungPh        = Vm.YoungPh,
+      YoungNotes     = Vm.YoungNotes,
 
-      FinalDate = Vm.FinalDate,
-      FinalAcidity = Vm.FinalAcidity,
-      FinalSugar = Vm.FinalSugar,
-      FinalAlcohol = Vm.FinalAlcohol,
-      FinalPh = Vm.FinalPh,
-      FinalSulfur = Vm.FinalSulfur,
-      FinalNotes = Vm.FinalNotes,
+      FinalDate      = Vm.FinalDate,
+      FinalAcidity   = Vm.FinalAcidity,
+      FinalSugar     = Vm.FinalSugar,
+      FinalAlcohol   = Vm.FinalAlcohol,
+      FinalPh        = Vm.FinalPh,
+      FinalSulfur    = Vm.FinalSulfur,
+      FinalNotes     = Vm.FinalNotes,
 
       GrapeTreatments = Vm.GrapeTreatments.Select(x => new TreatmentLineDto { Type = x.Type, Agent = x.Agent, Amount = x.Amount, Date = x.Date }).ToList(),
       MashTreatments  = Vm.MashTreatments .Select(x => new TreatmentLineDto { Type = x.Type, Agent = x.Agent, Amount = x.Amount, Date = x.Date }).ToList(),
@@ -444,115 +589,115 @@ async Task LoadFromVineyardHasBatchAsync()
       Movements       = Vm.Movements      .Select(m => new MovementLineDto { ToTankId = m.ToTankId, Volume = m.Volume, Date = m.Date }).ToList()
     };
 
-    // await BatchService.UpdateBatchAsync(Id, dto);
+    var resp = await BatchService.UpdateBatchAsync(Id, dto);
+    resp.EnsureSuccessStatusCode();
 
     RefreshPage();
     Reset();
   }
 
+
   void Reset()
   {
     Vm = new WeinFormVm();
+    MovementHistory = new();
     PrefillTemplate();
     StateHasChanged();
   }
 
   void RefreshPage() => Navigation.NavigateTo(Navigation.Uri, forceLoad: true);
-  
-  
-  //pdf 
+
+  string? GetTankName(int tankId) => Tanks.FirstOrDefault(t => t.TankId == tankId)?.Name;
+
+  // PDF
   private async Task ExportToPdf()
   {
-      using var ms = new MemoryStream();
-      var doc = new Document(PageSize.A4, 25, 25, 30, 30);
-      var writer = PdfWriter.GetInstance(doc, ms);
-      doc.Open();
-  
-      // Titel
-      var titleFont = FontFactory.GetFont("Arial", 18, Font.BOLD);
-      doc.Add(new Paragraph("Maßnahmendatenblatt", titleFont));
-      doc.Add(new Paragraph(" ")); // Leerzeile
-  
-      // Allgemeine Daten
-      var normalFont = FontFactory.GetFont("Arial", 12, Font.NORMAL);
-      doc.Add(new Paragraph($"Weingarten: {Vineyards.FirstOrDefault(v => v.BookingObjectId == Vm.VineyardId)?.Name}", normalFont));
-      doc.Add(new Paragraph($"Menge: {Vm.Amount} kg", normalFont));
-      doc.Add(new Paragraph($"Sorte: {Vm.Variety}", normalFont));
-      doc.Add(new Paragraph($"Erntedatum: {Vm.HarvestDate?.ToString("dd.MM.yyyy")}", normalFont));
+    using var ms = new MemoryStream();
+    var doc = new Document(PageSize.A4, 25, 25, 30, 30);
+    var writer = PdfWriter.GetInstance(doc, ms);
+    doc.Open();
+
+    var titleFont = FontFactory.GetFont("Arial", 18, Font.BOLD);
+    var normalFont = FontFactory.GetFont("Arial", 12, Font.NORMAL);
+
+    doc.Add(new Paragraph("Maßnahmendatenblatt", titleFont));
+    doc.Add(new Paragraph(" "));
+
+    doc.Add(new Paragraph($"Weingarten: {Vineyards.FirstOrDefault(v => v.BookingObjectId == Vm.VineyardId)?.Name}", normalFont));
+    doc.Add(new Paragraph($"Menge: {Vm.Amount} kg", normalFont));
+    doc.Add(new Paragraph($"Sorte: {Vm.Variety}", normalFont));
+    doc.Add(new Paragraph($"Erntedatum: {Vm.HarvestDate?.ToString("dd.MM.yyyy")}", normalFont));
+    doc.Add(new Paragraph(" "));
+
+    void AddTreatmentTable(string header, List<TreatmentLine> treatments)
+    {
+      if (!treatments.Any()) return;
+
+      doc.Add(new Paragraph(header, FontFactory.GetFont("Arial", 14, Font.BOLD)));
+      var table = new PdfPTable(4) { WidthPercentage = 100 };
+      table.SetWidths(new float[] { 25, 25, 25, 25 });
+
+      table.AddCell("Typ");
+      table.AddCell("Datum");
+      table.AddCell("Mittel");
+      table.AddCell("Menge");
+
+      foreach (var t in treatments)
+      {
+        table.AddCell(t.Type);
+        table.AddCell(t.Date?.ToString("dd.MM.yyyy") ?? "-");
+        table.AddCell(t.Agent ?? "-");
+        table.AddCell(t.Amount ?? "-");
+      }
+
+      doc.Add(table);
       doc.Add(new Paragraph(" "));
-  
-      // Tabellen erstellen
-      void AddTreatmentTable(string header, List<TreatmentLine> treatments)
+    }
+
+    AddTreatmentTable("Behandlungen (Trauben)", Vm.GrapeTreatments);
+    AddTreatmentTable("Most / Maische", Vm.MashTreatments);
+    AddTreatmentTable("Jungwein-Behandlungen", Vm.YoungTreatments);
+
+    if (Vm.Movements.Any())
+    {
+      doc.Add(new Paragraph("Umgezogen in Tank", FontFactory.GetFont("Arial", 14, Font.BOLD)));
+      var table = new PdfPTable(3) { WidthPercentage = 100 };
+      table.SetWidths(new float[] { 33, 33, 33 });
+
+      table.AddCell("Tank");
+      table.AddCell("Volumen (L)");
+      table.AddCell("Datum");
+
+      foreach (var m in Vm.Movements)
       {
-          if (!treatments.Any()) return;
-  
-          doc.Add(new Paragraph(header, FontFactory.GetFont("Arial", 14, Font.BOLD)));
-          var table = new PdfPTable(4) { WidthPercentage = 100 };
-          table.SetWidths(new float[] { 25, 25, 25, 25 });
-  
-          table.AddCell("Typ");
-          table.AddCell("Datum");
-          table.AddCell("Mittel");
-          table.AddCell("Menge");
-  
-          foreach (var t in treatments)
-          {
-              table.AddCell(t.Type);
-              table.AddCell(t.Date?.ToString("dd.MM.yyyy") ?? "-");
-              table.AddCell(t.Agent ?? "-");
-              table.AddCell(t.Amount ?? "-");
-          }
-  
-          doc.Add(table);
-          doc.Add(new Paragraph(" "));
+        var tankName = GetTankName(m.ToTankId ?? -1) ?? (m.ToTankId.HasValue ? $"Tank {m.ToTankId}" : "(kein Tank)");
+        table.AddCell(tankName);
+        table.AddCell(m.Volume?.ToString() ?? "-");
+        table.AddCell(m.Date?.ToString("dd.MM.yyyy") ?? "-");
       }
-  
-      AddTreatmentTable("Behandlungen (Trauben)", Vm.GrapeTreatments);
-      AddTreatmentTable("Most / Maische", Vm.MashTreatments);
-      AddTreatmentTable("Jungwein-Behandlungen", Vm.YoungTreatments);
-  
-      // Movements Tabelle
-      if (Vm.Movements.Any())
-      {
-          doc.Add(new Paragraph("Umgezogen in Tank", FontFactory.GetFont("Arial", 14, Font.BOLD)));
-          var table = new PdfPTable(3) { WidthPercentage = 100 };
-          table.SetWidths(new float[] { 33, 33, 33 });
-  
-          table.AddCell("Tank");
-          table.AddCell("Volumen (L)");
-          table.AddCell("Datum");
-  
-          foreach (var m in Vm.Movements)
-          {
-              var tankName = Tanks.FirstOrDefault(t => t.TankId == m.ToTankId)?.TankId.ToString() ?? "(kein Tank)";
-              table.AddCell(tankName);
-              table.AddCell(m.Volume?.ToString() ?? "-");
-              table.AddCell(m.Date?.ToString("dd.MM.yyyy") ?? "-");
-          }
-  
-          doc.Add(table);
-      }
-  
-      doc.Close();
-  
-      var bytes = ms.ToArray();
-       var vineyardName = Vineyards.FirstOrDefault(v => v.BookingObjectId == Vm.VineyardId)?.Name ?? "Weingarten";
-          var datePart = Vm.HarvestDate?.ToString("yyyy-MM-dd") ?? DateTime.Now.ToString("yyyy-MM-dd");
-          var fileName = $"Maßnahmendatenblatt_{vineyardName}_{datePart}.pdf";
-      
-          // PDF an Browser senden
-          await JS.InvokeVoidAsync("BlazorDownloadFile", fileName, "application/pdf", Convert.ToBase64String(bytes));
-      }
+
+      doc.Add(table);
+    }
+
+    doc.Close();
+
+    var bytes = ms.ToArray();
+    var vineyardName = Vineyards.FirstOrDefault(v => v.BookingObjectId == Vm.VineyardId)?.Name ?? "Weingarten";
+    var datePart = Vm.HarvestDate?.ToString("yyyy-MM-dd") ?? DateTime.Now.ToString("yyyy-MM-dd");
+    var fileName = $"Maßnahmendatenblatt_{vineyardName}_{datePart}.pdf";
+
+    await JS.InvokeVoidAsync("BlazorDownloadFile", fileName, "application/pdf", Convert.ToBase64String(bytes));
+  }
+
 }
 
 <script>
-    window.BlazorDownloadFile = (fileName, contentType, base64) => {
-        const link = document.createElement('a');
-        link.download = fileName;
-        link.href = "data:" + contentType + ";base64," + base64;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-    };
+  window.BlazorDownloadFile = (fileName, contentType, base64) => {
+    const link = document.createElement('a');
+    link.download = fileName;
+    link.href = "data:" + contentType + ";base64," + base64;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
 </script>
-

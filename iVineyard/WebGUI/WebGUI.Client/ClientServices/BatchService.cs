@@ -36,4 +36,7 @@ public class BatchService
             return null;    
         }
     }
+    
+    public Task<HttpResponseMessage> UpdateBatchAsync(int id, object dto)
+        => _httpClient.PutAsJsonAsync($"http://localhost:5189/batches/{id}", dto);
 }

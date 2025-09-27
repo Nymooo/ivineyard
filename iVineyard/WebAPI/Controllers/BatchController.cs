@@ -33,10 +33,10 @@ public class BatchController : ControllerBase
         var batch = new Batch
         {
             Variety = dto.Variety,
-            Amount  = dto.Amount,
-            Date    = dto.HarvestDate ?? DateTime.UtcNow,
+            Amount = dto.Amount,
+            Date = dto.HarvestDate ?? DateTime.UtcNow,
             Maturity_Health = dto.MaturityHealth ?? string.Empty,
-            Weather         = dto.Weather ?? string.Empty
+            Weather = dto.Weather ?? string.Empty
         };
         _db.Add(batch);
         await _db.SaveChangesAsync(ct); // BatchId
@@ -49,85 +49,88 @@ public class BatchController : ControllerBase
             _db.Add(new TankHasWineBatch { TankId = tid, BatchId = batch.BatchId });
 
         // 4) Ausgangsmust
-if (dto.KMW_OE.HasValue || dto.MustAcidity.HasValue || dto.MustPh.HasValue
-    || !string.IsNullOrWhiteSpace(dto.MustNotes)
-    || !string.IsNullOrWhiteSpace(dto.Rebel) || !string.IsNullOrWhiteSpace(dto.Squeeze) || !string.IsNullOrWhiteSpace(dto.MashLife))
-{
-    var info = new Informations
-    {
-        BatchId      = batch.BatchId,
-        Date         = dto.MustDate ?? dto.HarvestDate ?? DateTime.UtcNow,
-        Acidity      = dto.MustAcidity ?? 0,
-        PhValue      = dto.MustPh ?? 0,
-        FurtherSteps = dto.MustNotes ?? string.Empty
-    };
-    _db.Add(info);
-    await _db.SaveChangesAsync(); // erzeugt InformationId
+        if (dto.KMW_OE.HasValue || dto.MustAcidity.HasValue || dto.MustPh.HasValue
+            || !string.IsNullOrWhiteSpace(dto.MustNotes)
+            || !string.IsNullOrWhiteSpace(dto.Rebel) || !string.IsNullOrWhiteSpace(dto.Squeeze) ||
+            !string.IsNullOrWhiteSpace(dto.MashLife))
+        {
+            var info = new Informations
+            {
+                BatchId = batch.BatchId,
+                Date = dto.MustDate ?? dto.HarvestDate ?? DateTime.UtcNow,
+                Acidity = dto.MustAcidity ?? 0,
+                PhValue = dto.MustPh ?? 0,
+                FurtherSteps = dto.MustNotes ?? string.Empty
+            };
+            _db.Add(info);
+            await _db.SaveChangesAsync(); // erzeugt InformationId
 
-    _db.Add(new StartingMust
-    {
-        Id       = info.InformationId,        // shared PK ↔ FK
-        KMW_OE   = dto.KMW_OE ?? 0,
-        Rebel    = dto.Rebel ?? "",
-        Squeeze  = dto.Squeeze ?? "",
-        MashLife = dto.MashLife ?? ""
-    });
-}
+            _db.Add(new StartingMust
+            {
+                Id = info.InformationId, // shared PK ↔ FK
+                KMW_OE = dto.KMW_OE ?? 0,
+                Rebel = dto.Rebel ?? "",
+                Squeeze = dto.Squeeze ?? "",
+                MashLife = dto.MashLife ?? ""
+            });
+        }
 
 // 5) Jungwein
-if (dto.YoungAlcohol.HasValue || dto.YoungSugar.HasValue || dto.YoungAcidity.HasValue
-    || dto.YoungPh.HasValue || !string.IsNullOrWhiteSpace(dto.YoungNotes))
-{
-    var info = new Informations
-    {
-        BatchId      = batch.BatchId,
-        Date         = dto.YoungDate ?? DateTime.UtcNow,
-        Acidity      = dto.YoungAcidity ?? 0,
-        PhValue      = dto.YoungPh ?? 0,
-        FurtherSteps = dto.YoungNotes ?? string.Empty
-    };
-    _db.Add(info);
-    await _db.SaveChangesAsync();
+        if (dto.YoungAlcohol.HasValue || dto.YoungSugar.HasValue || dto.YoungAcidity.HasValue
+            || dto.YoungPh.HasValue || !string.IsNullOrWhiteSpace(dto.YoungNotes))
+        {
+            var info = new Informations
+            {
+                BatchId = batch.BatchId,
+                Date = dto.YoungDate ?? DateTime.UtcNow,
+                Acidity = dto.YoungAcidity ?? 0,
+                PhValue = dto.YoungPh ?? 0,
+                FurtherSteps = dto.YoungNotes ?? string.Empty
+            };
+            _db.Add(info);
+            await _db.SaveChangesAsync();
 
-    _db.Add(new YoungWine
-    {
-        Id           = info.InformationId,
-        Alcohol      = dto.YoungAlcohol ?? 0,
-        ResidualSugar= dto.YoungSugar   ?? 0
-    });
-}
+            _db.Add(new YoungWine
+            {
+                Id = info.InformationId,
+                Alcohol = dto.YoungAlcohol ?? 0,
+                ResidualSugar = dto.YoungSugar ?? 0
+            });
+        }
 
 // 6) Endwerte
-if (dto.FinalAlcohol.HasValue || dto.FinalSugar.HasValue || dto.FinalSulfur.HasValue
-    || dto.FinalAcidity.HasValue || dto.FinalPh.HasValue || !string.IsNullOrWhiteSpace(dto.FinalNotes))
-{
-    var info = new Informations
-    {
-        BatchId      = batch.BatchId,
-        Date         = dto.FinalDate ?? DateTime.UtcNow,
-        Acidity      = dto.FinalAcidity ?? 0,
-        PhValue      = dto.FinalPh ?? 0,
-        FurtherSteps = dto.FinalNotes ?? string.Empty
-    };
-    _db.Add(info);
-    await _db.SaveChangesAsync();
+        if (dto.FinalAlcohol.HasValue || dto.FinalSugar.HasValue || dto.FinalSulfur.HasValue
+            || dto.FinalAcidity.HasValue || dto.FinalPh.HasValue || !string.IsNullOrWhiteSpace(dto.FinalNotes))
+        {
+            var info = new Informations
+            {
+                BatchId = batch.BatchId,
+                Date = dto.FinalDate ?? DateTime.UtcNow,
+                Acidity = dto.FinalAcidity ?? 0,
+                PhValue = dto.FinalPh ?? 0,
+                FurtherSteps = dto.FinalNotes ?? string.Empty
+            };
+            _db.Add(info);
+            await _db.SaveChangesAsync();
 
-    _db.Add(new WhiteWine_RedWine
-    {
-        Id           = info.InformationId,
-        Alcohol      = dto.FinalAlcohol ?? 0,
-        ResidualSugar= dto.FinalSugar   ?? 0,
-        Sulfur       = dto.FinalSulfur  ?? 0
-    });
-}
+            _db.Add(new WhiteWine_RedWine
+            {
+                Id = info.InformationId,
+                Alcohol = dto.FinalAlcohol ?? 0,
+                ResidualSugar = dto.FinalSugar ?? 0,
+                Sulfur = dto.FinalSulfur ?? 0
+            });
+        }
 
-await _db.SaveChangesAsync();
+        await _db.SaveChangesAsync();
 
 
         // 7) Behandlungen
         async Task StoreTreatments(IEnumerable<TreatmentLineDto> lines)
         {
-            foreach (var l in lines.Where(x => !string.IsNullOrWhiteSpace(x.Agent) || !string.IsNullOrWhiteSpace(x.Amount) || x.Date.HasValue))
+            foreach (var l in lines.Where(x =>
+                         !string.IsNullOrWhiteSpace(x.Agent) || !string.IsNullOrWhiteSpace(x.Amount) ||
+                         x.Date.HasValue))
             {
                 var tr = new Treatment { Type = l.Type };
                 _db.Add(tr);
@@ -135,31 +138,38 @@ await _db.SaveChangesAsync();
 
                 _db.Add(new WineBatchHasTreatment
                 {
-                    BatchId      = batch.BatchId,
+                    BatchId = batch.BatchId,
                     TreatementId = tr.TreatmentId,
-                    Agent        = l.Agent ?? string.Empty,
-                    Amount       = l.Amount ?? string.Empty,
-                    Date         = l.Date ?? DateTime.UtcNow
+                    Agent = l.Agent ?? string.Empty,
+                    Amount = l.Amount ?? string.Empty,
+                    Date = l.Date ?? DateTime.UtcNow
                 });
             }
         }
+
         await StoreTreatments(dto.GrapeTreatments);
         await StoreTreatments(dto.MashTreatments);
         await StoreTreatments(dto.YoungTreatments);
 
         // 8) Umzüge
+        int? currentTankId = dto.TankId; // Start ist der evtl. gewählte Tank oberhalb
+
         foreach (var mv in dto.Movements.Where(m => m.ToTankId.HasValue && m.Volume.HasValue))
         {
             _db.Add(new TankMovement
             {
-                FromTakId = dto.TankId ?? 0,
-                ToTankId  = mv.ToTankId!.Value,
-                Date      = mv.Date ?? DateTime.UtcNow,
-                Volume    = mv.Volume!.Value
+                FromTakId = currentTankId ?? 0, // falls null, 0/unknown oder passe an dein Schema an
+                ToTankId = mv.ToTankId!.Value,
+                Date = mv.Date ?? DateTime.UtcNow,
+                Volume = mv.Volume!.Value
             });
 
+            // Batch in Ziel-Tank registrieren (Relationstabelle)
             _db.Add(new TankHasWineBatch { TankId = mv.ToTankId!.Value, BatchId = batch.BatchId });
+
+            currentTankId = mv.ToTankId; // Kette fortsetzen
         }
+
 
         await _db.SaveChangesAsync(ct);
         await tx.CommitAsync(ct);
@@ -176,14 +186,241 @@ await _db.SaveChangesAsync();
         if (batch is null) return NotFound();
         return Ok(batch);
     }
-    
+
     // GET /batches/batches
     [HttpGet("batches")]
-    public async Task<ActionResult<List<Batch>>> ReadAllVineyards() {
+    public async Task<ActionResult<List<Batch>>> ReadAllVineyards()
+    {
         var batches = await _repository.ReadAllAsync();
 
         _logger.LogInformation($"data found: {batches}");
         return Ok(batches);
+    }
+
+    // PUT /batches/{id}
+    [HttpPut("{id:int}")]
+    public async Task<IActionResult> Update(int id, [FromBody] BatchUpdateDto dto, CancellationToken ct)
+    {
+        await using var tx = await _db.Database.BeginTransactionAsync(ct);
+
+        var batch = await _db.Batches
+            .Include(b => b.InformationsList)
+            .ThenInclude(i => i.StartingMust)
+            .Include(b => b.InformationsList)
+            .ThenInclude(i => i.YoungWine)
+            .Include(b => b.InformationsList)
+            .ThenInclude(i => i.WhiteWineRedWine)
+            .FirstOrDefaultAsync(b => b.BatchId == id, ct);
+
+        if (batch is null) return NotFound();
+
+        // 1) Batch-Stammdaten
+        batch.Variety = dto.Variety;
+        batch.Amount = dto.Amount;
+        batch.Date = dto.HarvestDate ?? batch.Date;
+        batch.Maturity_Health = dto.MaturityHealth ?? string.Empty;
+        batch.Weather = dto.Weather ?? string.Empty;
+        await _db.SaveChangesAsync(ct);
+
+        // 2) Vineyard-Link (1:1)
+        var vLink = await _db.VineyardHasBatches.FirstOrDefaultAsync(x => x.BatchId == id, ct);
+        if (vLink is null)
+            _db.VineyardHasBatches.Add(new VineyardHasBatch { BatchId = id, VineyardId = dto.VineyardId });
+        else if (vLink.VineyardId != dto.VineyardId)
+            vLink.VineyardId = dto.VineyardId;
+
+        // 3) Tank-Links ersetzen (aus oberem Tank + allen Bewegungen)
+        var existingTankLinks = _db.TankHasWineBatches.Where(x => x.BatchId == id);
+        _db.TankHasWineBatches.RemoveRange(existingTankLinks);
+
+        var tankIds = new HashSet<int>();
+        if (dto.TankId is int tid) tankIds.Add(tid);
+        foreach (var mv in dto.Movements.Where(m => m.ToTankId.HasValue))
+            tankIds.Add(mv.ToTankId!.Value);
+
+        foreach (var t in tankIds)
+            _db.TankHasWineBatches.Add(new TankHasWineBatch { BatchId = id, TankId = t });
+
+        // 4) Bewegungen anhängen (Historie bleibt erhalten)
+        int? currentTankId = dto.TankId;
+        foreach (var mv in dto.Movements.Where(m => m.ToTankId.HasValue && m.Volume.HasValue))
+        {
+            _db.TankMovements.Add(new TankMovement
+            {
+                FromTakId = currentTankId ?? 0,
+                ToTankId = mv.ToTankId!.Value,
+                Date = mv.Date ?? DateTime.UtcNow,
+                Volume = mv.Volume!.Value
+            });
+            currentTankId = mv.ToTankId;
+        }
+
+        // 5) Behandlungen ersetzen (Join-Tabelle neu aufbauen)
+        var existingWbht = _db.WineBatchHasTreatments.Where(x => x.BatchId == id);
+        _db.WineBatchHasTreatments.RemoveRange(existingWbht);
+        await _db.SaveChangesAsync(ct);
+
+        async Task StoreTreatments(IEnumerable<TreatmentLineDto> lines)
+        {
+            foreach (var l in lines.Where(x =>
+                         !string.IsNullOrWhiteSpace(x.Agent) || !string.IsNullOrWhiteSpace(x.Amount) ||
+                         x.Date.HasValue))
+            {
+                var tr = new Treatment { Type = l.Type };
+                _db.Add(tr);
+                await _db.SaveChangesAsync(ct);
+
+                _db.Add(new WineBatchHasTreatment
+                {
+                    BatchId = id,
+                    TreatementId = tr.TreatmentId,
+                    Agent = l.Agent ?? string.Empty,
+                    Amount = l.Amount ?? string.Empty,
+                    Date = l.Date ?? DateTime.UtcNow
+                });
+            }
+        }
+
+        await StoreTreatments(dto.GrapeTreatments);
+        await StoreTreatments(dto.MashTreatments);
+        await StoreTreatments(dto.YoungTreatments);
+
+        // 6) Informations upsert (vorhandene Datensätze aktualisieren, sonst anlegen)
+
+        // Ausgangsmust
+        var mustInfo = batch.InformationsList?.FirstOrDefault(i => i.StartingMust != null);
+        bool hasMustDto =
+            dto.KMW_OE.HasValue || dto.MustAcidity.HasValue || dto.MustPh.HasValue ||
+            !string.IsNullOrWhiteSpace(dto.MustNotes) ||
+            !string.IsNullOrWhiteSpace(dto.Rebel) || !string.IsNullOrWhiteSpace(dto.Squeeze) ||
+            !string.IsNullOrWhiteSpace(dto.MashLife);
+
+        if (hasMustDto)
+        {
+            if (mustInfo is null)
+            {
+                mustInfo = new Informations
+                {
+                    BatchId = id,
+                    Date = dto.MustDate ?? dto.HarvestDate ?? DateTime.UtcNow,
+                    Acidity = dto.MustAcidity ?? 0,
+                    PhValue = dto.MustPh ?? 0,
+                    FurtherSteps = dto.MustNotes ?? string.Empty
+                };
+                _db.Informations.Add(mustInfo);
+                await _db.SaveChangesAsync(ct);
+
+                _db.StartingMusts.Add(new StartingMust
+                {
+                    Id = mustInfo.InformationId,
+                    KMW_OE = dto.KMW_OE ?? 0,
+                    Rebel = dto.Rebel ?? "",
+                    Squeeze = dto.Squeeze ?? "",
+                    MashLife = dto.MashLife ?? ""
+                });
+            }
+            else
+            {
+                mustInfo.Date = dto.MustDate ?? mustInfo.Date;
+                mustInfo.Acidity = dto.MustAcidity ?? mustInfo.Acidity;
+                mustInfo.PhValue = dto.MustPh ?? mustInfo.PhValue;
+                mustInfo.FurtherSteps = dto.MustNotes ?? mustInfo.FurtherSteps;
+
+                var sm = mustInfo.StartingMust!;
+                sm.KMW_OE = dto.KMW_OE ?? sm.KMW_OE;
+                sm.Rebel = dto.Rebel ?? sm.Rebel;
+                sm.Squeeze = dto.Squeeze ?? sm.Squeeze;
+                sm.MashLife = dto.MashLife ?? sm.MashLife;
+            }
+        }
+
+        // Jungwein
+        var youngInfo = batch.InformationsList?.FirstOrDefault(i => i.YoungWine != null);
+        bool hasYoungDto =
+            dto.YoungAlcohol.HasValue || dto.YoungSugar.HasValue || dto.YoungAcidity.HasValue || dto.YoungPh.HasValue ||
+            !string.IsNullOrWhiteSpace(dto.YoungNotes);
+
+        if (hasYoungDto)
+        {
+            if (youngInfo is null)
+            {
+                youngInfo = new Informations
+                {
+                    BatchId = id,
+                    Date = dto.YoungDate ?? DateTime.UtcNow,
+                    Acidity = dto.YoungAcidity ?? 0,
+                    PhValue = dto.YoungPh ?? 0,
+                    FurtherSteps = dto.YoungNotes ?? string.Empty
+                };
+                _db.Informations.Add(youngInfo);
+                await _db.SaveChangesAsync(ct);
+
+                _db.YoungWines.Add(new YoungWine
+                {
+                    Id = youngInfo.InformationId,
+                    Alcohol = dto.YoungAlcohol ?? 0,
+                    ResidualSugar = dto.YoungSugar ?? 0
+                });
+            }
+            else
+            {
+                youngInfo.Date = dto.YoungDate ?? youngInfo.Date;
+                youngInfo.Acidity = dto.YoungAcidity ?? youngInfo.Acidity;
+                youngInfo.PhValue = dto.YoungPh ?? youngInfo.PhValue;
+                youngInfo.FurtherSteps = dto.YoungNotes ?? youngInfo.FurtherSteps;
+
+                var yw = youngInfo.YoungWine!;
+                yw.Alcohol = dto.YoungAlcohol ?? yw.Alcohol;
+                yw.ResidualSugar = dto.YoungSugar ?? yw.ResidualSugar;
+            }
+        }
+
+        // Endwerte
+        var finalInfo = batch.InformationsList?.FirstOrDefault(i => i.WhiteWineRedWine != null);
+        bool hasFinalDto =
+            dto.FinalAlcohol.HasValue || dto.FinalSugar.HasValue || dto.FinalSulfur.HasValue ||
+            dto.FinalAcidity.HasValue || dto.FinalPh.HasValue || !string.IsNullOrWhiteSpace(dto.FinalNotes);
+
+        if (hasFinalDto)
+        {
+            if (finalInfo is null)
+            {
+                finalInfo = new Informations
+                {
+                    BatchId = id,
+                    Date = dto.FinalDate ?? DateTime.UtcNow,
+                    Acidity = dto.FinalAcidity ?? 0,
+                    PhValue = dto.FinalPh ?? 0,
+                    FurtherSteps = dto.FinalNotes ?? string.Empty
+                };
+                _db.Informations.Add(finalInfo);
+                await _db.SaveChangesAsync(ct);
+
+                _db.WhiteWineRedWines.Add(new WhiteWine_RedWine
+                {
+                    Id = finalInfo.InformationId,
+                    Alcohol = dto.FinalAlcohol ?? 0,
+                    ResidualSugar = dto.FinalSugar ?? 0,
+                    Sulfur = dto.FinalSulfur ?? 0
+                });
+            }
+            else
+            {
+                finalInfo.Date = dto.FinalDate ?? finalInfo.Date;
+                finalInfo.Acidity = dto.FinalAcidity ?? finalInfo.Acidity;
+                finalInfo.PhValue = dto.FinalPh ?? finalInfo.PhValue;
+                finalInfo.FurtherSteps = dto.FinalNotes ?? finalInfo.FurtherSteps;
+
+                var ww = finalInfo.WhiteWineRedWine!;
+                ww.Alcohol = dto.FinalAlcohol ?? ww.Alcohol;
+                ww.ResidualSugar = dto.FinalSugar ?? ww.ResidualSugar;
+                ww.Sulfur = dto.FinalSulfur ?? ww.Sulfur;
+            }
+        }
+
+        await _db.SaveChangesAsync(ct);
+        await tx.CommitAsync(ct);
+        return NoContent();
     }
 }
 
@@ -194,7 +431,7 @@ public class BatchCreateDto
 {
     // Kopf
     public int VineyardId { get; set; }
-    public double Amount { get; set; }
+    public string Amount { get; set; }
     public DateTime? HarvestDate { get; set; }
     public string Variety { get; set; } = string.Empty;
     public string? MaturityHealth { get; set; }
@@ -203,7 +440,7 @@ public class BatchCreateDto
 
     // Behandlungen
     public List<TreatmentLineDto> GrapeTreatments { get; set; } = new();
-    public List<TreatmentLineDto> MashTreatments  { get; set; } = new();
+    public List<TreatmentLineDto> MashTreatments { get; set; } = new();
     public List<TreatmentLineDto> YoungTreatments { get; set; } = new();
 
     // Ausgangsmust
@@ -250,4 +487,46 @@ public class MovementLineDto
     public int? ToTankId { get; set; }
     public double? Volume { get; set; }
     public DateTime? Date { get; set; }
+}
+
+// neben BatchCreateDto
+public class BatchUpdateDto
+{
+    public int VineyardId { get; set; }
+    public string Amount { get; set; } = "";   // << string
+    public DateTime? HarvestDate { get; set; }
+    public string Variety { get; set; } = string.Empty;
+    public string? MaturityHealth { get; set; }
+    public string? Weather { get; set; }
+    public int? TankId { get; set; }
+
+    public List<TreatmentLineDto> GrapeTreatments { get; set; } = new();
+    public List<TreatmentLineDto> MashTreatments  { get; set; } = new();
+    public List<TreatmentLineDto> YoungTreatments { get; set; } = new();
+
+    public DateTime? MustDate { get; set; }
+    public double? KMW_OE { get; set; }
+    public double? MustAcidity { get; set; }
+    public double? MustPh { get; set; }
+    public string? MustNotes { get; set; }
+    public string? Rebel { get; set; }
+    public string? Squeeze { get; set; }
+    public string? MashLife { get; set; }
+
+    public DateTime? YoungDate { get; set; }
+    public double? YoungAcidity { get; set; }
+    public double? YoungSugar { get; set; }
+    public double? YoungAlcohol { get; set; }
+    public double? YoungPh { get; set; }
+    public string? YoungNotes { get; set; }
+
+    public DateTime? FinalDate { get; set; }
+    public double? FinalAcidity { get; set; }
+    public double? FinalSugar { get; set; }
+    public double? FinalAlcohol { get; set; }
+    public double? FinalPh { get; set; }
+    public double? FinalSulfur { get; set; }
+    public string? FinalNotes { get; set; }
+
+    public List<MovementLineDto> Movements { get; set; } = new();
 }

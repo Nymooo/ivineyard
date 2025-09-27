@@ -11,4 +11,7 @@ public class Tank
     
     [Column("TANK_NAME")]
     public string Name { get; set; }
+
+    public List<TankMovement>? FromMovements { get; set; }
+    public List<TankMovement>? ToMovements { get; set; }
 }

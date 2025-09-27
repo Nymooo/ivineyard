@@ -165,7 +165,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
         
         builder.Entity<TankHasWineBatch>()
             .HasOne(vhb => vhb.Batch)
-            .WithMany()
+            .WithMany(b => b.TankList)
             .HasForeignKey(vhb => vhb.BatchId);
         
         builder.Entity<TankHasWineBatch>()
@@ -202,12 +202,12 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
         
         builder.Entity<TankMovement>()
             .HasOne(vhb => vhb.FromTank)
-            .WithMany()
+            .WithMany(t => t.FromMovements)
             .HasForeignKey(vhb => vhb.FromTakId);
         
         builder.Entity<TankMovement>()
             .HasOne(vhb => vhb.ToTank)
-            .WithMany()
+            .WithMany(t => t.ToMovements)
             .HasForeignKey(vhb => vhb.ToTankId);
         
         #endregion

@@ -514,8 +514,9 @@ namespace Model.Migrations
 
                     MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("BatchId"));
 
-                    b.Property<double>("Amount")
-                        .HasColumnType("double")
+                    b.Property<string>("Amount")
+                        .IsRequired()
+                        .HasColumnType("longtext")
                         .HasColumnName("AMOUNT");
 
                     b.Property<DateTime>("Date")
@@ -992,7 +993,7 @@ namespace Model.Migrations
             modelBuilder.Entity("Model.Entities.Harvest.TankHasWineBatch", b =>
                 {
                     b.HasOne("Model.Entities.Harvest.Batch", "Batch")
-                        .WithMany()
+                        .WithMany("TankList")
                         .HasForeignKey("BatchId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -1011,13 +1012,13 @@ namespace Model.Migrations
             modelBuilder.Entity("Model.Entities.Harvest.TankMovement", b =>
                 {
                     b.HasOne("Model.Entities.Harvest.Tank", "FromTank")
-                        .WithMany()
+                        .WithMany("FromMovements")
                         .HasForeignKey("FromTakId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("Model.Entities.Harvest.Tank", "ToTank")
-                        .WithMany()
+                        .WithMany("ToMovements")
                         .HasForeignKey("ToTankId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -1121,6 +1122,8 @@ namespace Model.Migrations
                 {
                     b.Navigation("InformationsList");
 
+                    b.Navigation("TankList");
+
                     b.Navigation("batchHasTreatmentsList");
                 });
 
@@ -1131,6 +1134,13 @@ namespace Model.Migrations
                     b.Navigation("WhiteWineRedWine");
 
                     b.Navigation("YoungWine");
+                });
+
+            modelBuilder.Entity("Model.Entities.Harvest.Tank", b =>
+                {
+                    b.Navigation("FromMovements");
+
+                    b.Navigation("ToMovements");
                 });
 #pragma warning restore 612, 618
         }

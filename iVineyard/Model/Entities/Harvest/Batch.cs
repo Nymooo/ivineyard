@@ -12,7 +12,7 @@ public class Batch
     [Column("VARIETY")]
     public string Variety { get; set; }
     [Column("AMOUNT")]
-    public double Amount { get; set; }
+    public string Amount { get; set; }
     [Column("DATE")]
     public DateTime Date { get; set; }
     [Column("MARURITY_HEALTH")]
@@ -22,4 +22,8 @@ public class Batch
     
     public List<WineBatchHasTreatment>? batchHasTreatmentsList { get; set; }
     public List<Informations>? InformationsList { get; set; }
+    public List<TankHasWineBatch>? TankList { get; set; }
+    
+    [NotMapped]                     // nur für Mapping/Response
+    public List<TankMovement>? TankMovements { get; set; }
 }

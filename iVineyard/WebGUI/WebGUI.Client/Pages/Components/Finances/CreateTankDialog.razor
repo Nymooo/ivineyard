@@ -1,0 +1,31 @@
+@using Model.Entities.Harvest
+@using WebGUI.Client.ClientServices
+@inject TankService _service
+
+<MudDialog MaxWidth="MaxWidth.Small" CloseButton="true">
+    <DialogContent>
+        <MudForm Spacing="6">
+            <MudInput @bind-Value="_tank.Name" Variant="Variant.Outlined" FullWidth="true" Placeholder="Tank Name"/>
+        </MudForm>
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="Cancel" Color="Color.Default">Abbrechen</MudButton>
+        <MudButton OnClick="Submit" Color="Color.Primary" Variant="Variant.Filled">Hinzufügen</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+
+    [CascadingParameter] private MudDialogInstance MudDialog { get; set; }
+
+    private Tank _tank = new();
+
+    private void Submit()
+    {
+        _service.CreateTankAsync(_tank);
+        MudDialog.Close(DialogResult.Ok(_tank));
+    }
+
+    private void Cancel() => MudDialog.Cancel();
+
+}

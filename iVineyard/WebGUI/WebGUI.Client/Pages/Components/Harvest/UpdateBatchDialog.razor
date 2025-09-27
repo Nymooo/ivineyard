@@ -6,6 +6,10 @@
 @using Model.Entities.Bookingobjects.Vineyard
 @using WebGUI.Client.ClientServices
 @using WebGUI.Client.Pages.Components.Records
+@using System.IO;
+@using iTextSharp.text;
+@using iTextSharp.text.pdf;
+@using Microsoft.JSInterop;
 
 @inject VineyardService VineyardService
 @inject TankService TankService
@@ -24,6 +28,7 @@
                          Color="Color.Primary"
                          Size="Size.Large"
                          Style="font-size:34px"
+                         OnClick="ExportToPdf" 
                          AriaLabel="PDF drucken" />
       </div>
 
@@ -186,6 +191,12 @@
 </MudDialog>
 
 @code {
+
+
+
+[Inject] IJSRuntime JS { get; set; }
+
+
   // Lookups
   List<VineyardRecord> Vineyards = new();
   List<Tank> Tanks = new();
@@ -447,4 +458,101 @@ async Task LoadFromVineyardHasBatchAsync()
   }
 
   void RefreshPage() => Navigation.NavigateTo(Navigation.Uri, forceLoad: true);
+  
+  
+  //pdf 
+  private async Task ExportToPdf()
+  {
+      using var ms = new MemoryStream();
+      var doc = new Document(PageSize.A4, 25, 25, 30, 30);
+      var writer = PdfWriter.GetInstance(doc, ms);
+      doc.Open();
+  
+      // Titel
+      var titleFont = FontFactory.GetFont("Arial", 18, Font.BOLD);
+      doc.Add(new Paragraph("Maßnahmendatenblatt", titleFont));
+      doc.Add(new Paragraph(" ")); // Leerzeile
+  
+      // Allgemeine Daten
+      var normalFont = FontFactory.GetFont("Arial", 12, Font.NORMAL);
+      doc.Add(new Paragraph($"Weingarten: {Vineyards.FirstOrDefault(v => v.BookingObjectId == Vm.VineyardId)?.Name}", normalFont));
+      doc.Add(new Paragraph($"Menge: {Vm.Amount} kg", normalFont));
+      doc.Add(new Paragraph($"Sorte: {Vm.Variety}", normalFont));
+      doc.Add(new Paragraph($"Erntedatum: {Vm.HarvestDate?.ToString("dd.MM.yyyy")}", normalFont));
+      doc.Add(new Paragraph(" "));
+  
+      // Tabellen erstellen
+      void AddTreatmentTable(string header, List<TreatmentLine> treatments)
+      {
+          if (!treatments.Any()) return;
+  
+          doc.Add(new Paragraph(header, FontFactory.GetFont("Arial", 14, Font.BOLD)));
+          var table = new PdfPTable(4) { WidthPercentage = 100 };
+          table.SetWidths(new float[] { 25, 25, 25, 25 });
+  
+          table.AddCell("Typ");
+          table.AddCell("Datum");
+          table.AddCell("Mittel");
+          table.AddCell("Menge");
+  
+          foreach (var t in treatments)
+          {
+              table.AddCell(t.Type);
+              table.AddCell(t.Date?.ToString("dd.MM.yyyy") ?? "-");
+              table.AddCell(t.Agent ?? "-");
+              table.AddCell(t.Amount ?? "-");
+          }
+  
+          doc.Add(table);
+          doc.Add(new Paragraph(" "));
+      }
+  
+      AddTreatmentTable("Behandlungen (Trauben)", Vm.GrapeTreatments);
+      AddTreatmentTable("Most / Maische", Vm.MashTreatments);
+      AddTreatmentTable("Jungwein-Behandlungen", Vm.YoungTreatments);
+  
+      // Movements Tabelle
+      if (Vm.Movements.Any())
+      {
+          doc.Add(new Paragraph("Umgezogen in Tank", FontFactory.GetFont("Arial", 14, Font.BOLD)));
+          var table = new PdfPTable(3) { WidthPercentage = 100 };
+          table.SetWidths(new float[] { 33, 33, 33 });
+  
+          table.AddCell("Tank");
+          table.AddCell("Volumen (L)");
+          table.AddCell("Datum");
+  
+          foreach (var m in Vm.Movements)
+          {
+              var tankName = Tanks.FirstOrDefault(t => t.TankId == m.ToTankId)?.TankId.ToString() ?? "(kein Tank)";
+              table.AddCell(tankName);
+              table.AddCell(m.Volume?.ToString() ?? "-");
+              table.AddCell(m.Date?.ToString("dd.MM.yyyy") ?? "-");
+          }
+  
+          doc.Add(table);
+      }
+  
+      doc.Close();
+  
+      var bytes = ms.ToArray();
+       var vineyardName = Vineyards.FirstOrDefault(v => v.BookingObjectId == Vm.VineyardId)?.Name ?? "Weingarten";
+          var datePart = Vm.HarvestDate?.ToString("yyyy-MM-dd") ?? DateTime.Now.ToString("yyyy-MM-dd");
+          var fileName = $"Maßnahmendatenblatt_{vineyardName}_{datePart}.pdf";
+      
+          // PDF an Browser senden
+          await JS.InvokeVoidAsync("BlazorDownloadFile", fileName, "application/pdf", Convert.ToBase64String(bytes));
+      }
 }
+
+<script>
+    window.BlazorDownloadFile = (fileName, contentType, base64) => {
+        const link = document.createElement('a');
+        link.download = fileName;
+        link.href = "data:" + contentType + ";base64," + base64;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    };
+</script>
+

@@ -39,4 +39,7 @@ public class BatchService
     
     public Task<HttpResponseMessage> UpdateBatchAsync(int id, object dto)
         => _httpClient.PutAsJsonAsync($"http://localhost:5189/batches/{id}", dto);
+    
+    public Task<HttpResponseMessage> DeleteBatchAsync(int id)
+        => _httpClient.DeleteAsync($"http://localhost:5189/batches/{id}");
 }

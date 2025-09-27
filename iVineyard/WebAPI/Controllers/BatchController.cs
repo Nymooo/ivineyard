@@ -422,6 +422,60 @@ public class BatchController : ControllerBase
         await tx.CommitAsync(ct);
         return NoContent();
     }
+
+    // using System.Linq;
+    [HttpDelete("{id:int}")]
+    public async Task<IActionResult> Delete(int id, CancellationToken ct)
+    {
+        await using var tx = await _db.Database.BeginTransactionAsync(ct);
+
+        var batch = await _db.Batches
+            .Include(b => b.InformationsList).ThenInclude(i => i.StartingMust)
+            .Include(b => b.InformationsList).ThenInclude(i => i.YoungWine)
+            .Include(b => b.InformationsList).ThenInclude(i => i.WhiteWineRedWine)
+            .FirstOrDefaultAsync(b => b.BatchId == id, ct);
+
+        if (batch is null) return NotFound();
+
+        // Behandlungen (Join + ggf. Treatment-Waisen)
+        var wbht = await _db.WineBatchHasTreatments.Where(x => x.BatchId == id).ToListAsync(ct);
+        var trIds = wbht.Select(x => x.TreatementId).Distinct().ToList();
+        _db.WineBatchHasTreatments.RemoveRange(wbht);
+
+        if (trIds.Count > 0)
+        {
+            var stillUsed = await _db.WineBatchHasTreatments
+                .Where(x => trIds.Contains(x.TreatementId))
+                .Select(x => x.TreatementId).Distinct().ToListAsync(ct);
+            var toDelete = trIds.Except(stillUsed).ToList();
+            if (toDelete.Count > 0)
+            {
+                var treatments = await _db.Treatments.Where(t => toDelete.Contains(t.TreatmentId)).ToListAsync(ct);
+                _db.Treatments.RemoveRange(treatments);
+            }
+        }
+
+        // Informations + Untertabellen
+        var infoIds = batch.InformationsList?.Select(i => i.InformationId).ToList() ?? new();
+        if (infoIds.Count > 0)
+        {
+            _db.StartingMusts.RemoveRange(_db.StartingMusts.Where(s => infoIds.Contains(s.Id)));
+            _db.YoungWines.RemoveRange(_db.YoungWines.Where(s => infoIds.Contains(s.Id)));
+            _db.WhiteWineRedWines.RemoveRange(_db.WhiteWineRedWines.Where(s => infoIds.Contains(s.Id)));
+            _db.Informations.RemoveRange(_db.Informations.Where(i => infoIds.Contains(i.InformationId)));
+        }
+
+        // Links
+        _db.VineyardHasBatches.RemoveRange(_db.VineyardHasBatches.Where(x => x.BatchId == id));
+        _db.TankHasWineBatches.RemoveRange(_db.TankHasWineBatches.Where(x => x.BatchId == id));
+
+        // Batch
+        _db.Batches.Remove(batch);
+
+        await _db.SaveChangesAsync(ct);
+        await tx.CommitAsync(ct);
+        return NoContent();
+    }
 }
 
 /// <summary>
@@ -493,7 +547,7 @@ public class MovementLineDto
 public class BatchUpdateDto
 {
     public int VineyardId { get; set; }
-    public string Amount { get; set; } = "";   // << string
+    public string Amount { get; set; } = ""; // << string
     public DateTime? HarvestDate { get; set; }
     public string Variety { get; set; } = string.Empty;
     public string? MaturityHealth { get; set; }
@@ -501,7 +555,7 @@ public class BatchUpdateDto
     public int? TankId { get; set; }
 
     public List<TreatmentLineDto> GrapeTreatments { get; set; } = new();
-    public List<TreatmentLineDto> MashTreatments  { get; set; } = new();
+    public List<TreatmentLineDto> MashTreatments { get; set; } = new();
     public List<TreatmentLineDto> YoungTreatments { get; set; } = new();
 
     public DateTime? MustDate { get; set; }

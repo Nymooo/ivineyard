@@ -18,6 +18,8 @@
 @inject VineyardHasBatchService VineyardBatchService
 @inject NavigationManager Navigation
 @inject IJSRuntime JS
+@inject ISnackbar Snackbar
+@inject IDialogService Dialogs
 
 <MudDialog Style="width:60vw; max-width:60vw;">
   <DialogContent>
@@ -31,6 +33,13 @@
                        Style="font-size:34px"
                        OnClick="ExportToPdf"
                        AriaLabel="PDF drucken"/>
+        <MudIconButton Icon="@Icons.Material.Filled.DeleteForever"
+                       Color="Color.Error"
+                       Size="Size.Large"
+                       Style="font-size:34px"
+                       Disabled="@(Id <= 0)"
+                       OnClick="ConfirmDeleteAsync"
+                       AriaLabel="Batch löschen" />
       </div>
 
       <EditForm Model="@Vm" OnValidSubmit="@SaveAsync">
@@ -687,6 +696,37 @@
     var fileName = $"Maßnahmendatenblatt_{vineyardName}_{datePart}.pdf";
 
     await JS.InvokeVoidAsync("BlazorDownloadFile", fileName, "application/pdf", Convert.ToBase64String(bytes));
+  }
+  
+  private async Task ConfirmDeleteAsync()
+  {
+    if (Id <= 0) return;
+
+    var confirmed = await Dialogs.ShowMessageBox(
+      "Batch löschen?",
+      "Möchtest du diesen Batch wirklich löschen? Dieser Vorgang kann nicht rückgängig gemacht werden.",
+      yesText: "Löschen",
+      cancelText: "Abbrechen",
+      options: new DialogOptions { CloseOnEscapeKey = true, MaxWidth = MaxWidth.Small });
+
+    if (confirmed == true)
+      await DeleteAsync();
+  }
+
+
+  private async Task DeleteAsync()
+  {
+    var resp = await BatchService.DeleteBatchAsync(Id);
+    if (resp.IsSuccessStatusCode)
+    {
+      Snackbar.Add("Batch gelöscht.", Severity.Success);
+      MudDialog?.Close(DialogResult.Ok(true)); // Dialog schließen
+      Navigation.NavigateTo(Navigation.Uri, forceLoad: true); // Refresh
+    }
+    else
+    {
+      Snackbar.Add("Löschen fehlgeschlagen.", Severity.Error);
+    }
   }
 
 }

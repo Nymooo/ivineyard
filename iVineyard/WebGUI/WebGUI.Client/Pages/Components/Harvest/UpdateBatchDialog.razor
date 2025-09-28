@@ -39,7 +39,7 @@
                        Style="font-size:34px"
                        Disabled="@(Id <= 0)"
                        OnClick="ConfirmDeleteAsync"
-                       AriaLabel="Batch löschen" />
+                       AriaLabel="Batch löschen"/>
       </div>
 
       <EditForm Model="@Vm" OnValidSubmit="@SaveAsync">
@@ -91,10 +91,10 @@
                   </MudItem>
                 </MudGrid>
               }
-          
-                         <MudItem xs="12">
-                            <MudTextField @bind-Value="Vm.GrapeNotes" Label="weitere Behandlungsschritte" Dense="true"/>
-                          </MudItem>
+
+              <MudItem xs="12">
+                <MudTextField @bind-Value="Vm.GrapeNotes" Label="weitere Behandlungsschritte" Dense="true"/>
+              </MudItem>
 
               <MudText Typo="Typo.h6" Class="mt-3 mb-1">Most / Maische</MudText>
               @foreach (var t in Vm.MashTreatments)
@@ -114,10 +114,10 @@
                   </MudItem>
                 </MudGrid>
               }
-          
-                         <MudItem xs="12">
-                          <MudTextField @bind-Value="Vm.MashNotes" Label="weitere Behandlungsschritte" Dense="true"/>
-                        </MudItem>
+
+              <MudItem xs="12">
+                <MudTextField @bind-Value="Vm.MashNotes" Label="weitere Behandlungsschritte" Dense="true"/>
+              </MudItem>
 
               <MudText Typo="Typo.h6" Class="mt-3 mb-1">Jungwein-Behandlungen</MudText>
               @foreach (var t in Vm.YoungTreatments)
@@ -137,11 +137,11 @@
                   </MudItem>
                 </MudGrid>
               }
-          
-           <MudItem xs="12">
-               <MudTextField @bind-Value="Vm.YoungNotesFree" Label="weitere Behandlungsschritte" Dense="true"/>
-           </MudItem>
-          
+
+              <MudItem xs="12">
+                <MudTextField @bind-Value="Vm.YoungNotesFree" Label="weitere Behandlungsschritte" Dense="true"/>
+              </MudItem>
+
             </MudPaper>
           </MudItem>
 
@@ -175,7 +175,7 @@
                   <MudDatePicker T="DateTime?" @bind-Date="Vm.MustDate" Label="Datum" Dense="true"/>
                 </MudItem>
                 <MudItem xs="6" md="3">
-                  <MudTextField  @bind-Value="Vm.MustAcidity" Label="Säure" Dense="true"/>
+                  <MudTextField @bind-Value="Vm.MustAcidity" Label="Säure" Dense="true"/>
                 </MudItem>
                 <MudItem xs="6" md="3">
                   <MudNumericField T="double?" @bind-Value="Vm.MustPh" Label="pH-Wert" Dense="true"/>
@@ -203,7 +203,7 @@
                   <MudDatePicker T="DateTime?" @bind-Date="Vm.YoungDate" Label="Datum" Dense="true"/>
                 </MudItem>
                 <MudItem xs="6" md="3">
-                  <MudTextField  @bind-Value="Vm.YoungAcidity" Label="Säure" Dense="true"/>
+                  <MudTextField @bind-Value="Vm.YoungAcidity" Label="Säure" Dense="true"/>
                 </MudItem>
                 <MudItem xs="6" md="3">
                   <MudTextField @bind-Value="Vm.YoungSugar" Label="Restzucker" Dense="true"/>
@@ -338,10 +338,10 @@
     public List<TreatmentLine> GrapeTreatments { get; set; } = new();
     public List<TreatmentLine> MashTreatments { get; set; } = new();
     public List<TreatmentLine> YoungTreatments { get; set; } = new();
-        
-            public string? GrapeNotes { get; set; }       
-            public string? MashNotes { get; set; }
-            public string? YoungNotesFree { get; set; }
+
+    public string? GrapeNotes { get; set; }
+    public string? MashNotes { get; set; }
+    public string? YoungNotesFree { get; set; }
 
     public DateTime? MustDate { get; set; }
     public double? KMW_OE { get; set; }
@@ -398,12 +398,12 @@
     public List<TreatmentLineDto> GrapeTreatments { get; set; } = new();
     public List<TreatmentLineDto> MashTreatments { get; set; } = new();
     public List<TreatmentLineDto> YoungTreatments { get; set; } = new();
-        
-  
-      public string? GrapeNotes { get; set; }
-      public string? MashNotes { get; set; }
-      public string? YoungNotesFree { get; set; }
-  
+
+
+    public string? GrapeNotes { get; set; }
+    public string? MashNotes { get; set; }
+    public string? YoungNotesFree { get; set; }
+
     public DateTime? MustDate { get; set; }
     public double? KMW_OE { get; set; }
     public string? MustAcidity { get; set; }
@@ -526,8 +526,8 @@
     // --- Treatments automatisch in die linken Zeilen mappen ---
     var srcTreats = link.Batch.batchHasTreatmentsList ?? new();
 
-// ggf. Alias/Schreibfehler korrigieren (optional erweitern)
-    string Normalize(string? s)
+    // Helper
+    static string Normalize(string? s)
     {
       if (string.IsNullOrWhiteSpace(s)) return "";
       s = s.Trim();
@@ -535,9 +535,23 @@
       return s;
     }
 
-// pro Typ den jüngsten Eintrag nehmen
+    // Helper: erste Notes eines speziellen Pseudo-Typs holen
+    string? GetSectionNotes(string type) =>
+      srcTreats.FirstOrDefault(x =>
+          x.Treatment is not null &&
+          string.Equals(x.Treatment.Type, type, StringComparison.OrdinalIgnoreCase))
+        ?.Treatment?.Notes;
+
+// Abschnitts-Notizen setzen
+    Vm.GrapeNotes = GetSectionNotes("GRAPE_NOTES") ?? Vm.GrapeNotes;
+    Vm.MashNotes = GetSectionNotes("MASH_NOTES") ?? Vm.MashNotes;
+    Vm.YoungNotesFree = GetSectionNotes("YOUNG_WINE_NOTES") ?? Vm.YoungNotesFree;
+
+    // >>> Nur „echte“ Behandlungen in die Zeilen mappen (Notes-Zeilen ausschließen)
     var byType = srcTreats
-      .Where(t => t.Treatment is not null && !string.IsNullOrWhiteSpace(t.Treatment!.Type))
+      .Where(t => t.Treatment is not null
+                  && !string.IsNullOrWhiteSpace(t.Treatment!.Type)
+                  && string.IsNullOrWhiteSpace(t.Treatment!.Notes)) // <— Notes ausschließen
       .GroupBy(t => Normalize(t.Treatment!.Type), StringComparer.OrdinalIgnoreCase)
       .ToDictionary(g => g.Key, g => g.OrderByDescending(x => x.Date).First(), StringComparer.OrdinalIgnoreCase);
 
@@ -550,9 +564,9 @@
 
         if (byType.TryGetValue(key, out var hit))
         {
-          row.Agent  = hit.Agent;
+          row.Agent = hit.Agent;
           row.Amount = hit.Amount;
-          row.Date   = hit.Date;
+          row.Date = hit.Date;
         }
       }
     }
@@ -560,7 +574,7 @@
     FillTreatments(Vm.GrapeTreatments);
     FillTreatments(Vm.MashTreatments);
     FillTreatments(Vm.YoungTreatments);
-    
+
     // Historie & aktueller Tank
     MovementHistory = (link.Batch.TankMovements ?? new())
       .OrderByDescending(m => m.Date)
@@ -583,48 +597,47 @@
   {
     var dto = new BatchUpdateDto
     {
-      VineyardId     = Vm.VineyardId,
-      Amount         = Vm.Amount,           // << string durchreichen, nicht parsen
-      HarvestDate    = Vm.HarvestDate,
-      Variety        = Vm.Variety,
+      VineyardId = Vm.VineyardId,
+      Amount = Vm.Amount, // << string durchreichen, nicht parsen
+      HarvestDate = Vm.HarvestDate,
+      Variety = Vm.Variety,
       MaturityHealth = Vm.MaturityHealth,
-      Weather        = Vm.Weather,
-      TankId         = Vm.TankId,
+      Weather = Vm.Weather,
+      TankId = Vm.TankId,
 
-      MustDate       = Vm.MustDate,
-      KMW_OE         = Vm.KMW_OE,
-      MustAcidity    = Vm.MustAcidity,
-      MustPh         = Vm.MustPh,
-      MustNotes      = Vm.MustNotes,
-      Rebel          = Vm.Rebel,
-      Squeeze        = Vm.Squeeze,
-      MashLife       = Vm.MashLife,
-      
-      
-      
-              GrapeNotes = Vm.GrapeNotes,
-              MashNotes = Vm.MashNotes,
-              YoungNotesFree = Vm.YoungNotesFree,
+      MustDate = Vm.MustDate,
+      KMW_OE = Vm.KMW_OE,
+      MustAcidity = Vm.MustAcidity,
+      MustPh = Vm.MustPh,
+      MustNotes = Vm.MustNotes,
+      Rebel = Vm.Rebel,
+      Squeeze = Vm.Squeeze,
+      MashLife = Vm.MashLife,
 
-      YoungDate      = Vm.YoungDate,
-      YoungAcidity   = Vm.YoungAcidity,
-      YoungSugar     = Vm.YoungSugar,
-      YoungAlcohol   = Vm.YoungAlcohol,
-      YoungPh        = Vm.YoungPh,
-      YoungNotes     = Vm.YoungNotes,
 
-      FinalDate      = Vm.FinalDate,
-      FinalAcidity   = Vm.FinalAcidity,
-      FinalSugar     = Vm.FinalSugar,
-      FinalAlcohol   = Vm.FinalAlcohol,
-      FinalPh        = Vm.FinalPh,
-      FinalSulfur    = Vm.FinalSulfur,
-      FinalNotes     = Vm.FinalNotes,
+      GrapeNotes = Vm.GrapeNotes,
+      MashNotes = Vm.MashNotes,
+      YoungNotesFree = Vm.YoungNotesFree,
+
+      YoungDate = Vm.YoungDate,
+      YoungAcidity = Vm.YoungAcidity,
+      YoungSugar = Vm.YoungSugar,
+      YoungAlcohol = Vm.YoungAlcohol,
+      YoungPh = Vm.YoungPh,
+      YoungNotes = Vm.YoungNotes,
+
+      FinalDate = Vm.FinalDate,
+      FinalAcidity = Vm.FinalAcidity,
+      FinalSugar = Vm.FinalSugar,
+      FinalAlcohol = Vm.FinalAlcohol,
+      FinalPh = Vm.FinalPh,
+      FinalSulfur = Vm.FinalSulfur,
+      FinalNotes = Vm.FinalNotes,
 
       GrapeTreatments = Vm.GrapeTreatments.Select(x => new TreatmentLineDto { Type = x.Type, Agent = x.Agent, Amount = x.Amount, Date = x.Date }).ToList(),
-      MashTreatments  = Vm.MashTreatments .Select(x => new TreatmentLineDto { Type = x.Type, Agent = x.Agent, Amount = x.Amount, Date = x.Date }).ToList(),
+      MashTreatments = Vm.MashTreatments.Select(x => new TreatmentLineDto { Type = x.Type, Agent = x.Agent, Amount = x.Amount, Date = x.Date }).ToList(),
       YoungTreatments = Vm.YoungTreatments.Select(x => new TreatmentLineDto { Type = x.Type, Agent = x.Agent, Amount = x.Amount, Date = x.Date }).ToList(),
-      Movements       = Vm.Movements      .Select(m => new MovementLineDto { ToTankId = m.ToTankId, Volume = m.Volume, Date = m.Date }).ToList()
+      Movements = Vm.Movements.Select(m => new MovementLineDto { ToTankId = m.ToTankId, Volume = m.Volume, Date = m.Date }).ToList()
     };
 
     var resp = await BatchService.UpdateBatchAsync(Id, dto);
@@ -726,7 +739,7 @@
 
     await JS.InvokeVoidAsync("BlazorDownloadFile", fileName, "application/pdf", Convert.ToBase64String(bytes));
   }
-  
+
   private async Task ConfirmDeleteAsync()
   {
     if (Id <= 0) return;

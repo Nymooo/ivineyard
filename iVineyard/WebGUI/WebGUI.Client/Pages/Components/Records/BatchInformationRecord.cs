@@ -46,6 +46,8 @@ public record TreatmentRecord
 {
     public int TreatmentId { get; init; }
     public string Type { get; init; } = string.Empty;
+    
+    public string Notes { get; init; } = string.Empty;
 }
 
 public record InformationsRecord

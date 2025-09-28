@@ -690,6 +690,11 @@ namespace Model.Migrations
 
                     MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("TreatmentId"));
 
+                    b.Property<string>("Notes")
+                        .IsRequired()
+                        .HasColumnType("longtext")
+                        .HasColumnName("NOTES");
+
                     b.Property<string>("Type")
                         .IsRequired()
                         .HasColumnType("longtext")

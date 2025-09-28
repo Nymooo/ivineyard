@@ -150,6 +150,32 @@ public class BatchController : ControllerBase
         await StoreTreatments(dto.GrapeTreatments);
         await StoreTreatments(dto.MashTreatments);
         await StoreTreatments(dto.YoungTreatments);
+        
+        const string TYPE_NOTES_GRAPE = "GRAPE_NOTES";
+        const string TYPE_NOTES_MASH  = "MASH_NOTES";
+        const string TYPE_NOTES_YOUNG = "YOUNG_WINE_NOTES";
+
+        async Task StoreSectionNotes(string? notes, string typeConst)
+        {
+            if (string.IsNullOrWhiteSpace(notes)) return;
+
+            var tr = new Treatment { Type = typeConst, Notes = notes };
+            _db.Add(tr);
+            await _db.SaveChangesAsync(ct);
+
+            _db.Add(new WineBatchHasTreatment
+            {
+                BatchId      = batch.BatchId,
+                TreatementId = tr.TreatmentId,
+                Agent        = string.Empty,
+                Amount       = string.Empty,
+                Date         = DateTime.UtcNow
+            });
+        }
+
+        await StoreSectionNotes(dto.GrapeNotes, TYPE_NOTES_GRAPE);
+        await StoreSectionNotes(dto.MashNotes,  TYPE_NOTES_MASH);
+        await StoreSectionNotes(dto.YoungNotesFree, TYPE_NOTES_YOUNG);
 
         // 8) Umzüge
         int? currentTankId = dto.TankId; // Start ist der evtl. gewählte Tank oberhalb
@@ -284,6 +310,49 @@ public class BatchController : ControllerBase
         await StoreTreatments(dto.GrapeTreatments);
         await StoreTreatments(dto.MashTreatments);
         await StoreTreatments(dto.YoungTreatments);
+        
+        const string TYPE_NOTES_GRAPE = "GRAPE_NOTES";
+        const string TYPE_NOTES_MASH  = "MASH_NOTES";
+        const string TYPE_NOTES_YOUNG = "YOUNG_WINE_NOTES";
+
+        async Task UpsertSectionNotes(int batchId, string? notes, string typeConst)
+        {
+            if (notes is null) return; // nur ändern, wenn Feld mitkommt (leer = leeren)
+
+            // Treatment für diese Notiz suchen (über Join, damit wir genau dieses Batch treffen)
+            var existing = await (from wbht in _db.WineBatchHasTreatments
+                join t in _db.Treatments on wbht.TreatementId equals t.TreatmentId
+                where wbht.BatchId == batchId && t.Type == typeConst
+                select t).FirstOrDefaultAsync(ct);
+
+            if (existing is null)
+            {
+                if (string.IsNullOrWhiteSpace(notes)) return; // nichts anzulegen
+                var tr = new Treatment { Type = typeConst, Notes = notes };
+                _db.Add(tr);
+                await _db.SaveChangesAsync(ct);
+
+                _db.Add(new WineBatchHasTreatment
+                {
+                    BatchId      = batchId,
+                    TreatementId = tr.TreatmentId,
+                    Agent        = string.Empty,
+                    Amount       = string.Empty,
+                    Date         = DateTime.UtcNow
+                });
+            }
+            else
+            {
+                // aktualisieren (auch leeren erlauben)
+                existing.Notes = notes ?? string.Empty;
+            }
+        }
+
+        // nach StoreTreatments(...) im Update():
+        await UpsertSectionNotes(id, dto.GrapeNotes, TYPE_NOTES_GRAPE);
+        await UpsertSectionNotes(id, dto.MashNotes,  TYPE_NOTES_MASH);
+        await UpsertSectionNotes(id, dto.YoungNotesFree, TYPE_NOTES_YOUNG);
+
 
         // 6) Informations upsert (vorhandene Datensätze aktualisieren, sonst anlegen)
 
@@ -498,6 +567,10 @@ public class BatchCreateDto
     public List<TreatmentLineDto> GrapeTreatments { get; set; } = new();
     public List<TreatmentLineDto> MashTreatments { get; set; } = new();
     public List<TreatmentLineDto> YoungTreatments { get; set; } = new();
+    
+    public string? GrapeNotes { get; set; }
+    public string? MashNotes { get; set; }
+    public string? YoungNotesFree { get; set; }
 
     // Ausgangsmust
     public DateTime? MustDate { get; set; }
@@ -560,6 +633,10 @@ public class BatchUpdateDto
     public List<TreatmentLineDto> MashTreatments { get; set; } = new();
     public List<TreatmentLineDto> YoungTreatments { get; set; } = new();
 
+    public string? GrapeNotes { get; set; }
+    public string? MashNotes { get; set; }
+    public string? YoungNotesFree { get; set; }
+    
     public DateTime? MustDate { get; set; }
     public double? KMW_OE { get; set; }
     public string? MustAcidity { get; set; }

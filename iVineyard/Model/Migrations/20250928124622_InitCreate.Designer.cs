@@ -12,8 +12,8 @@ using Model.Configurations;
 namespace Model.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250928105331_initcreate")]
-    partial class initcreate
+    [Migration("20250928124622_InitCreate")]
+    partial class InitCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -692,6 +692,11 @@ namespace Model.Migrations
                         .HasColumnName("TREATMENT_ID");
 
                     MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("TreatmentId"));
+
+                    b.Property<string>("Notes")
+                        .IsRequired()
+                        .HasColumnType("longtext")
+                        .HasColumnName("NOTES");
 
                     b.Property<string>("Type")
                         .IsRequired()

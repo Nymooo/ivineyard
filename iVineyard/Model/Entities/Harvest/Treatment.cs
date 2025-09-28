@@ -12,5 +12,5 @@ public class Treatment
     public string Type { get; set; }
     
     [Column("NOTES")]
-    public string Notes { get; set; } 
+    public string Notes { get; set; } = string.Empty;
 }

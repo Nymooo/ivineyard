@@ -289,16 +289,15 @@ public class BatchController : ControllerBase
         async Task StoreTreatments(IEnumerable<TreatmentLineDto> lines)
         {
             foreach (var l in lines.Where(x =>
-                         !string.IsNullOrWhiteSpace(x.Agent) || !string.IsNullOrWhiteSpace(x.Amount) ||
-                         x.Date.HasValue))
+                         !string.IsNullOrWhiteSpace(x.Agent) || !string.IsNullOrWhiteSpace(x.Amount) || x.Date.HasValue))
             {
-                var tr = new Treatment { Type = l.Type };
+                var tr = new Treatment { Type = l.Type, Notes = string.Empty }; // <- wichtig
                 _db.Add(tr);
                 await _db.SaveChangesAsync(ct);
 
                 _db.Add(new WineBatchHasTreatment
                 {
-                    BatchId = id,
+                    BatchId = batch.BatchId,      // bzw. id im Update
                     TreatementId = tr.TreatmentId,
                     Agent = l.Agent ?? string.Empty,
                     Amount = l.Amount ?? string.Empty,
@@ -306,6 +305,7 @@ public class BatchController : ControllerBase
                 });
             }
         }
+
 
         await StoreTreatments(dto.GrapeTreatments);
         await StoreTreatments(dto.MashTreatments);

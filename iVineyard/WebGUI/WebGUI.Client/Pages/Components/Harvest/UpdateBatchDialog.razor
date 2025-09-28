@@ -51,7 +51,6 @@
               <MudText Typo="Typo.h5" Class="mb-2">Weingarten</MudText>
 
               <MudGrid Class="mb-2">
-                <!-- Weingarten + Menge -->
                 <MudItem xs="12" md="8">
                   <MudSelect T="int" @bind-Value="Vm.VineyardId" Label="Weingarten" Dense="true" Required="true">
                     @foreach (var v in Vineyards)
@@ -64,7 +63,6 @@
                   <MudNumericField T="string" @bind-Value="Vm.Amount" Label="Menge (kg)" Dense="true" Required="true"/>
                 </MudItem>
 
-                <!-- Sorte + Erntedatum -->
                 <MudItem xs="12" md="6">
                   <MudTextField T="string" @bind-Value="Vm.Variety" Label="Sorte" Dense="true" Required="true"/>
                 </MudItem>
@@ -73,71 +71,119 @@
                 </MudItem>
               </MudGrid>
 
+              <!-- --- GRAPE --- -->
               <MudText Typo="Typo.h6" Class="mt-3 mb-1">Behandlungen (Trauben)</MudText>
-              @foreach (var t in Vm.GrapeTreatments)
+              @foreach (var g in Vm.GrapeTreatments)
               {
-                <MudGrid Class="mb-2">
-                  <MudItem xs="3">
-                    <MudText Typo="Typo.body1">@t.Type</MudText>
-                  </MudItem>
-                  <MudItem xs="3">
-                    <MudDatePicker T="DateTime?" @bind-Date="t.Date" Label="Datum" Dense="true"/>
-                  </MudItem>
-                  <MudItem xs="3">
-                    <MudTextField @bind-Value="t.Agent" Label="Mittel" Dense="true"/>
-                  </MudItem>
-                  <MudItem xs="3">
-                    <MudTextField T="string" @bind-Value="t.Amount" Label="Menge" Dense="true"/>
-                  </MudItem>
-                </MudGrid>
-              }
+                <div class="mb-2">
+                  <MudGrid Class="mb-1">
+                    <MudItem xs="6"><MudText Typo="Typo.body1">@g.Type</MudText></MudItem>
+                    <MudItem xs="6" Class="d-flex justify-end">
+                      <MudIconButton Icon="@Icons.Material.Filled.AddCircleOutline" Size="Size.Small" OnClick="@(()=>AddLine(g))" AriaLabel="Zeile hinzufügen"/>
+                    </MudItem>
+                  </MudGrid>
 
+                  @for (int i = 0; i < g.Lines.Count; i++)
+                  {
+                    var idx = i;
+                    <MudGrid Class="mb-2">
+                      <MudItem xs="4" md="3">
+                        <MudDatePicker T="DateTime?" @bind-Date="g.Lines[idx].Date" Label="Datum" Dense="true"/>
+                      </MudItem>
+                      <MudItem xs="4" md="3">
+                        <MudTextField @bind-Value="g.Lines[idx].Agent" Label="Mittel" Dense="true"/>
+                      </MudItem>
+                      <MudItem xs="3" md="3">
+                        <MudTextField T="string" @bind-Value="g.Lines[idx].Amount" Label="Menge" Dense="true"/>
+                      </MudItem>
+                      <MudItem xs="1" md="3" Class="d-flex align-center">
+                        <MudIconButton Icon="@Icons.Material.Filled.DeleteOutline"
+                                       Disabled="@(g.Lines.Count<=1)"
+                                       OnClick="@(()=>RemoveLine(g, idx))"
+                                       AriaLabel="Zeile löschen"/>
+                      </MudItem>
+                    </MudGrid>
+                  }
+                </div>
+              }
               <MudItem xs="12">
                 <MudTextField @bind-Value="Vm.GrapeNotes" Label="weitere Behandlungsschritte" Dense="true"/>
               </MudItem>
 
+              <!-- --- MASH --- -->
               <MudText Typo="Typo.h6" Class="mt-3 mb-1">Most / Maische</MudText>
-              @foreach (var t in Vm.MashTreatments)
+              @foreach (var g in Vm.MashTreatments)
               {
-                <MudGrid Class="mb-2">
-                  <MudItem xs="3">
-                    <MudText Typo="Typo.body1">@t.Type</MudText>
-                  </MudItem>
-                  <MudItem xs="3">
-                    <MudDatePicker T="DateTime?" @bind-Date="t.Date" Label="Datum" Dense="true"/>
-                  </MudItem>
-                  <MudItem xs="3">
-                    <MudTextField @bind-Value="t.Agent" Label="Mittel" Dense="true"/>
-                  </MudItem>
-                  <MudItem xs="3">
-                    <MudTextField T="string" @bind-Value="t.Amount" Label="Menge" Dense="true"/>
-                  </MudItem>
-                </MudGrid>
-              }
+                <div class="mb-2">
+                  <MudGrid Class="mb-1">
+                    <MudItem xs="6"><MudText Typo="Typo.body1">@g.Type</MudText></MudItem>
+                    <MudItem xs="6" Class="d-flex justify-end">
+                      <MudIconButton Icon="@Icons.Material.Filled.AddCircleOutline" Size="Size.Small" OnClick="@(()=>AddLine(g))" AriaLabel="Zeile hinzufügen"/>
+                    </MudItem>
+                  </MudGrid>
 
+                  @for (int i = 0; i < g.Lines.Count; i++)
+                  {
+                    var idx = i;
+                    <MudGrid Class="mb-2">
+                      <MudItem xs="4" md="3">
+                        <MudDatePicker T="DateTime?" @bind-Date="g.Lines[idx].Date" Label="Datum" Dense="true"/>
+                      </MudItem>
+                      <MudItem xs="4" md="3">
+                        <MudTextField @bind-Value="g.Lines[idx].Agent" Label="Mittel" Dense="true"/>
+                      </MudItem>
+                      <MudItem xs="3" md="3">
+                        <MudTextField T="string" @bind-Value="g.Lines[idx].Amount" Label="Menge" Dense="true"/>
+                      </MudItem>
+                      <MudItem xs="1" md="3" Class="d-flex align-center">
+                        <MudIconButton Icon="@Icons.Material.Filled.DeleteOutline"
+                                       Disabled="@(g.Lines.Count<=1)"
+                                       OnClick="@(()=>RemoveLine(g, idx))"
+                                       AriaLabel="Zeile löschen"/>
+                      </MudItem>
+                    </MudGrid>
+                  }
+                </div>
+              }
               <MudItem xs="12">
                 <MudTextField @bind-Value="Vm.MashNotes" Label="weitere Behandlungsschritte" Dense="true"/>
               </MudItem>
 
+              <!-- --- YOUNG --- -->
               <MudText Typo="Typo.h6" Class="mt-3 mb-1">Jungwein-Behandlungen</MudText>
-              @foreach (var t in Vm.YoungTreatments)
+              @foreach (var g in Vm.YoungTreatments)
               {
-                <MudGrid Class="mb-2">
-                  <MudItem xs="3">
-                    <MudText Typo="Typo.body1">@t.Type</MudText>
-                  </MudItem>
-                  <MudItem xs="3">
-                    <MudDatePicker T="DateTime?" @bind-Date="t.Date" Label="Datum" Dense="true"/>
-                  </MudItem>
-                  <MudItem xs="3">
-                    <MudTextField @bind-Value="t.Agent" Label="Mittel" Dense="true"/>
-                  </MudItem>
-                  <MudItem xs="3">
-                    <MudTextField T="string" @bind-Value="t.Amount" Label="Menge" Dense="true"/>
-                  </MudItem>
-                </MudGrid>
-              }
+                <div class="mb-2">
+                  <MudGrid Class="mb-1">
+                    <MudItem xs="6"><MudText Typo="Typo.body1">@g.Type</MudText></MudItem>
+                    <MudItem xs="6" Class="d-flex justify-end">
+                      <MudIconButton Icon="@Icons.Material.Filled.AddCircleOutline" Size="Size.Small" OnClick="@(()=>AddLine(g))" AriaLabel="Zeile hinzufügen"/>
+                    </MudItem>
+                  </MudGrid>
 
+                  @for (int i = 0; i < g.Lines.Count; i++)
+                  {
+                    var idx = i;
+                    <MudGrid Class="mb-2">
+                      <MudItem xs="4" md="3">
+                        <MudDatePicker T="DateTime?" @bind-Date="g.Lines[idx].Date" Label="Datum" Dense="true"/>
+                      </MudItem>
+                      <MudItem xs="4" md="3">
+                        <MudTextField @bind-Value="g.Lines[idx].Agent" Label="Mittel" Dense="true"/>
+                      </MudItem>
+                      <MudItem xs="3" md="3">
+                        <MudTextField T="string" @bind-Value="g.Lines[idx].Amount" Label="Menge" Dense="true"/>
+                      </MudItem>
+                      <MudItem xs="1" md="3" Class="d-flex align-center">
+                        <MudIconButton Icon="@Icons.Material.Filled.DeleteOutline"
+                                       Disabled="@(g.Lines.Count<=1)"
+                                       OnClick="@(()=>RemoveLine(g, idx))"
+                                       AriaLabel="Zeile löschen"/>
+                      </MudItem>
+                    </MudGrid>
+                  }
+                </div>
+              }
               <MudItem xs="12">
                 <MudTextField @bind-Value="Vm.YoungNotesFree" Label="weitere Behandlungsschritte" Dense="true"/>
               </MudItem>
@@ -309,21 +355,16 @@
   [CascadingParameter] public MudDialogInstance? MudDialog { get; set; }
   [Parameter] public int Id { get; set; } // BatchId
 
-  // UI-VM
-  class TreatmentLine
+  // VM
+  class TreatmentLine { public string? Agent { get; set; } public string? Amount { get; set; } public DateTime? Date { get; set; } }
+
+  class TreatmentGroup
   {
     public string Type { get; set; } = "";
-    public string? Agent { get; set; }
-    public string? Amount { get; set; }
-    public DateTime? Date { get; set; }
+    public List<TreatmentLine> Lines { get; set; } = new() { new() };
   }
 
-  class MovementLine
-  {
-    public int? ToTankId { get; set; }
-    public double? Volume { get; set; }
-    public DateTime? Date { get; set; }
-  }
+  class MovementLine { public int? ToTankId { get; set; } public double? Volume { get; set; } public DateTime? Date { get; set; } }
 
   class WeinFormVm
   {
@@ -335,9 +376,9 @@
     public string? Weather { get; set; }
     public int? TankId { get; set; }
 
-    public List<TreatmentLine> GrapeTreatments { get; set; } = new();
-    public List<TreatmentLine> MashTreatments { get; set; } = new();
-    public List<TreatmentLine> YoungTreatments { get; set; } = new();
+    public List<TreatmentGroup> GrapeTreatments { get; set; } = new();
+    public List<TreatmentGroup> MashTreatments  { get; set; } = new();
+    public List<TreatmentGroup> YoungTreatments { get; set; } = new();
 
     public string? GrapeNotes { get; set; }
     public string? MashNotes { get; set; }
@@ -370,21 +411,9 @@
     public List<MovementLine> Movements { get; set; } = new();
   }
 
-  // API-DTO (Update – falls verwendet)
-  class TreatmentLineDto
-  {
-    public string Type { get; set; } = "";
-    public string? Agent { get; set; }
-    public string? Amount { get; set; }
-    public DateTime? Date { get; set; }
-  }
-
-  class MovementLineDto
-  {
-    public int? ToTankId { get; set; }
-    public double? Volume { get; set; }
-    public DateTime? Date { get; set; }
-  }
+  // API-DTOs (Update)
+  class TreatmentLineDto { public string Type { get; set; } = ""; public string? Agent { get; set; } public string? Amount { get; set; } public DateTime? Date { get; set; } }
+  class MovementLineDto  { public int? ToTankId { get; set; } public double? Volume { get; set; } public DateTime? Date { get; set; } }
 
   class BatchUpdateDto
   {
@@ -396,9 +425,8 @@
     public string? Weather { get; set; }
     public int? TankId { get; set; }
     public List<TreatmentLineDto> GrapeTreatments { get; set; } = new();
-    public List<TreatmentLineDto> MashTreatments { get; set; } = new();
+    public List<TreatmentLineDto> MashTreatments  { get; set; } = new();
     public List<TreatmentLineDto> YoungTreatments { get; set; } = new();
-
 
     public string? GrapeNotes { get; set; }
     public string? MashNotes { get; set; }
@@ -436,11 +464,9 @@
 
   protected override async Task OnInitializedAsync()
   {
-    // Lookups
     Vineyards = await VineyardService.GetVineyardsAsync();
-    Tanks = await TankService.GetTanksAsync();
+    Tanks     = await TankService.GetTanksAsync();
     _lookupsLoaded = true;
-
     PrefillTemplate();
   }
 
@@ -456,7 +482,13 @@
   void PrefillTemplate()
   {
     Vm.Variety = "";
-    Vm.GrapeTreatments = new() { new() { Type = "Trauben" }, new() { Type = "Schwefelung" }, new() { Type = "Extraktionsenzym" }, new() { Type = "Pressprogramm" } };
+    Vm.GrapeTreatments = new()
+    {
+      new() { Type = "Trauben" },
+      new() { Type = "Schwefelung" },
+      new() { Type = "Extraktionsenzym" },
+      new() { Type = "Pressprogramm" }
+    };
     Vm.MashTreatments = new()
     {
       new() { Type = "Schwefelung" }, new() { Type = "Safentzug" }, new() { Type = "Maischestandzeit" }, new() { Type = "Ent-/Säuerung" }, new() { Type = "Mostbehandlung" },
@@ -523,10 +555,9 @@
       Vm.FinalSulfur = finalW.WhiteWineRedWine!.Sulfur;
     }
 
-    // --- Treatments automatisch in die linken Zeilen mappen ---
+    // --- Treatments & Notes ---
     var srcTreats = link.Batch.batchHasTreatmentsList ?? new();
 
-    // Helper
     static string Normalize(string? s)
     {
       if (string.IsNullOrWhiteSpace(s)) return "";
@@ -535,45 +566,46 @@
       return s;
     }
 
-    // Helper: erste Notes eines speziellen Pseudo-Typs holen
     string? GetSectionNotes(string type) =>
       srcTreats.FirstOrDefault(x =>
           x.Treatment is not null &&
-          string.Equals(x.Treatment.Type, type, StringComparison.OrdinalIgnoreCase))
-        ?.Treatment?.Notes;
+          string.Equals(x.Treatment.Type, type, StringComparison.OrdinalIgnoreCase))?.Treatment?.Notes;
 
-// Abschnitts-Notizen setzen
-    Vm.GrapeNotes = GetSectionNotes("GRAPE_NOTES") ?? Vm.GrapeNotes;
-    Vm.MashNotes = GetSectionNotes("MASH_NOTES") ?? Vm.MashNotes;
+    Vm.GrapeNotes     = GetSectionNotes("GRAPE_NOTES")      ?? Vm.GrapeNotes;
+    Vm.MashNotes      = GetSectionNotes("MASH_NOTES")       ?? Vm.MashNotes;
     Vm.YoungNotesFree = GetSectionNotes("YOUNG_WINE_NOTES") ?? Vm.YoungNotesFree;
 
-    // >>> Nur „echte“ Behandlungen in die Zeilen mappen (Notes-Zeilen ausschließen)
-    var byType = srcTreats
+    var grouped = srcTreats
       .Where(t => t.Treatment is not null
                   && !string.IsNullOrWhiteSpace(t.Treatment!.Type)
-                  && string.IsNullOrWhiteSpace(t.Treatment!.Notes)) // <— Notes ausschließen
+                  && string.IsNullOrWhiteSpace(t.Treatment!.Notes)) // Notes-Pseudo-Treatments ausschließen
       .GroupBy(t => Normalize(t.Treatment!.Type), StringComparer.OrdinalIgnoreCase)
-      .ToDictionary(g => g.Key, g => g.OrderByDescending(x => x.Date).First(), StringComparer.OrdinalIgnoreCase);
+      .ToDictionary(g => g.Key, g => g.OrderBy(x => x.Date).ToList(), StringComparer.OrdinalIgnoreCase);
 
-    void FillTreatments(List<TreatmentLine> target)
+    void FillGroups(List<TreatmentGroup> groups)
     {
-      foreach (var row in target)
+      foreach (var g in groups)
       {
-        var key = Normalize(row.Type);
-        if (string.IsNullOrEmpty(key)) continue;
-
-        if (byType.TryGetValue(key, out var hit))
+        var key = Normalize(g.Type);
+        if (grouped.TryGetValue(key, out var list) && list.Count > 0)
         {
-          row.Agent = hit.Agent;
-          row.Amount = hit.Amount;
-          row.Date = hit.Date;
+          g.Lines = list.Select(x => new TreatmentLine
+          {
+            Date   = x.Date,
+            Agent  = x.Agent,
+            Amount = x.Amount
+          }).ToList();
+        }
+        else
+        {
+          g.Lines = new() { new() };
         }
       }
     }
 
-    FillTreatments(Vm.GrapeTreatments);
-    FillTreatments(Vm.MashTreatments);
-    FillTreatments(Vm.YoungTreatments);
+    FillGroups(Vm.GrapeTreatments);
+    FillGroups(Vm.MashTreatments);
+    FillGroups(Vm.YoungTreatments);
 
     // Historie & aktueller Tank
     MovementHistory = (link.Batch.TankMovements ?? new())
@@ -593,51 +625,66 @@
     await InvokeAsync(StateHasChanged);
   }
 
+  void AddLine(TreatmentGroup g) => g.Lines.Add(new());
+  void RemoveLine(TreatmentGroup g, int idx)
+  {
+    if (idx >= 0 && idx < g.Lines.Count && g.Lines.Count > 1)
+      g.Lines.RemoveAt(idx);
+  }
+
   async Task SaveAsync()
   {
     var dto = new BatchUpdateDto
     {
-      VineyardId = Vm.VineyardId,
-      Amount = Vm.Amount, // << string durchreichen, nicht parsen
-      HarvestDate = Vm.HarvestDate,
-      Variety = Vm.Variety,
+      VineyardId     = Vm.VineyardId,
+      Amount         = Vm.Amount,
+      HarvestDate    = Vm.HarvestDate,
+      Variety        = Vm.Variety,
       MaturityHealth = Vm.MaturityHealth,
-      Weather = Vm.Weather,
-      TankId = Vm.TankId,
+      Weather        = Vm.Weather,
+      TankId         = Vm.TankId,
 
-      MustDate = Vm.MustDate,
-      KMW_OE = Vm.KMW_OE,
-      MustAcidity = Vm.MustAcidity,
-      MustPh = Vm.MustPh,
-      MustNotes = Vm.MustNotes,
-      Rebel = Vm.Rebel,
-      Squeeze = Vm.Squeeze,
-      MashLife = Vm.MashLife,
+      MustDate       = Vm.MustDate,
+      KMW_OE         = Vm.KMW_OE,
+      MustAcidity    = Vm.MustAcidity,
+      MustPh         = Vm.MustPh,
+      MustNotes      = Vm.MustNotes,
+      Rebel          = Vm.Rebel,
+      Squeeze        = Vm.Squeeze,
+      MashLife       = Vm.MashLife,
 
-
-      GrapeNotes = Vm.GrapeNotes,
-      MashNotes = Vm.MashNotes,
+      GrapeNotes     = Vm.GrapeNotes,
+      MashNotes      = Vm.MashNotes,
       YoungNotesFree = Vm.YoungNotesFree,
 
-      YoungDate = Vm.YoungDate,
-      YoungAcidity = Vm.YoungAcidity,
-      YoungSugar = Vm.YoungSugar,
-      YoungAlcohol = Vm.YoungAlcohol,
-      YoungPh = Vm.YoungPh,
-      YoungNotes = Vm.YoungNotes,
+      YoungDate      = Vm.YoungDate,
+      YoungAcidity   = Vm.YoungAcidity,
+      YoungSugar     = Vm.YoungSugar,
+      YoungAlcohol   = Vm.YoungAlcohol,
+      YoungPh        = Vm.YoungPh,
+      YoungNotes     = Vm.YoungNotes,
 
-      FinalDate = Vm.FinalDate,
-      FinalAcidity = Vm.FinalAcidity,
-      FinalSugar = Vm.FinalSugar,
-      FinalAlcohol = Vm.FinalAlcohol,
-      FinalPh = Vm.FinalPh,
-      FinalSulfur = Vm.FinalSulfur,
-      FinalNotes = Vm.FinalNotes,
+      FinalDate      = Vm.FinalDate,
+      FinalAcidity   = Vm.FinalAcidity,
+      FinalSugar     = Vm.FinalSugar,
+      FinalAlcohol   = Vm.FinalAlcohol,
+      FinalPh        = Vm.FinalPh,
+      FinalSulfur    = Vm.FinalSulfur,
+      FinalNotes     = Vm.FinalNotes,
 
-      GrapeTreatments = Vm.GrapeTreatments.Select(x => new TreatmentLineDto { Type = x.Type, Agent = x.Agent, Amount = x.Amount, Date = x.Date }).ToList(),
-      MashTreatments = Vm.MashTreatments.Select(x => new TreatmentLineDto { Type = x.Type, Agent = x.Agent, Amount = x.Amount, Date = x.Date }).ToList(),
-      YoungTreatments = Vm.YoungTreatments.Select(x => new TreatmentLineDto { Type = x.Type, Agent = x.Agent, Amount = x.Amount, Date = x.Date }).ToList(),
-      Movements = Vm.Movements.Select(m => new MovementLineDto { ToTankId = m.ToTankId, Volume = m.Volume, Date = m.Date }).ToList()
+      GrapeTreatments = Vm.GrapeTreatments
+        .SelectMany(g => g.Lines.Select(l => new TreatmentLineDto { Type = g.Type, Agent = l.Agent, Amount = l.Amount, Date = l.Date }))
+        .ToList(),
+      MashTreatments = Vm.MashTreatments
+        .SelectMany(g => g.Lines.Select(l => new TreatmentLineDto { Type = g.Type, Agent = l.Agent, Amount = l.Amount, Date = l.Date }))
+        .ToList(),
+      YoungTreatments = Vm.YoungTreatments
+        .SelectMany(g => g.Lines.Select(l => new TreatmentLineDto { Type = g.Type, Agent = l.Agent, Amount = l.Amount, Date = l.Date }))
+        .ToList(),
+
+      Movements = Vm.Movements
+        .Select(m => new MovementLineDto { ToTankId = m.ToTankId, Volume = m.Volume, Date = m.Date })
+        .ToList()
     };
 
     var resp = await BatchService.UpdateBatchAsync(Id, dto);
@@ -646,7 +693,6 @@
     RefreshPage();
     Reset();
   }
-
 
   void Reset()
   {
@@ -657,7 +703,6 @@
   }
 
   void RefreshPage() => Navigation.NavigateTo(Navigation.Uri, forceLoad: true);
-
   string? GetTankName(int tankId) => Tanks.FirstOrDefault(t => t.TankId == tankId)?.Name;
 
   // PDF
@@ -680,25 +725,29 @@
     doc.Add(new Paragraph($"Erntedatum: {Vm.HarvestDate?.ToString("dd.MM.yyyy")}", normalFont));
     doc.Add(new Paragraph(" "));
 
-    void AddTreatmentTable(string header, List<TreatmentLine> treatments)
+    void AddTreatmentTable(string header, List<TreatmentGroup> groups)
     {
-      if (!treatments.Any()) return;
+      var rows = new List<(string Type, TreatmentLine Line)>();
+      foreach (var g in groups)
+      {
+        if (g.Lines.Count == 0) rows.Add((g.Type, new TreatmentLine()));
+        else rows.AddRange(g.Lines.Select(l => (g.Type, l)));
+      }
+
+      if (!rows.Any()) return;
 
       doc.Add(new Paragraph(header, FontFactory.GetFont("Arial", 14, Font.BOLD)));
       var table = new PdfPTable(4) { WidthPercentage = 100 };
       table.SetWidths(new float[] { 25, 25, 25, 25 });
 
-      table.AddCell("Typ");
-      table.AddCell("Datum");
-      table.AddCell("Mittel");
-      table.AddCell("Menge");
+      table.AddCell("Typ"); table.AddCell("Datum"); table.AddCell("Mittel"); table.AddCell("Menge");
 
-      foreach (var t in treatments)
+      foreach (var r in rows)
       {
-        table.AddCell(t.Type);
-        table.AddCell(t.Date?.ToString("dd.MM.yyyy") ?? "-");
-        table.AddCell(t.Agent ?? "-");
-        table.AddCell(t.Amount ?? "-");
+        table.AddCell(r.Type);
+        table.AddCell(r.Line.Date?.ToString("dd.MM.yyyy") ?? "-");
+        table.AddCell(r.Line.Agent ?? "-");
+        table.AddCell(r.Line.Amount ?? "-");
       }
 
       doc.Add(table);
@@ -714,10 +763,7 @@
       doc.Add(new Paragraph("Umgezogen in Tank", FontFactory.GetFont("Arial", 14, Font.BOLD)));
       var table = new PdfPTable(3) { WidthPercentage = 100 };
       table.SetWidths(new float[] { 33, 33, 33 });
-
-      table.AddCell("Tank");
-      table.AddCell("Volumen (L)");
-      table.AddCell("Datum");
+      table.AddCell("Tank"); table.AddCell("Volumen (L)"); table.AddCell("Datum");
 
       foreach (var m in Vm.Movements)
       {
@@ -755,22 +801,20 @@
       await DeleteAsync();
   }
 
-
   private async Task DeleteAsync()
   {
     var resp = await BatchService.DeleteBatchAsync(Id);
     if (resp.IsSuccessStatusCode)
     {
       Snackbar.Add("Batch gelöscht.", Severity.Success);
-      MudDialog?.Close(DialogResult.Ok(true)); // Dialog schließen
-      Navigation.NavigateTo(Navigation.Uri, forceLoad: true); // Refresh
+      MudDialog?.Close(DialogResult.Ok(true));
+      Navigation.NavigateTo(Navigation.Uri, forceLoad: true);
     }
     else
     {
       Snackbar.Add("Löschen fehlgeschlagen.", Severity.Error);
     }
   }
-
 }
 
 <script>

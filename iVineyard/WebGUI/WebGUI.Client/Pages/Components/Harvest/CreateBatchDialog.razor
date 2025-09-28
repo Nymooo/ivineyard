@@ -17,7 +17,6 @@
   <DialogContent>
 
     <MudContainer Class="pa-4">
-      <p>TestId: @Id</p>
       <MudText Typo="Typo.h4" Class="mb-4">Maßnahmendatenblatt</MudText>
 
       <EditForm Model="@Vm" OnValidSubmit="@SaveAsync">
@@ -52,71 +51,139 @@
               </MudGrid>
 
               <MudText Typo="Typo.h6" Class="mt-3 mb-1">Behandlungen (Trauben)</MudText>
-              @foreach (var t in Vm.GrapeTreatments)
-              {
-                <MudGrid Class="mb-2">
-                  <MudItem xs="3">
-                    <MudText Typo="Typo.body1">@t.Type</MudText>
-                  </MudItem>
-                  <MudItem xs="3">
-                    <MudDatePicker T="DateTime?" @bind-Date="t.Date" Label="Datum" Dense="true"/>
-                  </MudItem>
-                  <MudItem xs="3">
-                    <MudTextField @bind-Value="t.Agent" Label="Mittel" Dense="true"/>
-                  </MudItem>
-                  <MudItem xs="3">
-                    <MudTextField T="string" @bind-Value="t.Amount" Label="Menge" Dense="true"/>
 
-                  </MudItem>
-                </MudGrid>
-              }
-                <MudItem xs="12">
-                  <MudTextField @bind-Value="Vm.GrapeNotes" Label="weitere Behandlungsschritte" Dense="true"/>
-                </MudItem>
-
-              <MudText Typo="Typo.h6" Class="mt-3 mb-1">Most / Maische</MudText>
-              @foreach (var t in Vm.MashTreatments)
+              @foreach (var grp in Vm.GrapeTreatments)
               {
-                <MudGrid Class="mb-2">
-                  <MudItem xs="3">
-                    <MudText Typo="Typo.body1">@t.Type</MudText>
-                  </MudItem>
-                  <MudItem xs="3">
-                    <MudDatePicker T="DateTime?" @bind-Date="t.Date" Label="Datum" Dense="true"/>
-                  </MudItem>
-                  <MudItem xs="3">
-                    <MudTextField @bind-Value="t.Agent" Label="Mittel" Dense="true"/>
-                  </MudItem>
-                  <MudItem xs="3">
-                    <MudTextField T="string" @bind-Value="t.Amount" Label="Menge" Dense="true"/>
-                  </MudItem>
-                </MudGrid>
+                <MudText Typo="Typo.body1" Class="mb-1">@grp.Type</MudText>
+
+                @for (int i = 0; i < grp.Lines.Count; i++)
+                {
+                  var idx  = i;                 // stabiler Index für das Click-Closure
+                  var line = grp.Lines[idx];    // lokale Referenz – kein mehrfacher Indexzugriff
+
+                  <MudGrid Class="mb-2" @key="line">
+                    <MudItem xs="4">
+                      <MudDatePicker T="DateTime?" @bind-Date="line.Date" Label="Datum" Dense="true" />
+                    </MudItem>
+                    <MudItem xs="4">
+                      <MudTextField @bind-Value="line.Agent" Label="Mittel" Dense="true" />
+                    </MudItem>
+                    <MudItem xs="3">
+                      <MudTextField T="string" @bind-Value="line.Amount" Label="Menge" Dense="true" />
+                    </MudItem>
+                    <MudItem xs="1" Class="d-flex align-center justify-end">
+                      <MudIconButton Icon="@Icons.Material.Filled.Delete"
+                                     Color="Color.Error"
+                                     Disabled="@(grp.Lines.Count == 1)"
+                                     OnClick="@(() => RemoveTreatmentRow(grp, idx))" />
+                    </MudItem>
+                  </MudGrid>
+                }
+
+
+                <MudButton Variant="Variant.Outlined" Size="Size.Small"
+                           StartIcon="@Icons.Material.Filled.Add"
+                           OnClick="@(() => AddTreatmentRow(grp))">
+                  Zeile hinzufügen
+                </MudButton>
+
+                <MudDivider Class="my-2" />
               }
+
               <MudItem xs="12">
-                <MudTextField @bind-Value="Vm.MashNotes" Label="weitere Behandlungsschritte" Dense="true"/>
+                <MudTextField @bind-Value="Vm.GrapeNotes" Label="weitere Behandlungsschritte" Dense="true" />
               </MudItem>
 
-              <MudText Typo="Typo.h6" Class="mt-3 mb-1">Jungwein-Behandlungen</MudText>
-              @foreach (var t in Vm.YoungTreatments)
+
+              <MudText Typo="Typo.h6" Class="mt-3 mb-1">Most / Maische</MudText>
+
+              @foreach (var grp in Vm.MashTreatments)
               {
-                <MudGrid Class="mb-2">
-                  <MudItem xs="3">
-                    <MudText Typo="Typo.body1">@t.Type</MudText>
-                  </MudItem>
-                  <MudItem xs="3">
-                    <MudDatePicker T="DateTime?" @bind-Date="t.Date" Label="Datum" Dense="true"/>
-                  </MudItem>
-                  <MudItem xs="3">
-                    <MudTextField @bind-Value="t.Agent" Label="Mittel" Dense="true"/>
-                  </MudItem>
-                  <MudItem xs="3">
-                    <MudTextField T="string" @bind-Value="t.Amount" Label="Menge" Dense="true"/>
-                  </MudItem>
-                </MudGrid>
+                <MudText Typo="Typo.body1" Class="mb-1">@grp.Type</MudText>
+
+                @for (int i = 0; i < grp.Lines.Count; i++)
+                {
+                  var idx  = i;                 // stabiler Index für das Click-Closure
+                  var line = grp.Lines[idx];    // lokale Referenz – kein mehrfacher Indexzugriff
+
+                  <MudGrid Class="mb-2" @key="line">
+                    <MudItem xs="4">
+                      <MudDatePicker T="DateTime?" @bind-Date="line.Date" Label="Datum" Dense="true" />
+                    </MudItem>
+                    <MudItem xs="4">
+                      <MudTextField @bind-Value="line.Agent" Label="Mittel" Dense="true" />
+                    </MudItem>
+                    <MudItem xs="3">
+                      <MudTextField T="string" @bind-Value="line.Amount" Label="Menge" Dense="true" />
+                    </MudItem>
+                    <MudItem xs="1" Class="d-flex align-center justify-end">
+                      <MudIconButton Icon="@Icons.Material.Filled.Delete"
+                                     Color="Color.Error"
+                                     Disabled="@(grp.Lines.Count == 1)"
+                                     OnClick="@(() => RemoveTreatmentRow(grp, idx))" />
+                    </MudItem>
+                  </MudGrid>
+                }
+
+
+                <MudButton Variant="Variant.Outlined" Size="Size.Small"
+                           StartIcon="@Icons.Material.Filled.Add"
+                           OnClick="@(() => AddTreatmentRow(grp))">
+                  Zeile hinzufügen
+                </MudButton>
+
+                <MudDivider Class="my-2" />
               }
-                <MudItem xs="12">
-                  <MudTextField @bind-Value="Vm.YoungNotesFree" Label="weitere Behandlungsschritte" Dense="true"/>
-                </MudItem>
+
+              <MudItem xs="12">
+                <MudTextField @bind-Value="Vm.MashNotes" Label="weitere Behandlungsschritte" Dense="true" />
+              </MudItem>
+
+
+              <MudText Typo="Typo.h6" Class="mt-3 mb-1">Jungwein-Behandlungen</MudText>
+
+              @foreach (var grp in Vm.YoungTreatments)
+              {
+                <MudText Typo="Typo.body1" Class="mb-1">@grp.Type</MudText>
+
+                @for (int i = 0; i < grp.Lines.Count; i++)
+                {
+                  var idx  = i;                 // stabiler Index für das Click-Closure
+                  var line = grp.Lines[idx];    // lokale Referenz – kein mehrfacher Indexzugriff
+
+                  <MudGrid Class="mb-2" @key="line">
+                    <MudItem xs="4">
+                      <MudDatePicker T="DateTime?" @bind-Date="line.Date" Label="Datum" Dense="true" />
+                    </MudItem>
+                    <MudItem xs="4">
+                      <MudTextField @bind-Value="line.Agent" Label="Mittel" Dense="true" />
+                    </MudItem>
+                    <MudItem xs="3">
+                      <MudTextField T="string" @bind-Value="line.Amount" Label="Menge" Dense="true" />
+                    </MudItem>
+                    <MudItem xs="1" Class="d-flex align-center justify-end">
+                      <MudIconButton Icon="@Icons.Material.Filled.Delete"
+                                     Color="Color.Error"
+                                     Disabled="@(grp.Lines.Count == 1)"
+                                     OnClick="@(() => RemoveTreatmentRow(grp, idx))" />
+                    </MudItem>
+                  </MudGrid>
+                }
+
+
+                <MudButton Variant="Variant.Outlined" Size="Size.Small"
+                           StartIcon="@Icons.Material.Filled.Add"
+                           OnClick="@(() => AddTreatmentRow(grp))">
+                  Zeile hinzufügen
+                </MudButton>
+
+                <MudDivider Class="my-2" />
+              }
+
+              <MudItem xs="12">
+                <MudTextField @bind-Value="Vm.YoungNotesFree" Label="weitere Behandlungsschritte" Dense="true" />
+              </MudItem>
+
             </MudPaper>
           </MudItem>
 
@@ -256,6 +323,23 @@
 
 @code {
 
+  void AddTreatmentRow(TreatmentGroup grp)
+  {
+    grp.Lines.Add(new TreatmentLine());
+    StateHasChanged();
+  }
+
+  void RemoveTreatmentRow(TreatmentGroup grp, int index)
+  {
+    if (index >= 0 && index < grp.Lines.Count && grp.Lines.Count > 1)
+    {
+      grp.Lines.RemoveAt(index);
+      StateHasChanged();
+    }
+  }
+
+
+  
   // Lookups
   List<VineyardRecord>? Vineyards = new();
   List<Tank>? Tanks = new();
@@ -265,14 +349,14 @@
 
 
   // VM
-  class TreatmentLine
+  class TreatmentLine { public string? Agent { get; set; } public string? Amount { get; set; } public DateTime? Date { get; set; } }
+
+  class TreatmentGroup
   {
     public string Type { get; set; } = "";
-    public string? Agent { get; set; }
-    public string? Amount { get; set; }
-    public DateTime? Date { get; set; }
+    public List<TreatmentLine> Lines { get; set; } = new();
   }
-
+  
   class MovementLine
   {
     public int? ToTankId { get; set; }
@@ -290,9 +374,9 @@
     public string? Weather { get; set; }
     public int? TankId { get; set; }
 
-    public List<TreatmentLine> GrapeTreatments { get; set; } = new();
-    public List<TreatmentLine> MashTreatments { get; set; } = new();
-    public List<TreatmentLine> YoungTreatments { get; set; } = new();
+    public List<TreatmentGroup> GrapeTreatments { get; set; } = new();
+    public List<TreatmentGroup> MashTreatments  { get; set; } = new();
+    public List<TreatmentGroup> YoungTreatments { get; set; } = new();
         
         
     public string? GrapeNotes { get; set; }       
@@ -404,29 +488,45 @@
   void Prefill()
   {
     Vm.Variety = "";
+
     Vm.GrapeTreatments = new()
     {
-      new() { Type = "Trauben" }, new() { Type = "Schwefelung" }, new() { Type = "Extraktionsenzym" }, new() { Type = "Pressprogramm" }
-    };
-    Vm.MashTreatments = new()
-    {
-      new() { Type = "Schwefelung" }, new() { Type = "Safentzug" }, new() { Type = "Maischestandzeit" }, new() { Type = "Ent-/Säuerung" }, new() { Type = "Mostbehandlung" },
-      new() { Type = "Klärenzym" }, new() { Type = "Maischeantannin" }, new() { Type = "Aufzuckerung" }, new() { Type = "Hefe" }, new() { Type = "Hefenährstoff" },
-      new() { Type = "Belüften" }, new() { Type = "Abgezogen" }
-    };
-    Vm.YoungTreatments = new()
-    {
-      new() { Type = "Ent-/Säuerung" },
-      new() { Type = "Biolog. Säureabbau" },
-      new() { Type = "Schwefelung" },
-      new() { Type = "Schönung" },
-      new() { Type = "Vorfiltration" },
-      new() { Type = "Filtration" },
-      new() { Type = "Füllung" }
+      new() { Type = "Trauben",          Lines = { new() } },
+      new() { Type = "Schwefelung",      Lines = { new() } },
+      new() { Type = "Extraktionsenzym", Lines = { new() } },
+      new() { Type = "Pressprogramm",    Lines = { new() } }
     };
 
-    Vm.Movements.Add(new());
+    Vm.MashTreatments = new()
+    {
+      new() { Type = "Schwefelung",      Lines = { new() } },
+      new() { Type = "Saftentzug",       Lines = { new() } },
+      new() { Type = "Maischestandzeit", Lines = { new() } },
+      new() { Type = "Ent-/Säuerung",    Lines = { new() } },
+      new() { Type = "Mostbehandlung",   Lines = { new() } },
+      new() { Type = "Klärenzym",        Lines = { new() } },
+      new() { Type = "Maischeantannin",  Lines = { new() } },
+      new() { Type = "Aufzuckerung",     Lines = { new() } },
+      new() { Type = "Hefe",             Lines = { new() } },
+      new() { Type = "Hefenährstoff",    Lines = { new() } },
+      new() { Type = "Belüften",         Lines = { new() } },
+      new() { Type = "Abgezogen",        Lines = { new() } }
+    };
+
+    Vm.YoungTreatments = new()
+    {
+      new() { Type = "Ent-/Säuerung",        Lines = { new() } },
+      new() { Type = "Biolog. Säureabbau",   Lines = { new() } },
+      new() { Type = "Schwefelung",          Lines = { new() } },
+      new() { Type = "Schönung",             Lines = { new() } },
+      new() { Type = "Vorfiltration",        Lines = { new() } },
+      new() { Type = "Filtration",           Lines = { new() } },
+      new() { Type = "Füllung",              Lines = { new() } }
+    };
+
+    if (!Vm.Movements.Any()) Vm.Movements.Add(new());
   }
+
 
   async Task SaveAsync()
   {
@@ -468,9 +568,18 @@
       FinalSulfur = Vm.FinalSulfur,
       FinalNotes = Vm.FinalNotes,
 
-      GrapeTreatments = Vm.GrapeTreatments.Select(x => new TreatmentLineDto { Type = x.Type, Agent = x.Agent, Amount = x.Amount, Date = x.Date }).ToList(),
-      MashTreatments = Vm.MashTreatments.Select(x => new TreatmentLineDto { Type = x.Type, Agent = x.Agent, Amount = x.Amount, Date = x.Date }).ToList(),
-      YoungTreatments = Vm.YoungTreatments.Select(x => new TreatmentLineDto { Type = x.Type, Agent = x.Agent, Amount = x.Amount, Date = x.Date }).ToList(),
+      GrapeTreatments = Vm.GrapeTreatments
+        .SelectMany(g => g.Lines.Select(l => new TreatmentLineDto { Type = g.Type, Agent = l.Agent, Amount = l.Amount, Date = l.Date }))
+        .ToList(),
+
+      MashTreatments = Vm.MashTreatments
+        .SelectMany(g => g.Lines.Select(l => new TreatmentLineDto { Type = g.Type, Agent = l.Agent, Amount = l.Amount, Date = l.Date }))
+        .ToList(),
+
+      YoungTreatments = Vm.YoungTreatments
+        .SelectMany(g => g.Lines.Select(l => new TreatmentLineDto { Type = g.Type, Agent = l.Agent, Amount = l.Amount, Date = l.Date }))
+        .ToList(),
+
       Movements = Vm.Movements.Select(m => new MovementLineDto { ToTankId = m.ToTankId, Volume = m.Volume, Date = m.Date }).ToList()
     };
 

@@ -12,7 +12,6 @@
 <MudSnackbarProvider />
 
 @inject NavigationManager NavigationManager
-@rendermode InteractiveAuto
 
 <style>
     .mud-nav-link:hover {
@@ -84,7 +83,7 @@
     private bool _isOpen = true;
     private string? currentUrl;
 
-    bool _drawerOpen = false;
+    bool _drawerOpen = true;
     
     protected override void OnInitialized()
     {

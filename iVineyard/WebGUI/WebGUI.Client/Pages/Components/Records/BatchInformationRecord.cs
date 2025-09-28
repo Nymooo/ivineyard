@@ -53,7 +53,7 @@ public record InformationsRecord
     public int InformationId { get; init; }
     public int BatchId { get; init; }
     public DateTime Date { get; init; }
-    public double Acidity { get; init; }
+    public string Acidity { get; init; }
     public double PhValue { get; init; }
     public string FurtherSteps { get; init; } = string.Empty;
 
@@ -75,15 +75,15 @@ public record YoungWineRecord
 {
     public int Id { get; init; }
     public double Alcohol { get; init; }
-    public double ResidualSugar { get; init; }
+    public string ResidualSugar { get; init; }
 }
 
 public record WhiteWineRedWineRecord
 {
     public int Id { get; init; }
     public double Alcohol { get; init; }
-    public double ResidualSugar { get; init; }
-    public double Sulfur { get; init; }
+    public string ResidualSugar { get; init; }
+    public string Sulfur { get; init; }
 }
 
 // ---- Tanks & Bewegungen (zyklusfrei) ----

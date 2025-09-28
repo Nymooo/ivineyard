@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace Model.Migrations
 {
     /// <inheritdoc />
-    public partial class InitCreate : Migration
+    public partial class initcreate : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -349,7 +349,8 @@ namespace Model.Migrations
                         .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
                     BATCH_ID = table.Column<int>(type: "int", nullable: false),
                     DATE = table.Column<DateTime>(type: "datetime(6)", nullable: false),
-                    ACIDITY = table.Column<double>(type: "double", nullable: false),
+                    ACIDITY = table.Column<string>(type: "longtext", nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
                     PH_VALUE = table.Column<double>(type: "double", nullable: false),
                     FURTHER_STEPS = table.Column<string>(type: "longtext", nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4")
@@ -671,8 +672,10 @@ namespace Model.Migrations
                 {
                     INFORMATION_ID = table.Column<int>(type: "int", nullable: false),
                     ALCOHOL = table.Column<double>(type: "double", nullable: false),
-                    RESIDUAL_SUGAR = table.Column<double>(type: "double", nullable: false),
-                    SULFUR = table.Column<double>(type: "double", nullable: false)
+                    RESIDUAL_SUGAR = table.Column<string>(type: "longtext", nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    SULFUR = table.Column<string>(type: "longtext", nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4")
                 },
                 constraints: table =>
                 {
@@ -692,7 +695,8 @@ namespace Model.Migrations
                 {
                     INFORMATION_ID = table.Column<int>(type: "int", nullable: false),
                     ALCOHOL = table.Column<double>(type: "double", nullable: false),
-                    RESIDUAL_SUGAR = table.Column<double>(type: "double", nullable: false)
+                    RESIDUAL_SUGAR = table.Column<string>(type: "longtext", nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4")
                 },
                 constraints: table =>
                 {

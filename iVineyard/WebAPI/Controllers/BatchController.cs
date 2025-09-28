@@ -49,7 +49,7 @@ public class BatchController : ControllerBase
             _db.Add(new TankHasWineBatch { TankId = tid, BatchId = batch.BatchId });
 
         // 4) Ausgangsmust
-        if (dto.KMW_OE.HasValue || dto.MustAcidity.HasValue || dto.MustPh.HasValue
+        if (dto.KMW_OE.HasValue || !string.IsNullOrWhiteSpace(dto.MustAcidity) || dto.MustPh.HasValue
             || !string.IsNullOrWhiteSpace(dto.MustNotes)
             || !string.IsNullOrWhiteSpace(dto.Rebel) || !string.IsNullOrWhiteSpace(dto.Squeeze) ||
             !string.IsNullOrWhiteSpace(dto.MashLife))
@@ -58,7 +58,7 @@ public class BatchController : ControllerBase
             {
                 BatchId = batch.BatchId,
                 Date = dto.MustDate ?? dto.HarvestDate ?? DateTime.UtcNow,
-                Acidity = dto.MustAcidity ?? 0,
+                Acidity = dto.MustAcidity ?? string.Empty,
                 PhValue = dto.MustPh ?? 0,
                 FurtherSteps = dto.MustNotes ?? string.Empty
             };
@@ -76,14 +76,14 @@ public class BatchController : ControllerBase
         }
 
 // 5) Jungwein
-        if (dto.YoungAlcohol.HasValue || dto.YoungSugar.HasValue || dto.YoungAcidity.HasValue
+        if (dto.YoungAlcohol.HasValue || !string.IsNullOrWhiteSpace(dto.YoungSugar) || !string.IsNullOrWhiteSpace(dto.YoungAcidity)
             || dto.YoungPh.HasValue || !string.IsNullOrWhiteSpace(dto.YoungNotes))
         {
             var info = new Informations
             {
                 BatchId = batch.BatchId,
                 Date = dto.YoungDate ?? DateTime.UtcNow,
-                Acidity = dto.YoungAcidity ?? 0,
+                Acidity = dto.YoungAcidity ?? String.Empty,
                 PhValue = dto.YoungPh ?? 0,
                 FurtherSteps = dto.YoungNotes ?? string.Empty
             };
@@ -94,19 +94,19 @@ public class BatchController : ControllerBase
             {
                 Id = info.InformationId,
                 Alcohol = dto.YoungAlcohol ?? 0,
-                ResidualSugar = dto.YoungSugar ?? 0
+                ResidualSugar = dto.YoungSugar ?? String.Empty
             });
         }
 
 // 6) Endwerte
-        if (dto.FinalAlcohol.HasValue || dto.FinalSugar.HasValue || dto.FinalSulfur.HasValue
-            || dto.FinalAcidity.HasValue || dto.FinalPh.HasValue || !string.IsNullOrWhiteSpace(dto.FinalNotes))
+        if (dto.FinalAlcohol.HasValue || !string.IsNullOrWhiteSpace(dto.FinalSugar) || !string.IsNullOrWhiteSpace(dto.FinalSulfur)
+            || !string.IsNullOrWhiteSpace(dto.FinalAcidity) || dto.FinalPh.HasValue || !string.IsNullOrWhiteSpace(dto.FinalNotes))
         {
             var info = new Informations
             {
                 BatchId = batch.BatchId,
                 Date = dto.FinalDate ?? DateTime.UtcNow,
-                Acidity = dto.FinalAcidity ?? 0,
+                Acidity = dto.FinalAcidity ?? String.Empty,
                 PhValue = dto.FinalPh ?? 0,
                 FurtherSteps = dto.FinalNotes ?? string.Empty
             };
@@ -117,8 +117,8 @@ public class BatchController : ControllerBase
             {
                 Id = info.InformationId,
                 Alcohol = dto.FinalAlcohol ?? 0,
-                ResidualSugar = dto.FinalSugar ?? 0,
-                Sulfur = dto.FinalSulfur ?? 0
+                ResidualSugar = dto.FinalSugar ?? String.Empty,
+                Sulfur = dto.FinalSulfur ?? String.Empty
             });
         }
 
@@ -290,7 +290,7 @@ public class BatchController : ControllerBase
         // Ausgangsmust
         var mustInfo = batch.InformationsList?.FirstOrDefault(i => i.StartingMust != null);
         bool hasMustDto =
-            dto.KMW_OE.HasValue || dto.MustAcidity.HasValue || dto.MustPh.HasValue ||
+            dto.KMW_OE.HasValue || !string.IsNullOrWhiteSpace(dto.MustAcidity) || dto.MustPh.HasValue ||
             !string.IsNullOrWhiteSpace(dto.MustNotes) ||
             !string.IsNullOrWhiteSpace(dto.Rebel) || !string.IsNullOrWhiteSpace(dto.Squeeze) ||
             !string.IsNullOrWhiteSpace(dto.MashLife);
@@ -303,7 +303,7 @@ public class BatchController : ControllerBase
                 {
                     BatchId = id,
                     Date = dto.MustDate ?? dto.HarvestDate ?? DateTime.UtcNow,
-                    Acidity = dto.MustAcidity ?? 0,
+                    Acidity = dto.MustAcidity ?? string.Empty,
                     PhValue = dto.MustPh ?? 0,
                     FurtherSteps = dto.MustNotes ?? string.Empty
                 };
@@ -337,7 +337,7 @@ public class BatchController : ControllerBase
         // Jungwein
         var youngInfo = batch.InformationsList?.FirstOrDefault(i => i.YoungWine != null);
         bool hasYoungDto =
-            dto.YoungAlcohol.HasValue || dto.YoungSugar.HasValue || dto.YoungAcidity.HasValue || dto.YoungPh.HasValue ||
+            dto.YoungAlcohol.HasValue || !string.IsNullOrWhiteSpace(dto.YoungSugar) || !string.IsNullOrWhiteSpace(dto.YoungAcidity) || dto.YoungPh.HasValue ||
             !string.IsNullOrWhiteSpace(dto.YoungNotes);
 
         if (hasYoungDto)
@@ -348,7 +348,7 @@ public class BatchController : ControllerBase
                 {
                     BatchId = id,
                     Date = dto.YoungDate ?? DateTime.UtcNow,
-                    Acidity = dto.YoungAcidity ?? 0,
+                    Acidity = dto.YoungAcidity ?? string.Empty,
                     PhValue = dto.YoungPh ?? 0,
                     FurtherSteps = dto.YoungNotes ?? string.Empty
                 };
@@ -359,7 +359,7 @@ public class BatchController : ControllerBase
                 {
                     Id = youngInfo.InformationId,
                     Alcohol = dto.YoungAlcohol ?? 0,
-                    ResidualSugar = dto.YoungSugar ?? 0
+                    ResidualSugar = dto.YoungSugar ?? String.Empty
                 });
             }
             else
@@ -378,8 +378,10 @@ public class BatchController : ControllerBase
         // Endwerte
         var finalInfo = batch.InformationsList?.FirstOrDefault(i => i.WhiteWineRedWine != null);
         bool hasFinalDto =
-            dto.FinalAlcohol.HasValue || dto.FinalSugar.HasValue || dto.FinalSulfur.HasValue ||
-            dto.FinalAcidity.HasValue || dto.FinalPh.HasValue || !string.IsNullOrWhiteSpace(dto.FinalNotes);
+            dto.FinalAlcohol.HasValue || !string.IsNullOrWhiteSpace(dto.FinalSugar) ||
+            !string.IsNullOrWhiteSpace(dto.FinalSulfur) ||
+            !string.IsNullOrWhiteSpace(dto.FinalAcidity) || dto.FinalPh.HasValue ||
+            !string.IsNullOrWhiteSpace(dto.FinalNotes);
 
         if (hasFinalDto)
         {
@@ -389,7 +391,7 @@ public class BatchController : ControllerBase
                 {
                     BatchId = id,
                     Date = dto.FinalDate ?? DateTime.UtcNow,
-                    Acidity = dto.FinalAcidity ?? 0,
+                    Acidity = dto.FinalAcidity ?? string.Empty,
                     PhValue = dto.FinalPh ?? 0,
                     FurtherSteps = dto.FinalNotes ?? string.Empty
                 };
@@ -400,8 +402,8 @@ public class BatchController : ControllerBase
                 {
                     Id = finalInfo.InformationId,
                     Alcohol = dto.FinalAlcohol ?? 0,
-                    ResidualSugar = dto.FinalSugar ?? 0,
-                    Sulfur = dto.FinalSulfur ?? 0
+                    ResidualSugar = dto.FinalSugar ?? string.Empty,
+                    Sulfur = dto.FinalSulfur ?? string.Empty
                 });
             }
             else
@@ -500,7 +502,7 @@ public class BatchCreateDto
     // Ausgangsmust
     public DateTime? MustDate { get; set; }
     public double? KMW_OE { get; set; }
-    public double? MustAcidity { get; set; }
+    public string? MustAcidity { get; set; }
     public double? MustPh { get; set; }
     public string? MustNotes { get; set; }
     public string? Rebel { get; set; }
@@ -509,19 +511,19 @@ public class BatchCreateDto
 
     // Jungwein
     public DateTime? YoungDate { get; set; }
-    public double? YoungAcidity { get; set; }
-    public double? YoungSugar { get; set; }
+    public string? YoungAcidity { get; set; }
+    public string? YoungSugar { get; set; }
     public double? YoungAlcohol { get; set; }
     public double? YoungPh { get; set; }
     public string? YoungNotes { get; set; }
 
     // Endwerte
     public DateTime? FinalDate { get; set; }
-    public double? FinalAcidity { get; set; }
-    public double? FinalSugar { get; set; }
+    public string? FinalAcidity { get; set; }
+    public string? FinalSugar { get; set; }
     public double? FinalAlcohol { get; set; }
     public double? FinalPh { get; set; }
-    public double? FinalSulfur { get; set; }
+    public string? FinalSulfur { get; set; }
     public string? FinalNotes { get; set; }
 
     // Umzüge
@@ -560,7 +562,7 @@ public class BatchUpdateDto
 
     public DateTime? MustDate { get; set; }
     public double? KMW_OE { get; set; }
-    public double? MustAcidity { get; set; }
+    public string? MustAcidity { get; set; }
     public double? MustPh { get; set; }
     public string? MustNotes { get; set; }
     public string? Rebel { get; set; }
@@ -568,18 +570,18 @@ public class BatchUpdateDto
     public string? MashLife { get; set; }
 
     public DateTime? YoungDate { get; set; }
-    public double? YoungAcidity { get; set; }
-    public double? YoungSugar { get; set; }
+    public string? YoungAcidity { get; set; }
+    public string? YoungSugar { get; set; }
     public double? YoungAlcohol { get; set; }
     public double? YoungPh { get; set; }
     public string? YoungNotes { get; set; }
 
     public DateTime? FinalDate { get; set; }
-    public double? FinalAcidity { get; set; }
-    public double? FinalSugar { get; set; }
+    public string? FinalAcidity { get; set; }
+    public string? FinalSugar { get; set; }
     public double? FinalAlcohol { get; set; }
     public double? FinalPh { get; set; }
-    public double? FinalSulfur { get; set; }
+    public string? FinalSulfur { get; set; }
     public string? FinalNotes { get; set; }
 
     public List<MovementLineDto> Movements { get; set; } = new();

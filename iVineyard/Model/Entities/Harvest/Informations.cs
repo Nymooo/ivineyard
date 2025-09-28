@@ -16,7 +16,7 @@ public class Informations
     [Column("DATE")]
     public DateTime Date { get; set; }
     [Column("ACIDITY")]
-    public double Acidity { get; set; }
+    public string Acidity { get; set; }
     [Column("PH_VALUE")]
     public double PhValue { get; set; }
     [Column("FURTHER_STEPS")]

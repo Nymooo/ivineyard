@@ -14,7 +14,7 @@ public class WhiteWine_RedWine
     [Column("ALCOHOL")]
     public double Alcohol { get; set; }
     [Column("RESIDUAL_SUGAR")]
-    public double ResidualSugar { get; set; }
+    public string ResidualSugar { get; set; }
     [Column("SULFUR")]
-    public double Sulfur { get; set; }
+    public string Sulfur { get; set; }
 }

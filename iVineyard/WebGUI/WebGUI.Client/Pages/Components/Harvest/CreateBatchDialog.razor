@@ -142,7 +142,7 @@
                   <MudDatePicker T="DateTime?" @bind-Date="Vm.MustDate" Label="Datum" Dense="true"/>
                 </MudItem>
                 <MudItem xs="6" md="3">
-                  <MudNumericField T="double?" @bind-Value="Vm.MustAcidity" Label="Säure" Dense="true"/>
+                  <MudTextField @bind-Value="Vm.MustAcidity" Label="Säure" Dense="true"/>
                 </MudItem>
                 <MudItem xs="6" md="3">
                   <MudNumericField T="double?" @bind-Value="Vm.MustPh" Label="pH-Wert" Dense="true"/>
@@ -171,10 +171,10 @@
                   <MudDatePicker T="DateTime?" @bind-Date="Vm.YoungDate" Label="Datum" Dense="true"/>
                 </MudItem>
                 <MudItem xs="6" md="3">
-                  <MudNumericField T="double?" @bind-Value="Vm.YoungAcidity" Label="Säure" Dense="true"/>
+                  <MudTextField  @bind-Value="Vm.YoungAcidity" Label="Säure" Dense="true"/>
                 </MudItem>
                 <MudItem xs="6" md="3">
-                  <MudNumericField T="double?" @bind-Value="Vm.YoungSugar" Label="Restzucker" Dense="true"/>
+                  <MudTextField  @bind-Value="Vm.YoungSugar" Label="Restzucker" Dense="true"/>
                 </MudItem>
                 <MudItem xs="6" md="3">
                   <MudNumericField T="double?" @bind-Value="Vm.YoungAlcohol" Label="Alkohol" Dense="true"/>
@@ -193,10 +193,10 @@
                   <MudDatePicker T="DateTime?" @bind-Date="Vm.FinalDate" Label="Datum" Dense="true"/>
                 </MudItem>
                 <MudItem xs="6" md="3">
-                  <MudNumericField T="double?" @bind-Value="Vm.FinalAcidity" Label="Säure" Dense="true"/>
+                  <MudTextField  @bind-Value="Vm.FinalAcidity" Label="Säure" Dense="true"/>
                 </MudItem>
                 <MudItem xs="6" md="3">
-                  <MudNumericField T="double?" @bind-Value="Vm.FinalSugar" Label="Restzucker" Dense="true"/>
+                  <MudTextField  @bind-Value="Vm.FinalSugar" Label="Restzucker" Dense="true"/>
                 </MudItem>
                 <MudItem xs="6" md="3">
                   <MudNumericField T="double?" @bind-Value="Vm.FinalAlcohol" Label="Alkohol" Dense="true"/>
@@ -205,7 +205,7 @@
                   <MudNumericField T="double?" @bind-Value="Vm.FinalPh" Label="pH-Wert" Dense="true"/>
                 </MudItem>
                 <MudItem xs="6" md="3">
-                  <MudNumericField T="double?" @bind-Value="Vm.FinalSulfur" Label="Schwefel" Dense="true"/>
+                  <MudTextField @bind-Value="Vm.FinalSulfur" Label="Schwefel" Dense="true"/>
                 </MudItem>
                 <MudItem xs="12">
                   <MudTextField @bind-Value="Vm.FinalNotes" Label="weitere Behandlungsschritte" Dense="true"/>
@@ -289,7 +289,7 @@
 
     public DateTime? MustDate { get; set; }
     public double? KMW_OE { get; set; }
-    public double? MustAcidity { get; set; }
+    public string? MustAcidity { get; set; }
     public double? MustPh { get; set; }
     public string? MustNotes { get; set; }
     public string? Rebel { get; set; }
@@ -297,18 +297,18 @@
     public string? MashLife { get; set; }
 
     public DateTime? YoungDate { get; set; }
-    public double? YoungAcidity { get; set; }
-    public double? YoungSugar { get; set; }
+    public string? YoungAcidity { get; set; }
+    public string? YoungSugar { get; set; }
     public double? YoungAlcohol { get; set; }
     public double? YoungPh { get; set; }
     public string? YoungNotes { get; set; }
 
     public DateTime? FinalDate { get; set; }
-    public double? FinalAcidity { get; set; }
-    public double? FinalSugar { get; set; }
+    public string? FinalAcidity { get; set; }
+    public string? FinalSugar { get; set; }
     public double? FinalAlcohol { get; set; }
     public double? FinalPh { get; set; }
-    public double? FinalSulfur { get; set; }
+    public string? FinalSulfur { get; set; }
     public string? FinalNotes { get; set; }
 
     public List<MovementLine> Movements { get; set; } = new();
@@ -331,7 +331,7 @@
 
     public DateTime? MustDate { get; set; }
     public double? KMW_OE { get; set; }
-    public double? MustAcidity { get; set; }
+    public string? MustAcidity { get; set; }
     public double? MustPh { get; set; }
     public string? MustNotes { get; set; }
     public string? Rebel { get; set; }
@@ -339,18 +339,18 @@
     public string? MashLife { get; set; }
 
     public DateTime? YoungDate { get; set; }
-    public double? YoungAcidity { get; set; }
-    public double? YoungSugar { get; set; }
+    public string? YoungAcidity { get; set; }
+    public string? YoungSugar { get; set; }
     public double? YoungAlcohol { get; set; }
     public double? YoungPh { get; set; }
     public string? YoungNotes { get; set; }
 
     public DateTime? FinalDate { get; set; }
-    public double? FinalAcidity { get; set; }
-    public double? FinalSugar { get; set; }
+    public string? FinalAcidity { get; set; }
+    public string? FinalSugar { get; set; }
     public double? FinalAlcohol { get; set; }
     public double? FinalPh { get; set; }
-    public double? FinalSulfur { get; set; }
+    public string? FinalSulfur { get; set; }
     public string? FinalNotes { get; set; }
 
     public List<MovementLineDto> Movements { get; set; } = new();

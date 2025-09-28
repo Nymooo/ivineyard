@@ -12,8 +12,8 @@ using Model.Configurations;
 namespace Model.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250927151905_InitCreate")]
-    partial class InitCreate
+    [Migration("20250928105331_initcreate")]
+    partial class initcreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -555,8 +555,9 @@ namespace Model.Migrations
 
                     MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("InformationId"));
 
-                    b.Property<double>("Acidity")
-                        .HasColumnType("double")
+                    b.Property<string>("Acidity")
+                        .IsRequired()
+                        .HasColumnType("longtext")
                         .HasColumnName("ACIDITY");
 
                     b.Property<int>("BatchId")
@@ -729,12 +730,14 @@ namespace Model.Migrations
                         .HasColumnType("double")
                         .HasColumnName("ALCOHOL");
 
-                    b.Property<double>("ResidualSugar")
-                        .HasColumnType("double")
+                    b.Property<string>("ResidualSugar")
+                        .IsRequired()
+                        .HasColumnType("longtext")
                         .HasColumnName("RESIDUAL_SUGAR");
 
-                    b.Property<double>("Sulfur")
-                        .HasColumnType("double")
+                    b.Property<string>("Sulfur")
+                        .IsRequired()
+                        .HasColumnType("longtext")
                         .HasColumnName("SULFUR");
 
                     b.HasKey("Id");
@@ -783,8 +786,9 @@ namespace Model.Migrations
                         .HasColumnType("double")
                         .HasColumnName("ALCOHOL");
 
-                    b.Property<double>("ResidualSugar")
-                        .HasColumnType("double")
+                    b.Property<string>("ResidualSugar")
+                        .IsRequired()
+                        .HasColumnType("longtext")
                         .HasColumnName("RESIDUAL_SUGAR");
 
                     b.HasKey("Id");

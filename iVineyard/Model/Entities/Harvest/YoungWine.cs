@@ -14,5 +14,5 @@ public class YoungWine
     [Column("ALCOHOL")]
     public double Alcohol { get; set; }
     [Column("RESIDUAL_SUGAR")]
-    public double ResidualSugar { get; set; }
+    public string ResidualSugar { get; set; }
 }

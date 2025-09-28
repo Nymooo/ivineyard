@@ -12,6 +12,7 @@
 <MudSnackbarProvider />
 
 @inject NavigationManager NavigationManager
+@rendermode InteractiveAuto
 
 <style>
     .mud-nav-link:hover {
@@ -45,6 +46,7 @@
     {
     <MudAppBar Class="shadow-lg" Elevation="0" Style="min-height: 114px !important; background-color: white !important; color: black !important;">
         <div class="d-flex justify-content-between align-items-center w-100">
+            <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="@((e) => _drawerOpen = !_drawerOpen)" />
             <SectionOutlet SectionName="headbar"></SectionOutlet>
             <MudMenu>
                 <ActivatorContent>
@@ -56,7 +58,7 @@
             </MudMenu>
         </div>
     </MudAppBar>
-    <MudDrawer @bind-Open="_isOpen" Elevation="2" Width="350px">
+    <MudDrawer Variant="DrawerVariant.Responsive" @bind-Open="_drawerOpen" Elevation="2" Width="350px">
         <MudDrawerHeader Style="min-height: 200px;" Class="d-flex justify-content-center align-items-center">
             <b>
                 <MudText Typo="Typo.h3" Class="mt-1 heading">iVineyard</MudText>
@@ -82,7 +84,8 @@
     private bool _isOpen = true;
     private string? currentUrl;
 
-
+    bool _drawerOpen = false;
+    
     protected override void OnInitialized()
     {
         currentUrl = NavigationManager.ToBaseRelativePath(NavigationManager.Uri);

@@ -12,8 +12,8 @@ using Model.Configurations;
 namespace Model.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250928185117_InitCreate")]
-    partial class InitCreate
+    [Migration("20250928195106_initcreate")]
+    partial class initcreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -660,11 +660,15 @@ namespace Model.Migrations
 
                     MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("MovementId"));
 
+                    b.Property<int>("BatchId")
+                        .HasColumnType("int")
+                        .HasColumnName("BATCH_ID");
+
                     b.Property<DateTime>("Date")
                         .HasColumnType("datetime(6)")
                         .HasColumnName("DATE");
 
-                    b.Property<int>("FromTakId")
+                    b.Property<int?>("FromTakId")
                         .HasColumnType("int")
                         .HasColumnName("FROM_TANK");
 
@@ -677,6 +681,8 @@ namespace Model.Migrations
                         .HasColumnName("VOLUME");
 
                     b.HasKey("MovementId");
+
+                    b.HasIndex("BatchId");
 
                     b.HasIndex("FromTakId");
 
@@ -1033,17 +1039,23 @@ namespace Model.Migrations
 
             modelBuilder.Entity("Model.Entities.Harvest.TankMovement", b =>
                 {
-                    b.HasOne("Model.Entities.Harvest.Tank", "FromTank")
-                        .WithMany("FromMovements")
-                        .HasForeignKey("FromTakId")
+                    b.HasOne("Model.Entities.Harvest.Batch", "Batch")
+                        .WithMany("TankMovements")
+                        .HasForeignKey("BatchId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.HasOne("Model.Entities.Harvest.Tank", "FromTank")
+                        .WithMany("FromMovements")
+                        .HasForeignKey("FromTakId");
 
                     b.HasOne("Model.Entities.Harvest.Tank", "ToTank")
                         .WithMany("ToMovements")
                         .HasForeignKey("ToTankId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("Batch");
 
                     b.Navigation("FromTank");
 
@@ -1145,6 +1157,8 @@ namespace Model.Migrations
                     b.Navigation("InformationsList");
 
                     b.Navigation("TankList");
+
+                    b.Navigation("TankMovements");
 
                     b.Navigation("batchHasTreatmentsList");
                 });

@@ -243,6 +243,7 @@ public class BatchController : ControllerBase
         {
             _db.TankMovements.Add(new TankMovement
             {
+                BatchId = batch.BatchId,
                 FromTakId = currentTankId ?? 0,
                 ToTankId  = mv.ToTankId!.Value,
                 Date      = mv.Date ?? DateTime.UtcNow,
@@ -330,6 +331,7 @@ public class BatchController : ControllerBase
         {
             _db.TankMovements.Add(new TankMovement
             {
+                BatchId = id,
                 FromTakId = currentTankId ?? 0,
                 ToTankId  = mv.ToTankId!.Value,
                 Date      = mv.Date ?? DateTime.UtcNow,
@@ -628,6 +630,7 @@ public class TreatmentLineDto
 
 public class MovementLineDto
 {
+    public int BatchId   { get; set; }  //KA OB DA STIMMT
     public int?      ToTankId { get; set; }
     public double?   Volume   { get; set; }
     public DateTime? Date     { get; set; }

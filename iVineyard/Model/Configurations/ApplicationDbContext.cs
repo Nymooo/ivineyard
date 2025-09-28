@@ -210,6 +210,12 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
             .WithMany(t => t.ToMovements)
             .HasForeignKey(vhb => vhb.ToTankId);
         
+        builder.Entity<TankMovement>()
+            .HasOne(vhb => vhb.Batch)
+            .WithMany(b => b.TankMovements)
+            .HasForeignKey(vhb => vhb.BatchId)
+            .OnDelete(DeleteBehavior.Cascade);
+        
         #endregion
 
         #region StartingMust

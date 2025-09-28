@@ -107,6 +107,8 @@ public record TankRecord
 
 public record TankMovementRecord
 {
+    
+    public int BatchId { get; set; }
     public int MovementId { get; init; }
     public int FromTakId { get; init; }   // Schreibweise wie im Entity!
     public int ToTankId  { get; init; }

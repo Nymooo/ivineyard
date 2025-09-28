@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace Model.Migrations
 {
     /// <inheritdoc />
-    public partial class InitCreate : Migration
+    public partial class initcreate : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -315,35 +315,6 @@ namespace Model.Migrations
                 .Annotation("MySql:CharSet", "utf8mb4");
 
             migrationBuilder.CreateTable(
-                name: "TANK_MOVEMENT",
-                columns: table => new
-                {
-                    MOVEMENT_ID = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
-                    FROM_TANK = table.Column<int>(type: "int", nullable: false),
-                    TO_TANK = table.Column<int>(type: "int", nullable: false),
-                    DATE = table.Column<DateTime>(type: "datetime(6)", nullable: false),
-                    VOLUME = table.Column<double>(type: "double", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_TANK_MOVEMENT", x => x.MOVEMENT_ID);
-                    table.ForeignKey(
-                        name: "FK_TANK_MOVEMENT_TANK_FROM_TANK",
-                        column: x => x.FROM_TANK,
-                        principalTable: "TANK",
-                        principalColumn: "TANK_ID",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_TANK_MOVEMENT_TANK_TO_TANK",
-                        column: x => x.TO_TANK,
-                        principalTable: "TANK",
-                        principalColumn: "TANK_ID",
-                        onDelete: ReferentialAction.Cascade);
-                })
-                .Annotation("MySql:CharSet", "utf8mb4");
-
-            migrationBuilder.CreateTable(
                 name: "INFORMATIONS",
                 columns: table => new
                 {
@@ -388,6 +359,41 @@ namespace Model.Migrations
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_TANK_has_WINE_BATCH_WINE_BATCH_BATCH_ID",
+                        column: x => x.BATCH_ID,
+                        principalTable: "WINE_BATCH",
+                        principalColumn: "BATCH_ID",
+                        onDelete: ReferentialAction.Cascade);
+                })
+                .Annotation("MySql:CharSet", "utf8mb4");
+
+            migrationBuilder.CreateTable(
+                name: "TANK_MOVEMENT",
+                columns: table => new
+                {
+                    MOVEMENT_ID = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
+                    FROM_TANK = table.Column<int>(type: "int", nullable: true),
+                    TO_TANK = table.Column<int>(type: "int", nullable: false),
+                    DATE = table.Column<DateTime>(type: "datetime(6)", nullable: false),
+                    VOLUME = table.Column<double>(type: "double", nullable: false),
+                    BATCH_ID = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_TANK_MOVEMENT", x => x.MOVEMENT_ID);
+                    table.ForeignKey(
+                        name: "FK_TANK_MOVEMENT_TANK_FROM_TANK",
+                        column: x => x.FROM_TANK,
+                        principalTable: "TANK",
+                        principalColumn: "TANK_ID");
+                    table.ForeignKey(
+                        name: "FK_TANK_MOVEMENT_TANK_TO_TANK",
+                        column: x => x.TO_TANK,
+                        principalTable: "TANK",
+                        principalColumn: "TANK_ID",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_TANK_MOVEMENT_WINE_BATCH_BATCH_ID",
                         column: x => x.BATCH_ID,
                         principalTable: "WINE_BATCH",
                         principalColumn: "BATCH_ID",
@@ -788,6 +794,11 @@ namespace Model.Migrations
                 name: "IX_TANK_has_WINE_BATCH_TANK_ID",
                 table: "TANK_has_WINE_BATCH",
                 column: "TANK_ID");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_TANK_MOVEMENT_BATCH_ID",
+                table: "TANK_MOVEMENT",
+                column: "BATCH_ID");
 
             migrationBuilder.CreateIndex(
                 name: "IX_TANK_MOVEMENT_FROM_TANK",

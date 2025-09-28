@@ -364,7 +364,7 @@
   // VM
   class TreatmentLine { public string? Agent { get; set; } public string? Amount { get; set; } public DateTime? Date { get; set; } }
   class TreatmentGroup { public string Type { get; set; } = ""; public List<TreatmentLine> Lines { get; set; } = new() { new() }; }
-  class MovementLine { public int? ToTankId { get; set; } public double? Volume { get; set; } public DateTime? Date { get; set; } }
+  class MovementLine { public int BatchId { get; set; } public int? ToTankId { get; set; } public double? Volume { get; set; } public DateTime? Date { get; set; } }
 
   class WeinFormVm {
     public int VineyardId { get; set; }
@@ -406,7 +406,7 @@
 
   // API-DTOs (Update)
   class TreatmentLineDto { public string Type { get; set; } = ""; public string? Agent { get; set; } public string? Amount { get; set; } public DateTime? Date { get; set; } }
-  class MovementLineDto { public int? ToTankId { get; set; } public double? Volume { get; set; } public DateTime? Date { get; set; } }
+  class MovementLineDto {  public int? ToTankId { get; set; } public double? Volume { get; set; } public DateTime? Date { get; set; } }
   class BatchUpdateDto {
     public int VineyardId { get; set; }
     public string Amount { get; set; } = "";
@@ -629,12 +629,14 @@
     FillGroups("MASH",  Vm.MashTreatments);
     FillGroups("YOUNG", Vm.YoungTreatments);
 
-    // Historie & aktueller Tank
+    // --- Historie NUR für diesen Batch ---
     MovementHistory = (link.Batch.TankMovements ?? new())
+      .Where(m => m.BatchId == link.Batch.BatchId)   // << filter auf aktuellen Batch
       .OrderByDescending(m => m.Date)
       .ToList();
 
-    var lastMoveTo = link.Batch.TankMovements?
+    // aktuellen Tank ableiten
+    var lastMoveTo = MovementHistory
       .OrderBy(m => m.Date)
       .LastOrDefault()?.ToTankId;
 
@@ -712,9 +714,10 @@
           Type = MakeType("YOUNG", g.Type), Agent = l.Agent, Amount = l.Amount, Date = l.Date
         })).ToList(),
 
-      Movements = Vm.Movements
-        .Select(m => new MovementLineDto { ToTankId = m.ToTankId, Volume = m.Volume, Date = m.Date })
-        .ToList()
+      // BatchId mitschicken (Server setzt id i.d.R. selbst, schadet aber nicht)
+      Movements = Vm.Movements.Select(m => new MovementLineDto {
+          ToTankId = m.ToTankId, Volume = m.Volume, Date = m.Date
+      }).ToList()
     };
 
     var resp = await BatchService.UpdateBatchAsync(Id, dto);
@@ -764,7 +767,7 @@
     AddKeyValueTable(doc, baseRows);
 
     AddTreatmentGroupSection(doc, "Behandlungen (Trauben)", Vm.GrapeTreatments, Vm.GrapeNotes, headerFont);
-    AddTreatmentGroupSection(doc, "Most / Maische", Vm.MashTreatments, Vm.MashNotes, headerFont);
+    AddTreatmentGroupSection(doc, "Most / Maische", Vm.MashTreatments, headerFont: headerFont, notes: Vm.MashNotes);
     AddTreatmentGroupSection(doc, "Jungwein-Behandlungen", Vm.YoungTreatments, Vm.YoungNotesFree, headerFont);
 
     AddSectionHeader(doc, "Daten Ausgangsmost", headerFont);
@@ -952,5 +955,4 @@
 </script>
 
 <style>
-  
 </style>

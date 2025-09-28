@@ -257,7 +257,11 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
             .HasKey(vhb => new { vhb.BatchId, vhb.VineyardId });
         
         builder.Entity<WineBatchHasTreatment>()
-            .HasKey(wbht => new { wbht.BatchId, wbht.TreatementId });
+            .HasIndex(x => x.BatchId);
+        builder.Entity<WineBatchHasTreatment>()
+            .HasIndex(x => x.TreatementId);
+        /*builder.Entity<WineBatchHasTreatment>()
+            .HasKey(wbht => new { wbht.BatchId, wbht.TreatementId });*/
 
         #endregion
         

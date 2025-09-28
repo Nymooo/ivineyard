@@ -12,7 +12,7 @@ using Model.Configurations;
 namespace Model.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250928124622_InitCreate")]
+    [Migration("20250928150951_InitCreate")]
     partial class InitCreate
     {
         /// <inheritdoc />
@@ -752,13 +752,12 @@ namespace Model.Migrations
 
             modelBuilder.Entity("Model.Entities.Harvest.WineBatchHasTreatment", b =>
                 {
-                    b.Property<int>("BatchId")
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("int")
-                        .HasColumnName("BATCH_ID");
+                        .HasColumnName("WBHT_ID");
 
-                    b.Property<int>("TreatementId")
-                        .HasColumnType("int")
-                        .HasColumnName("TREATMENT_ID");
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("Agent")
                         .IsRequired()
@@ -770,11 +769,21 @@ namespace Model.Migrations
                         .HasColumnType("longtext")
                         .HasColumnName("AMOUNT");
 
+                    b.Property<int>("BatchId")
+                        .HasColumnType("int")
+                        .HasColumnName("BATCH_ID");
+
                     b.Property<DateTime>("Date")
                         .HasColumnType("datetime(6)")
                         .HasColumnName("DATE");
 
-                    b.HasKey("BatchId", "TreatementId");
+                    b.Property<int>("TreatementId")
+                        .HasColumnType("int")
+                        .HasColumnName("TREATMENT_ID");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("BatchId");
 
                     b.HasIndex("TreatementId");
 

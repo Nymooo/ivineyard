@@ -398,6 +398,8 @@ namespace Model.Migrations
                 name: "WINE_BATCH_has_TREATMENT",
                 columns: table => new
                 {
+                    WBHT_ID = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
                     BATCH_ID = table.Column<int>(type: "int", nullable: false),
                     TREATMENT_ID = table.Column<int>(type: "int", nullable: false),
                     AMOUNT = table.Column<string>(type: "longtext", nullable: false)
@@ -408,7 +410,7 @@ namespace Model.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_WINE_BATCH_has_TREATMENT", x => new { x.BATCH_ID, x.TREATMENT_ID });
+                    table.PrimaryKey("PK_WINE_BATCH_has_TREATMENT", x => x.WBHT_ID);
                     table.ForeignKey(
                         name: "FK_WINE_BATCH_has_TREATMENT_TREATMENT_TREATMENT_ID",
                         column: x => x.TREATMENT_ID,
@@ -825,6 +827,11 @@ namespace Model.Migrations
                 name: "IX_VINEYARDS_COMPANY_ID",
                 table: "VINEYARDS",
                 column: "COMPANY_ID");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_WINE_BATCH_has_TREATMENT_BATCH_ID",
+                table: "WINE_BATCH_has_TREATMENT",
+                column: "BATCH_ID");
 
             migrationBuilder.CreateIndex(
                 name: "IX_WINE_BATCH_has_TREATMENT_TREATMENT_ID",

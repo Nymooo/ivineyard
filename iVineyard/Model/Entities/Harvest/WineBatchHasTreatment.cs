@@ -1,9 +1,14 @@
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Model.Entities.Harvest;
 [Table("WINE_BATCH_has_TREATMENT")]
 public class WineBatchHasTreatment
 {
+    [Key, DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+    [Column("WBHT_ID")]
+    public int Id { get; set; }
+    
     public Batch? Batch { get; set; }
     [Column("BATCH_ID")]
     public int BatchId { get; set; }

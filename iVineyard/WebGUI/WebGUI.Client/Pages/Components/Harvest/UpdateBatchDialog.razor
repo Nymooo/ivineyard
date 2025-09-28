@@ -809,7 +809,7 @@
     };
     AddKeyValueTable(doc, finalRows);
 
-    if (Vm.Movements.Any())
+    /*if (Vm.Movements.Any())
     {
       AddSectionHeader(doc, "Umgezogen in Tank (aktuell)", headerFont);
       var t = new PdfPTable(3) { WidthPercentage = 100 };
@@ -824,7 +824,7 @@
       }
       doc.Add(t);
       doc.Add(new Paragraph(" "));
-    }
+    }*/
 
     if (MovementHistory.Any())
     {

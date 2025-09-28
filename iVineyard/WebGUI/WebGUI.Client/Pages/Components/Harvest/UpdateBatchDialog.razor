@@ -91,6 +91,10 @@
                   </MudItem>
                 </MudGrid>
               }
+          
+                         <MudItem xs="12">
+                            <MudTextField @bind-Value="Vm.GrapeNotes" Label="weitere Behandlungsschritte" Dense="true"/>
+                          </MudItem>
 
               <MudText Typo="Typo.h6" Class="mt-3 mb-1">Most / Maische</MudText>
               @foreach (var t in Vm.MashTreatments)
@@ -110,6 +114,10 @@
                   </MudItem>
                 </MudGrid>
               }
+          
+                         <MudItem xs="12">
+                          <MudTextField @bind-Value="Vm.MashNotes" Label="weitere Behandlungsschritte" Dense="true"/>
+                        </MudItem>
 
               <MudText Typo="Typo.h6" Class="mt-3 mb-1">Jungwein-Behandlungen</MudText>
               @foreach (var t in Vm.YoungTreatments)
@@ -129,6 +137,11 @@
                   </MudItem>
                 </MudGrid>
               }
+          
+           <MudItem xs="12">
+               <MudTextField @bind-Value="Vm.YoungNotesFree" Label="weitere Behandlungsschritte" Dense="true"/>
+           </MudItem>
+          
             </MudPaper>
           </MudItem>
 
@@ -325,6 +338,10 @@
     public List<TreatmentLine> GrapeTreatments { get; set; } = new();
     public List<TreatmentLine> MashTreatments { get; set; } = new();
     public List<TreatmentLine> YoungTreatments { get; set; } = new();
+        
+            public string? GrapeNotes { get; set; }       
+            public string? MashNotes { get; set; }
+            public string? YoungNotesFree { get; set; }
 
     public DateTime? MustDate { get; set; }
     public double? KMW_OE { get; set; }
@@ -381,6 +398,12 @@
     public List<TreatmentLineDto> GrapeTreatments { get; set; } = new();
     public List<TreatmentLineDto> MashTreatments { get; set; } = new();
     public List<TreatmentLineDto> YoungTreatments { get; set; } = new();
+        
+  
+      public string? GrapeNotes { get; set; }
+      public string? MashNotes { get; set; }
+      public string? YoungNotesFree { get; set; }
+  
     public DateTime? MustDate { get; set; }
     public double? KMW_OE { get; set; }
     public string? MustAcidity { get; set; }
@@ -576,6 +599,12 @@
       Rebel          = Vm.Rebel,
       Squeeze        = Vm.Squeeze,
       MashLife       = Vm.MashLife,
+      
+      
+      
+              GrapeNotes = Vm.GrapeNotes,
+              MashNotes = Vm.MashNotes,
+              YoungNotesFree = Vm.YoungNotesFree,
 
       YoungDate      = Vm.YoungDate,
       YoungAcidity   = Vm.YoungAcidity,

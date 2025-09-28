@@ -10,4 +10,7 @@ public class Treatment
     public int TreatmentId { get; set; }
     [Column("TYPE")]
     public string Type { get; set; }
+    
+    [Column("NOTES")]
+    public string Notes { get; set; } 
 }

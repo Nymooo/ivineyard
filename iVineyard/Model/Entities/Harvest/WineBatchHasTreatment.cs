@@ -17,4 +17,6 @@ public class WineBatchHasTreatment
     public string Agent { get; set; }
     [Column("DATE")]
     public DateTime Date { get; set; }
+    
+    
 }

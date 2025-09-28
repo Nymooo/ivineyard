@@ -69,6 +69,8 @@ public record StartingMustRecord
     public string Rebel { get; init; } = string.Empty;
     public string Squeeze { get; init; } = string.Empty;
     public string MashLife { get; init; } = string.Empty;
+    
+    
 }
 
 public record YoungWineRecord

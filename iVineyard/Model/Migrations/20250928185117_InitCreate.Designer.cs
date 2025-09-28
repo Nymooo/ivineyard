@@ -12,7 +12,7 @@ using Model.Configurations;
 namespace Model.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250928150951_InitCreate")]
+    [Migration("20250928185117_InitCreate")]
     partial class InitCreate
     {
         /// <inheritdoc />
@@ -573,8 +573,9 @@ namespace Model.Migrations
                         .HasColumnType("longtext")
                         .HasColumnName("FURTHER_STEPS");
 
-                    b.Property<double>("PhValue")
-                        .HasColumnType("double")
+                    b.Property<string>("PhValue")
+                        .IsRequired()
+                        .HasColumnType("longtext")
                         .HasColumnName("PH_VALUE");
 
                     b.HasKey("InformationId");

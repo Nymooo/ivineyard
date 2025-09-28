@@ -570,8 +570,9 @@ namespace Model.Migrations
                         .HasColumnType("longtext")
                         .HasColumnName("FURTHER_STEPS");
 
-                    b.Property<double>("PhValue")
-                        .HasColumnType("double")
+                    b.Property<string>("PhValue")
+                        .IsRequired()
+                        .HasColumnType("longtext")
                         .HasColumnName("PH_VALUE");
 
                     b.HasKey("InformationId");

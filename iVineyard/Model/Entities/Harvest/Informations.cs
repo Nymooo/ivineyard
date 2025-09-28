@@ -18,7 +18,7 @@ public class Informations
     [Column("ACIDITY")]
     public string Acidity { get; set; }
     [Column("PH_VALUE")]
-    public double PhValue { get; set; }
+    public string PhValue { get; set; }
     [Column("FURTHER_STEPS")]
     public string FurtherSteps { get; set; }
 

@@ -218,7 +218,7 @@
                   <MudTextField @bind-Value="Vm.MustAcidity" Label="Säure" Dense="true"/>
                 </MudItem>
                 <MudItem xs="12" sm="6" md="3">
-                  <MudNumericField T="double?" @bind-Value="Vm.MustPh" Label="pH-Wert" Dense="true"/>
+                  <MudNumericField T="string?" @bind-Value="Vm.MustPh" Label="pH-Wert" Dense="true"/>
                 </MudItem>
                 <MudItem xs="12" sm="6" md="3">
                   <MudNumericField T="double?" @bind-Value="Vm.KMW_OE" Label="KMW/°Oe" Dense="true"/>
@@ -253,7 +253,7 @@
                   <MudNumericField T="double?" @bind-Value="Vm.YoungAlcohol" Label="Alkohol" Dense="true"/>
                 </MudItem>
                 <MudItem xs="12" sm="6" md="3">
-                  <MudNumericField T="double?" @bind-Value="Vm.YoungPh" Label="pH-Wert" Dense="true"/>
+                  <MudNumericField T="string?" @bind-Value="Vm.YoungPh" Label="pH-Wert" Dense="true"/>
                 </MudItem>
                 <MudItem xs="12">
                   <MudTextField @bind-Value="Vm.YoungNotes" Label="weitere Behandlungsschritte" Dense="true"/>
@@ -275,7 +275,7 @@
                   <MudNumericField T="double?" @bind-Value="Vm.FinalAlcohol" Label="Alkohol" Dense="true"/>
                 </MudItem>
                 <MudItem xs="12" sm="6" md="3">
-                  <MudNumericField T="double?" @bind-Value="Vm.FinalPh" Label="pH-Wert" Dense="true"/>
+                  <MudNumericField T="string?" @bind-Value="Vm.FinalPh" Label="pH-Wert" Dense="true"/>
                 </MudItem>
                 <MudItem xs="12" sm="6" md="3">
                   <MudTextField @bind-Value="Vm.FinalSulfur" Label="Schwefel" Dense="true"/>
@@ -381,7 +381,7 @@
     public DateTime? MustDate { get; set; }
     public double? KMW_OE { get; set; }
     public string? MustAcidity { get; set; }
-    public double? MustPh { get; set; }
+    public string? MustPh { get; set; }
     public string? MustNotes { get; set; }
     public string? Rebel { get; set; }
     public string? Squeeze { get; set; }
@@ -391,14 +391,14 @@
     public string? YoungAcidity { get; set; }
     public string? YoungSugar { get; set; }
     public double? YoungAlcohol { get; set; }
-    public double? YoungPh { get; set; }
+    public string? YoungPh { get; set; }
     public string? YoungNotes { get; set; }
 
     public DateTime? FinalDate { get; set; }
     public string? FinalAcidity { get; set; }
     public string? FinalSugar { get; set; }
     public double? FinalAlcohol { get; set; }
-    public double? FinalPh { get; set; }
+    public string? FinalPh { get; set; }
     public string? FinalSulfur { get; set; }
     public string? FinalNotes { get; set; }
 
@@ -427,7 +427,7 @@
     public DateTime? MustDate { get; set; }
     public double? KMW_OE { get; set; }
     public string? MustAcidity { get; set; }
-    public double? MustPh { get; set; }
+    public string? MustPh { get; set; }
     public string? MustNotes { get; set; }
     public string? Rebel { get; set; }
     public string? Squeeze { get; set; }
@@ -437,14 +437,14 @@
     public string? YoungAcidity { get; set; }
     public string? YoungSugar { get; set; }
     public double? YoungAlcohol { get; set; }
-    public double? YoungPh { get; set; }
+    public string? YoungPh { get; set; }
     public string? YoungNotes { get; set; }
 
     public DateTime? FinalDate { get; set; }
     public string? FinalAcidity { get; set; }
     public string? FinalSugar { get; set; }
     public double? FinalAlcohol { get; set; }
-    public double? FinalPh { get; set; }
+    public string? FinalPh { get; set; }
     public string? FinalSulfur { get; set; }
     public string? FinalNotes { get; set; }
 

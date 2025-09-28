@@ -47,14 +47,14 @@
                     Remember me
                 </label>
             </div>
-            <div>
-                @*<p>
+            @*<div>
+                <p>
                     <a href="Account/ForgotPassword">Forgot your password?</a>
-                </p>*@
+                </p>
                 <p>
                     No Account? <a href="@(NavigationManager.GetUriWithQueryParameters("Account/Register", new Dictionary<string, object?> { ["ReturnUrl"] = _returnUrl }))">Register now</a>
                 </p>
-            </div>
+            </div>*@
             <div>
                 <MudButton Variant="Variant.Filled" Color="Color.Primary" ButtonType="ButtonType.Submit" Class="w-100">
                     <MudText Typo="Typo.h5">Log In</MudText>

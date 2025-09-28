@@ -91,3 +91,8 @@ h1:focus {
               margin: 15px 0;
           }
 }
+/* Kleine Screens: Kartenhöhe etwas kleiner, damit Header sichtbar bleibt */
+@media (max-width: 600px) {
+    .vineyard-map { height: calc(100vh - 56px); }
+    .menu-content { height: 22vh; }
+}

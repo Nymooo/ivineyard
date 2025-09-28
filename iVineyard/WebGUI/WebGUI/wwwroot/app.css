@@ -57,3 +57,20 @@ h1:focus {
 .darker-border-checkbox.form-check-input {
     border-color: #929292;
 }
+
+
+/* Desktop wie vorher: 60vw, großzügige Abstände */
+.responsive-dialog .mud-dialog-paper { width: 100vw; max-width: 100vw; }
+
+/* Nur auf kleinen Screens kompakter & fullscreen */
+@media (max-width: 768px) {
+    .responsive-dialog .mud-dialog-paper{
+        width:100vw !important; max-width:100vw !important;
+        height:100vh !important; max-height:100vh !important;
+        margin:0 !important; border-radius:0 !important;
+    }
+    /* nur mobil Paddings/Gaps etwas reduzieren */
+    .responsive-dialog .pa-4 { padding:12px !important; }
+    .responsive-dialog .mb-4 { margin-bottom:12px !important; }
+    .responsive-dialog .mud-icon-button { font-size:22px; }
+}

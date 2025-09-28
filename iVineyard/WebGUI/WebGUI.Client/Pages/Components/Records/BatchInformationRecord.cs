@@ -56,7 +56,7 @@ public record InformationsRecord
     public int BatchId { get; init; }
     public DateTime Date { get; init; }
     public string Acidity { get; init; }
-    public double PhValue { get; init; }
+    public string PhValue { get; init; }
     public string FurtherSteps { get; init; } = string.Empty;
 
     public StartingMustRecord? StartingMust { get; init; }

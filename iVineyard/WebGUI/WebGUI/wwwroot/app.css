@@ -73,4 +73,21 @@ h1:focus {
     .responsive-dialog .pa-4 { padding:12px !important; }
     .responsive-dialog .mb-4 { margin-bottom:12px !important; }
     .responsive-dialog .mud-icon-button { font-size:22px; }
+    
+     
+       /* Alle Charts und Karten ausblenden */
+          .flex-grid,
+           #video,
+          .top-cards {
+              display: none !important;
+          }
+      
+          /* Mobile Buttons sichtbar machen */
+          .mobile-buttons {
+              display: flex !important;
+              flex-direction: column;
+              align-items: center;
+              gap: 10px;
+              margin: 15px 0;
+          }
 }

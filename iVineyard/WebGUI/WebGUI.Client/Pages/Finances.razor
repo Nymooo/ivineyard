@@ -14,17 +14,41 @@
 @attribute [Authorize(Roles = "Admin")]
 
 <style>
-    .flex-grid {
-        display: flex;
-    }
+.flex-grid {
+    display: flex;
+}
 
-    .col {
-        flex: 1;
-    }
+.col {
+    flex: 1;
+}
+
+
+}
+
 </style>
 
 <SectionContent SectionName="headbar">
     <MudText Typo="Typo.h4">Finances</MudText>
+
+    <!-- Desktop Buttons -->
+    <div class="desktop-buttons d-none d-md-flex gap-2">
+        <MudButton OnClick="AddFinanceModal" Variant="Variant.Filled" ButtonType="ButtonType.Button"
+                   StartIcon="@Icons.Material.Filled.ShowChart" Color="Color.Primary">
+            Add Expense / Income
+        </MudButton>
+        <MudButton OnClick="ViewInvoicesModal" Variant="Variant.Filled" ButtonType="ButtonType.Button"
+                   StartIcon="@Icons.Material.Filled.RemoveRedEye" Color="Color.Primary">
+            Invoice Details
+        </MudButton>
+        <MudButton OnClick="AddEquipmentModal" Variant="Variant.Filled" ButtonType="ButtonType.Button"
+                   StartIcon="@Icons.Material.Filled.Cases" Color="Color.Primary">
+            Tank Hinzufügen
+        </MudButton>
+    </div>
+</SectionContent>
+
+<!-- Mobile Buttons -->
+<div class="mobile-buttons d-md-none">
     <MudButton OnClick="AddFinanceModal" Variant="Variant.Filled" ButtonType="ButtonType.Button"
                StartIcon="@Icons.Material.Filled.ShowChart" Color="Color.Primary">
         Add Expense / Income
@@ -37,10 +61,10 @@
                StartIcon="@Icons.Material.Filled.Cases" Color="Color.Primary">
         Tank Hinzufügen
     </MudButton>
-</SectionContent>
+</div>
 
 <div class="d-flex flex-column w-100">
-    <div class="flex-grid">
+    <div class="flex-grid" id="finances">
         <div class="col">
             <MudCard Class="d-flex flex-grow-1 shadow-lg flex-column rounded-3" Elevation="0"
                      Style="margin: 25px 15px 15px 30px; height: 15vh; background-color: #44633F; color: white">
@@ -98,6 +122,7 @@
             </MudCard>
         </div>
     </div>
+
     <MudCard Class="d-flex flex-grow-1 shadow-lg" Elevation="0" Style="margin: 15px 30px 25px 30px; height: 64vh">
         <MudCardContent Class="d-flex justify-content-center align-items-center ">
             <div class="flex-grid w-100 justify-content-evenly">
@@ -105,13 +130,13 @@
                     <MudText Typo="Typo.h6" Align="Align.Center" Style="margin-bottom: 10px">Types of Expenses</MudText>
                     @if (FinanceService.Data.Any())
                     {
-                    <MudChart ChartType="ChartType.Pie" InputData="@FinanceService.Data" InputLabels="@FinanceService.Labels" Width="300px" Height="300px"/>
+                        <MudChart ChartType="ChartType.Pie" InputData="@FinanceService.Data" InputLabels="@FinanceService.Labels" Width="300px" Height="300px"/>
                     }
                     else
                     {
-                    <MudText Typo="Typo.body1" Align="Align.Center" Color="Color.Error">
-                        No expense data available to display.
-                    </MudText>
+                        <MudText Typo="Typo.body1" Align="Align.Center" Color="Color.Error">
+                            No expense data available to display.
+                        </MudText>
                     }
                 </div>
                 <div class="col">
@@ -123,9 +148,9 @@
                     }
                     else
                     {
-                    <MudText Typo="Typo.body1" Align="Align.Center" Color="Color.Error">
-                        No income or expense data available to display.
-                    </MudText>
+                        <MudText Typo="Typo.body1" Align="Align.Center" Color="Color.Error">
+                            No income or expense data available to display.
+                        </MudText>
                     }
                 </div>
             </div>
@@ -133,14 +158,12 @@
     </MudCard>
 </div>
 
-
 @code {
     private readonly ChartOptions _options = new();
-    
+
     protected override async Task OnInitializedAsync()
     {
         _options.YAxisTicks = 50;
-        
         await FinanceService.LoadFinanceDataAsync();
     }
 
@@ -152,7 +175,6 @@
             CloseButton = true,
             NoHeader = true
         };
-
         return DialogService.ShowAsync<CreateInvoiceDialog>("Add Invoice", options);
     }
 
@@ -162,22 +184,19 @@
         {
             CloseButton = true,
         };
-
         return DialogService.ShowAsync<CreateTankDialog>("Add new Equipment", options);
     }
-    
+
     private Task ViewInvoicesModal()
     {
         var options = new DialogOptions()
         {
             CloseButton = true,
         };
-
         var parameters = new DialogParameters<ViewInvoicesDialog>()
         {
             { x => x.Invoices, FinanceService.Invoices }
         };
-
         return DialogService.ShowAsync<ViewInvoicesDialog>("Invoices", parameters, options);
     }
 }
